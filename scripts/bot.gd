@@ -85,6 +85,8 @@ var strafe_duration: float = 1.5
 var patrol_travel_timer: float = 0.0
 # Im Flug nach einem Jump-Pad: keine eigene Steuerung bis zur Landung
 var is_launched: bool = false
+# Item, das gerade angesteuert wird (dann muss der Bot es wirklich beruehren)
+var patrol_item: Node3D = null
 var original_mesh_transform: Transform3D
 var hit_spark_scene: PackedScene = preload("res://scenes/weapons/hit_spark.tscn")
 var floating_number_scene: PackedScene = preload("res://scenes/effects/floating_number.tscn")
@@ -200,7 +202,11 @@ func _process_patrol(delta: float, _target: CharacterBody3D, target_visible: boo
 	patrol_travel_timer += delta
 	var to_target := patrol_target - global_position
 	to_target.y = 0.0
-	if to_target.length() < 2.0 or nav_agent.is_navigation_finished() or patrol_travel_timer > 12.0:
+	# Items muessen beruehrt werden (Ankunft 0,5 m), normale Wegpunkte reichen auf 2 m
+	var item_active: bool = is_instance_valid(patrol_item) and patrol_item.get("is_active") == true
+	var arrive_dist: float = 0.5 if item_active else 2.0
+	var arrived: bool = to_target.length() < arrive_dist or (not item_active and nav_agent.is_navigation_finished())
+	if arrived or patrol_travel_timer > 12.0 or (patrol_item != null and not item_active):
 		patrol_wait_timer = randf_range(1.5, 3.5)
 		_pick_new_patrol_point()
 		return
@@ -587,9 +593,9 @@ func _look_towards(target_pos: Vector3) -> void:
 ## wenig HP), sonst einen zufaelligen, erreichbaren Punkt auf dem Navigationsnetz.
 func _pick_new_patrol_point() -> void:
 	patrol_travel_timer = 0.0
-	var item := _best_item()
-	if item:
-		patrol_target = item.global_position
+	patrol_item = _best_item()
+	if patrol_item:
+		patrol_target = patrol_item.global_position
 		nav_agent.target_position = patrol_target
 		return
 	var nav_map: RID = nav_agent.get_navigation_map()

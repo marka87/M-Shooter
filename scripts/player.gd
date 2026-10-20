@@ -65,7 +65,7 @@ class_name Player
 ## Eigener Treffer an einem Gegner (fuer Hitmarker im HUD)
 signal enemy_hit()
 ## Item eingesammelt (fuer Ansagen im HUD), Wert aus ItemPickup.PickupType
-signal item_picked(pickup_type: int)
+signal item_picked(pickup_type: int, item_name: String)
 
 # ==============================================================================
 # STATUS
@@ -352,6 +352,7 @@ func _on_died(info: DamageInfo) -> void:
 ## Respawn des Spielers an einem Spawnpunkt
 func _respawn() -> void:
 	health.reset()
+	weapon_manager.reset_loadout()
 	global_transform = GameManager.get_spawn_transform(self)
 
 	# Blick wieder geradeaus richten
@@ -362,8 +363,8 @@ func _respawn() -> void:
 
 
 ## Wird vom Pickup aufgerufen, das HUD zeigt dann z. B. "QUAD DAMAGE!"
-func on_item_picked(pickup_type: int) -> void:
-	item_picked.emit(pickup_type)
+func on_item_picked(pickup_type: int, item_name: String = "") -> void:
+	item_picked.emit(pickup_type, item_name)
 
 
 ## Treffer-Feedback: Quake-Trefferton, Hitmarker zeigt das HUD

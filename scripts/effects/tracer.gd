@@ -10,11 +10,12 @@ const TRACER_SCENE: PackedScene = preload("res://scenes/effects/tracer.tscn")
 
 
 ## Erzeugt eine Leuchtspur in der Welt (parent = Knoten, unter den sie gehaengt wird)
-static func spawn(parent: Node, from: Vector3, to: Vector3, color: Color, width: float = 0.03) -> void:
+static func spawn(parent: Node, from: Vector3, to: Vector3, color: Color, width: float = 0.03, life: float = 0.09) -> void:
 	var length: float = from.distance_to(to)
 	if length < 0.3:
 		return
 	var tracer: Tracer = TRACER_SCENE.instantiate()
+	tracer.duration = life
 	parent.add_child(tracer)
 	tracer.setup(from, to, color, width)
 

@@ -43,6 +43,7 @@ func bind(p: Player) -> void:
 	player.item_picked.connect(_on_item_picked)
 	player.weapon_manager.weapon_switched.connect(_on_weapon_switched)
 	player.weapon_manager.ammo_updated.connect(_on_ammo_updated)
+	player.weapon_manager.loadout_changed.connect(_refresh_slots)
 	GameManager.score_updated.connect(_on_score_updated)
 	GameManager.kill_registered.connect(add_kill_entry)
 	GameManager.scoreboard_changed.connect(_refresh_scoreboard)
@@ -100,8 +101,11 @@ func announce(text: String, color: Color) -> void:
 	tween.tween_property(announce_label, "modulate:a", 0.0, 0.6)
 
 
-func _on_item_picked(pickup_type: int) -> void:
+func _on_item_picked(pickup_type: int, item_name: String) -> void:
 	match pickup_type:
+		ItemPickup.PickupType.WEAPON:
+			var weapon := player.weapon_manager.get_current_weapon()
+			announce(item_name.to_upper(), weapon.data.color if weapon else Color.WHITE)
 		ItemPickup.PickupType.QUAD_DAMAGE:
 			announce("QUAD DAMAGE!", Color(0.8, 0.5, 1.0))
 		ItemPickup.PickupType.MEGA_HEALTH:
@@ -167,11 +171,23 @@ func show_hitmarker() -> void:
 func _on_weapon_switched(w_name: String, current_ammo: int, max_ammo: int) -> void:
 	weapon_name_label.text = w_name
 	_on_ammo_updated(current_ammo, max_ammo)
-	# Aktiven Slot hervorheben
+	_refresh_slots()
+
+
+## Slot-Ziffern: aktive Waffe in ihrer Farbe, eingesammelte hell, fehlende kaum sichtbar
+func _refresh_slots() -> void:
+	var weapons: Array[WeaponBase] = player.weapon_manager.weapons
 	var active: int = player.weapon_manager.current_weapon_index
 	for i in weapon_slots.get_child_count():
 		var slot := weapon_slots.get_child(i) as Label
-		slot.modulate = Color(1.0, 0.8, 0.25) if i == active else Color(1, 1, 1, 0.35)
+		if i >= weapons.size():
+			slot.visible = false
+		elif i == active:
+			slot.modulate = weapons[i].data.color.lightened(0.2)
+		elif weapons[i].owned:
+			slot.modulate = Color(1, 1, 1, 0.6)
+		else:
+			slot.modulate = Color(1, 1, 1, 0.12)
 
 
 func _on_ammo_updated(current_ammo: int, max_ammo: int) -> void:

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/weapon_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = &"shock_rifle"
+weapon_name = "Shock Rifle"
+damage = 45.0
+cooldown = 0.75
+max_ammo = 50
+start_ammo = 20
+ammo_box_amount = 8
+recoil_distance = 0.1
+start_owned = false
+alt_cooldown = 0.6
+alt_ammo_cost = 1
+color = Color(0.6, 0.35, 1, 1)

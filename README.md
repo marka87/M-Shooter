@@ -14,7 +14,8 @@ Ein rasanter 3D-Arena-Shooter entwickelt in **Godot 4** mit **GDScript**. Das Sp
 | **Leertaste (in der Luft)** | **Doppelsprung** (Unreal Tournament Style mit Richtungs-Boost!) |
 | **Maus** | Umschauen / Zielen |
 | **Linke Maustaste** | Waffe abfeuern (Halten für Maschinengewehr-Dauerfeuer) |
-| **1, 2, 3, 4** oder **Mausrad** | Waffe wechseln (1: MG, 2: Shotgun, 3: Raketenwerfer, 4: Railgun) |
+| **1–7** oder **Mausrad** | Waffe wechseln (1 MG, 2 Shotgun, 3 Plasma, 4 Raketenwerfer, 5 Lightning Gun, 6 Railgun, 7 Shock Rifle) |
+| **Rechte Maustaste** | Alt-Feuer (Shock Rifle: Shock-Kugel) |
 | **Tab (halten)** | Scoreboard (Frags und Tode aller Teilnehmer) |
 | **ESC** | Spiel pausieren & Pause-Menü aufrufen |
 
@@ -42,8 +43,11 @@ Alle Tasten laufen über die InputMap (Projekt → Projekteinstellungen → Eing
 |---|---|---|---|---|
 | **Maschinengewehr** (1) | Hitscan | 12 | 11 Schuss/s | Geringer Rückstoß, leichte Streuung, Mündungsfeuer |
 | **Shotgun** (2) | Hitscan, 11 Kugeln | 9 pro Kugel (bis 99) | 1.0s Abklingzeit | Stark auf kurze Distanz, Treffer werden pro Ziel zusammengefasst |
-| **Raketenwerfer** (3) | Projektil | 50 (Direkt) + bis zu 100 (Fläche) | 0.8s Abklingzeit | Sichtbare Rakete, Schockwelle, Flächenschaden & Rocket-Jumping |
-| **Railgun** (4) | Hitscan-Strahl | 100 | 1.25s Abklingzeit | Sofortiger Einschlag über 300m, nachleuchtender Cyan-Energiestrahl |
+| **Raketenwerfer** (4) | Projektil | 50 (Direkt) + bis zu 100 (Fläche) | 0.8s Abklingzeit | Sichtbare Rakete, Schockwelle, Flächenschaden & Rocket-Jumping |
+| **Plasma** (3) | Projektil, 10 Schuss/s | 20 + bis 15 Fläche | 0.1s | Schnelle Energie-Bolzen, kleiner Splash. **Muss eingesammelt werden** |
+| **Lightning Gun** (5) | Dauerstrahl, 24 m | 8 pro Tick, 20 Ticks/s | – | Zuckender Doppel-Blitz, ideal für gutes Tracking. **Muss eingesammelt werden** |
+| **Shock Rifle** (7) | Strahl / Kugel | 45 Strahl, 55 + 35 Fläche Kugel | 0.75s / 0.6s | Rechtsklick feuert eine langsame Shock-Kugel. Trifft der Strahl die Kugel: **Combo**, 150 Schaden im Radius 7 m. **Muss eingesammelt werden** |
+| **Railgun** (6) | Hitscan-Strahl | 100 | 1.25s Abklingzeit | Sofortiger Einschlag über 300m, nachleuchtender Cyan-Energiestrahl |
 
 ---
 

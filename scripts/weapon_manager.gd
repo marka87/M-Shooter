@@ -1,11 +1,13 @@
 extends Node3D
 class_name WeaponManager
 
-## Verwaltet die Waffen des Spielers: Ausruesten, Wechseln (1-3 / Mausrad),
-## Schiessen (Klick und Halten), optisches Waffen-Schwanken (Sway) und HUD-Signale.
+## Verwaltet die Waffen des Spielers: Ausruesten, Wechseln (1-7 / Mausrad), Waffenbesitz,
+## Schiessen (Klick und Halten, rechte Maustaste = Alt-Feuer), Sway und HUD-Signale.
 
 signal weapon_switched(weapon_name: String, current_ammo: int, max_ammo: int)
 signal ammo_updated(current_ammo: int, max_ammo: int)
+## Waffenbesitz hat sich geaendert (Pickup, Respawn), fuer die Slot-Anzeige im HUD
+signal loadout_changed()
 
 @export var sway_amount: float = 0.0012
 @export var max_sway: float = 0.05
@@ -84,8 +86,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		mouse_input = event.relative
 	
-	# Waffenwechsel per Zahlentasten 1-4 (Reihenfolge wie unter WeaponHolder in player.tscn)
-	for slot in 4:
+	# Waffenwechsel per Zahlentasten 1-7 (Reihenfolge wie unter WeaponHolder in player.tscn)
+	for slot in weapons.size():
 		if event.is_action_pressed("weapon_%d" % (slot + 1)):
 			switch_to_weapon(slot)
 			break
@@ -103,7 +105,9 @@ func _process(delta: float) -> void:
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		if Input.is_action_pressed("shoot") and not _wait_for_shoot_release:
 			fire_current_weapon()
-		elif not Input.is_action_pressed("shoot"):
+		elif Input.is_action_pressed("shoot_alt") and not _wait_for_shoot_release:
+			fire_current_weapon_alt()
+		elif not Input.is_action_pressed("shoot") and not Input.is_action_pressed("shoot_alt"):
 			_wait_for_shoot_release = false
 	
 	# Visuelles Waffen-Swaying (Traegheit beim Umschauen)
@@ -124,9 +128,21 @@ func fire_current_weapon() -> void:
 		weapon.try_fire(player, camera)
 
 
-## Wechselt zu einem Waffen-Index (0 = MG, 1 = Shotgun, 2 = Raketenwerfer, 3 = Railgun)
+## Alt-Feuer der aktiven Waffe (rechte Maustaste)
+func fire_current_weapon_alt() -> void:
+	if player and player.get("is_dead") == true:
+		return
+	var weapon := get_current_weapon()
+	if weapon:
+		weapon.try_fire_alt(player, camera)
+
+
+## Wechselt zu einem Waffen-Index (0 MG, 1 Shotgun, 2 Plasma, 3 Raketenwerfer,
+## 4 Lightning Gun, 5 Railgun, 6 Shock Rifle). Nicht eingesammelte Waffen werden ignoriert.
 func switch_to_weapon(index: int) -> void:
 	if weapons.is_empty() or index < 0 or index >= weapons.size():
+		return
+	if not weapons[index].owned:
 		return
 	if index == current_weapon_index and weapons[index].visible:
 		return
@@ -152,9 +168,12 @@ func switch_to_weapon(index: int) -> void:
 func cycle_weapon(direction: int) -> void:
 	if weapons.is_empty():
 		return
-	var new_index: int = (current_weapon_index + direction) % weapons.size()
-	if new_index < 0:
-		new_index = weapons.size() - 1
+	# Naechste Waffe in der Richtung, die man besitzt
+	var new_index: int = current_weapon_index
+	for i in weapons.size():
+		new_index = posmod(new_index + direction, weapons.size())
+		if weapons[new_index].owned:
+			break
 	switch_to_weapon(new_index)
 
 
@@ -179,6 +198,32 @@ func get_current_weapon() -> WeaponBase:
 	if weapons.is_empty():
 		return null
 	return weapons[current_weapon_index]
+
+
+## Waffen-Pickup: Waffe in Besitz nehmen (und hinwechseln) oder nur Munition auffuellen.
+## True, wenn sich etwas geaendert hat.
+func give_weapon(weapon_id: StringName, ammo: int) -> bool:
+	var weapon := get_weapon(weapon_id)
+	if weapon == null:
+		return false
+	if not weapon.owned:
+		weapon.owned = true
+		weapon.add_ammo(ammo)
+		loadout_changed.emit()
+		switch_to_weapon(weapons.find(weapon))
+		return true
+	return weapon.add_ammo(ammo)
+
+
+## Nach dem Respawn: Start-Ausruestung laut WeaponData, zurueck zum MG
+func reset_loadout() -> void:
+	for weapon in weapons:
+		weapon.reset_loadout()
+	weapons[current_weapon_index].unequip()
+	current_weapon_index = 0
+	weapons[0].equip()
+	loadout_changed.emit()
+	weapon_switched.emit(weapons[0].weapon_name, weapons[0].current_ammo, weapons[0].max_ammo)
 
 
 ## Munitionskiste: jede Waffe bekommt ihre ammo_box_amount. True, wenn irgendetwas aufgefuellt wurde.

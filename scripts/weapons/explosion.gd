@@ -13,6 +13,8 @@ extends Node3D
 
 var shooter_node: Node = null
 var weapon_name: String = "Raketenwerfer"
+## Optionale Einfaerbung (z. B. violett fuer die Shock-Combo). Alpha 0 = Originalfarben.
+var tint: Color = Color(0, 0, 0, 0)
 
 
 func _ready() -> void:
@@ -22,6 +24,9 @@ func _ready() -> void:
 		audio_player.pitch_scale = randf_range(0.9, 1.1)
 		audio_player.play()
 	
+	if tint.a > 0.0:
+		_apply_tint()
+
 	# Partikel starten
 	if particles:
 		particles.emitting = true
@@ -37,6 +42,19 @@ func _ready() -> void:
 	
 	# Nach Ablauf der Effekte entfernen
 	get_tree().create_timer(1.2, false).timeout.connect(queue_free)
+
+
+## Kugel, Licht und Truemmer in der Tint-Farbe einfaerben (eigene Material-Kopien)
+func _apply_tint() -> void:
+	light.light_color = tint
+	var sphere_mat := (blast_sphere.mesh.surface_get_material(0) as StandardMaterial3D).duplicate() as StandardMaterial3D
+	sphere_mat.albedo_color = Color(tint.r, tint.g, tint.b, 0.75)
+	sphere_mat.emission = tint
+	blast_sphere.material_override = sphere_mat
+	var debris_mat := (particles.mesh.surface_get_material(0) as StandardMaterial3D).duplicate() as StandardMaterial3D
+	debris_mat.albedo_color = tint.lightened(0.3)
+	debris_mat.emission = tint
+	particles.material_override = debris_mat
 
 
 func _apply_blast_damage_and_impulse() -> void:

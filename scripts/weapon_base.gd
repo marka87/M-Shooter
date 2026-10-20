@@ -29,6 +29,8 @@ var recoil_distance: float:
 	get: return data.recoil_distance
 
 var current_ammo: int = 0
+## Besitzt der Spieler die Waffe? (Waffen ohne start_owned muessen erst eingesammelt werden)
+var owned: bool = true
 
 # Knoten-Referenzen
 @onready var muzzle: Node3D = $Muzzle
@@ -43,7 +45,14 @@ var current_recoil: float = 0.0
 func _ready() -> void:
 	assert(data != null, "%s: WeaponData fehlt" % name)
 	initial_position = position
+	reset_loadout()
+
+
+## Zustand wie beim Spawn: Besitz und Start-Munition laut WeaponData
+func reset_loadout() -> void:
+	owned = data.start_owned
 	current_ammo = data.start_ammo
+	cooldown_timer = 0.0
 
 
 func _process(delta: float) -> void:
@@ -95,6 +104,26 @@ func try_fire(shooter: Node3D, camera: Camera3D) -> bool:
 
 ## Virtuelle Methode: Wird von Maschinengewehr, Raketenwerfer etc. ueberschrieben
 func _on_fire(_shooter: Node3D, _camera: Camera3D) -> void:
+	pass
+
+
+## Alt-Feuer (rechte Maustaste). Nur Waffen mit alt_cooldown > 0 haben eins.
+func try_fire_alt(shooter: Node3D, camera: Camera3D) -> bool:
+	if data.alt_cooldown <= 0.0 or cooldown_timer > 0.0:
+		return false
+	if current_ammo < data.alt_ammo_cost:
+		return try_fire(shooter, camera)  # spielt den Leer-Klick
+	current_ammo -= data.alt_ammo_cost
+	cooldown_timer += data.alt_cooldown
+	ammo_changed.emit(current_ammo, max_ammo)
+	current_recoil = recoil_distance
+	_on_fire_alt(shooter, camera)
+	fired.emit()
+	return true
+
+
+## Virtuelle Methode fuer das Alt-Feuer
+func _on_fire_alt(_shooter: Node3D, _camera: Camera3D) -> void:
 	pass
 
 

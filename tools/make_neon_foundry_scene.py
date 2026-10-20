@@ -34,6 +34,12 @@ ITEMS = [
     ('AmmoGroundN', 'ammo', 0, 0.8, -20),
     ('AmmoGroundS', 'ammo', 0, 0.8, 20),
 ]
+# Waffen-Pickups: (Name, Waffen-ID, Waffenszene, Anzeigename, Farbe, x, y, z)
+WEAPONS = [
+    ('PlasmaRingN', 'plasma', 'plasma_gun', 'Plasma', (0.25, 0.75, 1), -5, 4.9, -28.5),
+    ('LightningGroundE', 'lightning', 'lightning_gun', 'Lightning Gun', (0.7, 0.9, 1), 28, 0.9, -6),
+    ('ShockRingS', 'shock_rifle', 'shock_rifle', 'Shock Rifle', (0.6, 0.35, 1), -4, 4.9, 28.5),
+]
 # Jump-Pads: (Name, Pad-Position, Ziel, Scheitelhoehe)
 PADS = [
     ('PadTowerNE', (22, 0, -12), (25.5, 8.1, -25.5), 3.0),
@@ -59,6 +65,10 @@ head = '''[gd_scene format=3]
 [ext_resource type="PackedScene" path="res://scenes/items/jump_pad.tscn" id="8_pad"]
 [ext_resource type="PackedScene" path="res://scenes/items/quad_damage_pickup.tscn" id="12_quad"]
 [ext_resource type="PackedScene" path="res://scenes/items/mega_health_pickup.tscn" id="13_mega"]
+[ext_resource type="PackedScene" path="res://scenes/items/weapon_pickup.tscn" id="14_wpick"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/plasma_gun.tscn" id="15_plasma"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/lightning_gun.tscn" id="16_lightning_gun"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/shock_rifle.tscn" id="17_shock_rifle"]
 [ext_resource type="Shader" path="res://assets/shaders/space_sky.gdshader" id="9_sky"]
 [ext_resource type="Script" path="res://addons/func_godot/src/map/func_godot_map.gd" id="10_map"]
 [ext_resource type="Resource" path="res://resources/map/neon_map_settings.tres" id="11_settings"]
@@ -140,6 +150,12 @@ body += '[node name="Items" type="Node3D" parent="."]\n\n'
 res = {'ammo': '4_ammo', 'health': '5_health', 'armor': '6_armor', 'quad': '12_quad', 'mega': '13_mega'}
 for name, kind, x, y, z in ITEMS:
     body += f'[node name="{name}" parent="Items" instance=ExtResource("{res[kind]}")]\ntransform = {tf(x, y, z)}\n\n'
+
+wscene = {'plasma_gun': '15_plasma', 'lightning_gun': '16_lightning_gun', 'shock_rifle': '17_shock_rifle'}
+for name, wid, scene, label, c, x, y, z in WEAPONS:
+    body += (f'[node name="{name}" parent="Items" instance=ExtResource("14_wpick")]\ntransform = {tf(x, y, z)}\n'
+             f'weapon_id = &"{wid}"\nweapon_scene = ExtResource("{wscene[scene]}")\ndisplay_name = "{label}"\n\n'
+             f'[node name="OmniLight3D" parent="Items/{name}" index="4"]\nlight_color = Color({c[0]}, {c[1]}, {c[2]}, 1)\n\n')
 
 body += '[node name="JumpPads" type="Node3D" parent="."]\n\n'
 for name, pos, target, apex in PADS:

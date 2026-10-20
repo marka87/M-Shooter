@@ -1,0 +1,54 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/pickup.gd" id="1_pickup"]
+
+[sub_resource type="BoxShape3D" id="Shape_Pickup"]
+size = Vector3(1.6, 1.6, 1.6)
+
+[sub_resource type="StandardMaterial3D" id="Mat_Ring"]
+shading_mode = 0
+albedo_color = Color(1, 0.85, 0.4, 1)
+emission_enabled = true
+emission = Color(1, 0.85, 0.4, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="TorusMesh" id="Mesh_Ring"]
+material = SubResource("Mat_Ring")
+inner_radius = 0.6
+outer_radius = 0.68
+
+[sub_resource type="CylinderMesh" id="Mesh_Base"]
+top_radius = 0.75
+bottom_radius = 0.8
+height = 0.08
+
+[node name="WeaponPickup" type="Area3D"]
+collision_layer = 8
+collision_mask = 6
+script = ExtResource("1_pickup")
+pickup_type = 6
+respawn_time = 15.0
+weapon_ammo_amount = 30
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("Shape_Pickup")
+
+[node name="Base" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.76, 0)
+mesh = SubResource("Mesh_Base")
+
+[node name="Ring" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.7, 0)
+mesh = SubResource("Mesh_Ring")
+
+[node name="VisualMesh" type="Node3D" parent="."]
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+light_color = Color(1, 0.85, 0.4, 1)
+light_energy = 2.5
+light_volumetric_fog_energy = 2.0
+omni_range = 4.5
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+unit_size = 6.0
+max_distance = 40.0

@@ -110,6 +110,95 @@ func run() -> void:
 	check(player.health.health < hp_after, "Ueberheilung baut sich ab (%.1f)" % player.health.health)
 	player.health.reset()
 
+	# --- Neue Waffen ---
+	var wm = player.weapon_manager
+	var target_bot = bots[0]
+	# Im Test schnell respawnen, damit der Bot nach einem Kill gleich wieder Ziel sein kann
+	target_bot.respawn_delay = 0.2
+	check(not wm.get_weapon(&"plasma").owned, "Plasma am Anfang nicht im Besitz")
+	wm.switch_to_weapon_id(&"plasma")
+	check(wm.get_current_weapon().weapon_id != &"plasma", "Wechsel zu fehlender Waffe wird ignoriert")
+
+	# Plasma einsammeln (Nord-Ring) -> Besitz und automatischer Wechsel
+	player.velocity = Vector3.ZERO
+	player.global_position = current_scene.get_node("Items/PlasmaRingN").global_position - Vector3(0, 0.9, 0)
+	await create_timer(0.4).timeout
+	check(wm.get_current_weapon().weapon_id == &"plasma", "Plasma eingesammelt und ausgeruestet")
+
+	# Schiessstand am Boden: Spieler bei x=-10, Bot 6 m weiter westlich
+	var stand := func():
+		if target_bot.health.is_dead:
+			await create_timer(0.5).timeout
+		player.velocity = Vector3.ZERO
+		player.global_position = Vector3(-10, 0.05, 0)
+		player.look_at(Vector3(-20, 0.05, 0), Vector3.UP)
+		player.camera_pitch = 0.0
+		player.head.rotation.x = 0.0
+		target_bot.global_position = Vector3(-16, 0.05, 0)
+		target_bot.velocity = Vector3.ZERO
+		target_bot.health.reset()
+	await stand.call()
+	await create_timer(0.3).timeout
+	var plasma_hits: Array = []
+	var on_plasma := func(info: DamageInfo, _lost: float): plasma_hits.append(info.amount)
+	target_bot.health.damaged.connect(on_plasma)
+	for i in 60:
+		wm.fire_current_weapon()
+		await physics_frame
+	await create_timer(0.4).timeout
+	target_bot.health.damaged.disconnect(on_plasma)
+	print("Plasma-Treffer: ", plasma_hits.size())
+	check(plasma_hits.size() >= 3, "Plasma-Bolzen treffen (%d Treffer)" % plasma_hits.size())
+
+	# Lightning Gun (Boden Ost) einsammeln und 0,5 s auf den Bot halten
+	player.velocity = Vector3.ZERO
+	player.global_position = current_scene.get_node("Items/LightningGroundE").global_position - Vector3(0, 0.9, 0)
+	await create_timer(0.4).timeout
+	check(wm.get_current_weapon().weapon_id == &"lightning", "Lightning Gun eingesammelt")
+	await stand.call()
+	await create_timer(0.3).timeout
+	for i in 60:
+		wm.fire_current_weapon()
+		await physics_frame
+	print("Bot-HP nach Lightning: ", target_bot.health.health)
+	check(target_bot.health.health <= 100.0 - 50.0 or target_bot.health.is_dead, "Lightning Gun Dauerstrahl trifft (%.0f HP)" % target_bot.health.health)
+
+	# Shock Rifle (Sued-Ring): Strahl und Combo
+	player.velocity = Vector3.ZERO
+	player.global_position = current_scene.get_node("Items/ShockRingS").global_position - Vector3(0, 0.9, 0)
+	await create_timer(0.4).timeout
+	check(wm.get_current_weapon().weapon_id == &"shock_rifle", "Shock Rifle eingesammelt")
+	await stand.call()
+	await create_timer(1.0).timeout
+	wm.fire_current_weapon()
+	await physics_frame
+	check(is_equal_approx(target_bot.health.health, 55.0), "Shock-Strahl trifft (%.0f HP)" % target_bot.health.health)
+
+	await stand.call()
+	await create_timer(1.0).timeout
+	var combo_kills: Array = []
+	var on_kill := func(k, v, w): combo_kills.append(w)
+	gm.kill_registered.connect(on_kill)
+	wm.fire_current_weapon_alt()
+	check(get_nodes_in_group("shock_balls").size() == 1, "Shock-Kugel abgefeuert")
+	await create_timer(0.3).timeout
+	var shock = wm.get_current_weapon()
+	shock.cooldown_timer = 0.0
+	wm.fire_current_weapon()
+	await create_timer(0.3).timeout
+	gm.kill_registered.disconnect(on_kill)
+	print("Combo: Kugeln uebrig ", get_nodes_in_group("shock_balls").size(), ", Kills ", combo_kills, ", Bot-HP ", target_bot.health.health)
+	check(get_nodes_in_group("shock_balls").is_empty(), "Strahl zuendet die Kugel")
+	check("Shock-Combo" in combo_kills, "Shock-Combo toetet den Bot")
+
+	# Tod: neue Waffen sind weg, zurueck zum MG
+	player.take_damage(DamageInfo.create(1000.0, target_bot, player.global_position, Vector3.ZERO, "Test"))
+	await create_timer(3.5).timeout
+	check(not wm.get_weapon(&"shock_rifle").owned and wm.current_weapon_index == 0, "Nach Respawn nur Start-Waffen")
+	if target_bot.health.is_dead:
+		target_bot._respawn()
+	target_bot.set_physics_process(false)
+
 	# Navigationsnetz: Wege vom Boden auf Ring, Mitte und Tuerme
 	var map_rid: RID = bots[0].nav_agent.get_navigation_map()
 	var from := NavigationServer3D.map_get_closest_point(map_rid, Vector3(0, 0, 25))
@@ -122,6 +211,8 @@ func run() -> void:
 	var bot = bots[0]
 	player.remove_from_group("player")
 	bot.global_position = Vector3(0, 0.1, 22)
+	bot.target = null
+	bot._switch_state(bot.State.PATROL)
 	bot.set_physics_process(true)
 	bot.patrol_target = Vector3(-26, 8.0, 26)
 	bot.nav_agent.target_position = bot.patrol_target
@@ -142,6 +233,7 @@ func run() -> void:
 	await create_timer(0.2).timeout
 	bot.global_position = Vector3(0, 0.1, 18)
 	bot.velocity = Vector3.ZERO
+	bot.target = null
 	bot.patrol_wait_timer = 0.0
 	bot._switch_state(bot.State.PATROL)
 	var got_quad := false

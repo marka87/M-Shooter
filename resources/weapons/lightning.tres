@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/weapon_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = &"lightning"
+weapon_name = "Lightning Gun"
+damage = 8.0
+cooldown = 0.05
+max_ammo = 200
+start_ammo = 100
+ammo_box_amount = 40
+recoil_distance = 0.0
+start_owned = false
+alt_cooldown = 0.0
+alt_ammo_cost = 1
+color = Color(0.7, 0.9, 1, 1)

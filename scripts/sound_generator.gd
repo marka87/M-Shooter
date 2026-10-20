@@ -21,6 +21,11 @@ static func create_hitsound() -> AudioStreamWAV: return _cached("hitsound", _bui
 static func create_double_jump_sound() -> AudioStreamWAV: return _cached("double_jump", _build_double_jump_sound)
 static func create_jump_pad_sound() -> AudioStreamWAV: return _cached("jump_pad", _build_jump_pad_sound)
 static func create_shotgun_sound() -> AudioStreamWAV: return _cached("shotgun", _build_shotgun_sound)
+static func create_plasma_sound() -> AudioStreamWAV: return _cached("plasma", _build_plasma_sound)
+static func create_lightning_sound() -> AudioStreamWAV: return _cached("lightning", _build_lightning_sound)
+static func create_shock_beam_sound() -> AudioStreamWAV: return _cached("shock_beam", _build_shock_beam_sound)
+static func create_shock_ball_sound() -> AudioStreamWAV: return _cached("shock_ball", _build_shock_ball_sound)
+static func create_combo_sound() -> AudioStreamWAV: return _cached("combo", _build_combo_sound)
 
 
 ## Gibt alle zwischengespeicherten Sounds frei (beim Beenden, sonst meldet Godot Speicherlecks)
@@ -355,3 +360,52 @@ static func _build_shotgun_sound() -> AudioStreamWAV:
 
 	stream.data = data
 	return stream
+
+
+## Gemeinsamer Baukasten fuer die Energiewaffen: Tonhoehe faellt von f0 auf f1,
+## Lautstaerke klingt mit der Huellkurve ab, dazu etwas Rauschen und optional Rechteckanteil
+static func _build_zap(length: float, f0: float, f1: float, decay: float, noise: float, square: float) -> AudioStreamWAV:
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_8_BITS
+	stream.mix_rate = 22050
+	stream.stereo = false
+	var samples := int(stream.mix_rate * length)
+	var data := PackedByteArray()
+	data.resize(samples)
+	var phase: float = 0.0
+	for i in range(samples):
+		var t: float = float(i) / float(samples)
+		var env: float = pow(1.0 - t, decay) * minf(t * 80.0, 1.0)
+		phase += lerpf(f0, f1, t) * (TAU / stream.mix_rate)
+		var tone: float = sin(phase)
+		if square > 0.0:
+			tone = lerpf(tone, signf(tone), square)
+		var val: float = (tone * 0.7 + randf_range(-1.0, 1.0) * noise) * env
+		data[i] = _to_s8(val * 115.0)
+	stream.data = data
+	return stream
+
+
+## Plasma: kurzes, hohes "Pew"
+static func _build_plasma_sound() -> AudioStreamWAV:
+	return _build_zap(0.12, 1400.0, 500.0, 2.0, 0.15, 0.3)
+
+
+## Lightning Gun: kurzes Knistern, wird bei Dauerfeuer schnell hintereinander gespielt
+static func _build_lightning_sound() -> AudioStreamWAV:
+	return _build_zap(0.07, 180.0, 140.0, 0.6, 0.6, 0.8)
+
+
+## Shock Rifle Strahl: scharfer, metallischer Zap
+static func _build_shock_beam_sound() -> AudioStreamWAV:
+	return _build_zap(0.3, 2200.0, 300.0, 1.6, 0.2, 0.0)
+
+
+## Shock-Kugel: tiefes, wabberndes Woosh
+static func _build_shock_ball_sound() -> AudioStreamWAV:
+	return _build_zap(0.35, 260.0, 120.0, 1.2, 0.25, 0.5)
+
+
+## Shock-Combo: lange, tiefe Explosion mit Rauschen
+static func _build_combo_sound() -> AudioStreamWAV:
+	return _build_zap(0.9, 160.0, 25.0, 1.4, 0.8, 0.2)

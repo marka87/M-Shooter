@@ -5,7 +5,7 @@ class_name ItemPickup
 ## Wird beim Beruehren aufgesammelt und respawnt automatisch nach einigen Sekunden.
 ## Spieler sammeln alles, Bots alles ausser Munition (sie haben keinen WeaponManager).
 
-enum PickupType { AMMO_BOX, WEAPON_AMMO, HEALTH, ARMOR, QUAD_DAMAGE, MEGA_HEALTH }
+enum PickupType { AMMO_BOX, WEAPON_AMMO, HEALTH, ARMOR, QUAD_DAMAGE, MEGA_HEALTH, WEAPON }
 
 @export var pickup_type: PickupType = PickupType.AMMO_BOX
 @export var respawn_time: float = 8.0
@@ -21,6 +21,10 @@ enum PickupType { AMMO_BOX, WEAPON_AMMO, HEALTH, ARMOR, QUAD_DAMAGE, MEGA_HEALTH
 @export var quad_seconds: float = 30.0
 ## Mega Health: Heilung ueber das Maximum hinaus
 @export var mega_amount: float = 100.0
+## Nur fuer WEAPON: Waffenmodell, das ueber dem Sockel schwebt (Skripte werden entfernt)
+@export var weapon_scene: PackedScene
+## Anzeigename fuer die Ansage beim Einsammeln
+@export var display_name: String = ""
 
 @onready var visual_mesh: Node3D = $VisualMesh
 @onready var light: OmniLight3D = $OmniLight3D
@@ -41,6 +45,9 @@ func _ready() -> void:
 		add_child(audio_player)
 	audio_player.stream = SoundGenerator.create_pickup_sound()
 	
+	if pickup_type == PickupType.WEAPON and weapon_scene:
+		_build_weapon_visual()
+
 	# Signal verbinden; Gruppe "pickups" nutzen die Bots zur Item-Suche
 	body_entered.connect(_on_body_entered)
 	add_to_group("pickups")
@@ -83,11 +90,33 @@ func _on_body_entered(body: Node3D) -> void:
 				picked_up = true
 		PickupType.MEGA_HEALTH:
 			picked_up = body.health.mega_heal(mega_amount)
+		PickupType.WEAPON:
+			picked_up = has_weapons and body.weapon_manager.give_weapon(weapon_id, weapon_ammo_amount)
 
 	if picked_up:
 		if body.has_method("on_item_picked"):
-			body.on_item_picked(pickup_type)
+			body.on_item_picked(pickup_type, display_name)
 		_collect()
+
+
+## Waffenmodell als Anzeige: Szene instanziieren, Skripte entfernen (keine Waffenlogik),
+## vergroessern und leicht schraeg stellen
+func _build_weapon_visual() -> void:
+	var model := weapon_scene.instantiate()
+	_strip_scripts(model)
+	model.scale = Vector3.ONE * 2.2
+	model.rotation_degrees = Vector3(0, 90, -12)
+	model.position = Vector3(0.0, 0.0, -0.5)
+	visual_mesh.add_child(model)
+
+
+func _strip_scripts(node: Node) -> void:
+	node.set_script(null)
+	for child in node.get_children():
+		if child is AudioStreamPlayer3D or child is Light3D:
+			child.queue_free()
+		else:
+			_strip_scripts(child)
 
 
 ## Lohnt es sich fuer diesen Kaempfer, das Item zu holen? (fuer die Bot-Planung)

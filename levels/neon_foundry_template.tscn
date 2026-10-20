@@ -8,6 +8,10 @@
 [ext_resource type="PackedScene" path="res://scenes/items/jump_pad.tscn" id="8_pad"]
 [ext_resource type="PackedScene" path="res://scenes/items/quad_damage_pickup.tscn" id="12_quad"]
 [ext_resource type="PackedScene" path="res://scenes/items/mega_health_pickup.tscn" id="13_mega"]
+[ext_resource type="PackedScene" path="res://scenes/items/weapon_pickup.tscn" id="14_wpick"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/plasma_gun.tscn" id="15_plasma"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/lightning_gun.tscn" id="16_lightning_gun"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/shock_rifle.tscn" id="17_shock_rifle"]
 [ext_resource type="Shader" path="res://assets/shaders/space_sky.gdshader" id="9_sky"]
 [ext_resource type="Script" path="res://addons/func_godot/src/map/func_godot_map.gd" id="10_map"]
 [ext_resource type="Resource" path="res://resources/map/neon_map_settings.tres" id="11_settings"]
@@ -139,6 +143,33 @@ transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 
 
 [node name="AmmoGroundS" parent="Items" instance=ExtResource("4_ammo")]
 transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, 0.8, 20)
+
+[node name="PlasmaRingN" parent="Items" instance=ExtResource("14_wpick")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -5, 4.9, -28.5)
+weapon_id = &"plasma"
+weapon_scene = ExtResource("15_plasma")
+display_name = "Plasma"
+
+[node name="OmniLight3D" parent="Items/PlasmaRingN" index="4"]
+light_color = Color(0.25, 0.75, 1, 1)
+
+[node name="LightningGroundE" parent="Items" instance=ExtResource("14_wpick")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 28, 0.9, -6)
+weapon_id = &"lightning"
+weapon_scene = ExtResource("16_lightning_gun")
+display_name = "Lightning Gun"
+
+[node name="OmniLight3D" parent="Items/LightningGroundE" index="4"]
+light_color = Color(0.7, 0.9, 1, 1)
+
+[node name="ShockRingS" parent="Items" instance=ExtResource("14_wpick")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -4, 4.9, 28.5)
+weapon_id = &"shock_rifle"
+weapon_scene = ExtResource("17_shock_rifle")
+display_name = "Shock Rifle"
+
+[node name="OmniLight3D" parent="Items/ShockRingS" index="4"]
+light_color = Color(0.6, 0.35, 1, 1)
 
 [node name="JumpPads" type="Node3D" parent="."]
 

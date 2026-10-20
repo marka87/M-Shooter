@@ -12,3 +12,4 @@ max_ammo = 200
 start_ammo = 120
 ammo_box_amount = 60
 recoil_distance = 0.04
+color = Color(1, 0.75, 0.25, 1)

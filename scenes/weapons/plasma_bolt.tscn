@@ -1,0 +1,37 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/energy_projectile.gd" id="1_proj"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_Core"]
+shading_mode = 0
+albedo_color = Color(0.25, 0.75, 1, 1)
+emission_enabled = true
+emission = Color(0.25, 0.75, 1, 1)
+emission_energy_multiplier = 6.0
+
+[sub_resource type="SphereMesh" id="Mesh_Core"]
+material = SubResource("Mat_Core")
+radius = 0.11
+height = 0.22
+radial_segments = 16
+rings = 8
+
+[node name="PlasmaBolt" type="Node3D"]
+script = ExtResource("1_proj")
+speed = 42.0
+direct_damage = 20.0
+splash_damage = 15.0
+splash_radius = 1.5
+lifetime = 4.0
+color = Color(0.25, 0.75, 1, 1)
+is_shock_ball = false
+weapon_name = "Plasma"
+
+[node name="Core" type="MeshInstance3D" parent="."]
+cast_shadow = 0
+mesh = SubResource("Mesh_Core")
+
+[node name="Light" type="OmniLight3D" parent="."]
+light_color = Color(0.25, 0.75, 1, 1)
+light_energy = 2.0
+omni_range = 3.0

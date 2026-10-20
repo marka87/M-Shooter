@@ -1,3 +1,18 @@
+# Änderungen (Runde 13: Neue Waffen)
+
+- **Plasma** (Slot 3): Energie-Bolzen mit 10 Schuss/s, 20 Direktschaden plus kleiner Splash. Neues gemeinsames Projektil `EnergyProjectile` mit farbigem Einschlag (`scenes/effects/energy_impact.tscn`).
+- **Lightning Gun** (Slot 5): Dauerstrahl bis 24 m, 20 Treffer-Ticks pro Sekunde zu je 8 Schaden. Zwei zuckende Blitzstränge plus weißer Kern.
+- **Shock Rifle** (Slot 7): Strahl (45 Schaden) und per Rechtsklick eine langsame Shock-Kugel (55 + Splash). **Combo:** Trifft der Strahl eine Shock-Kugel, explodiert sie violett mit 150 Schaden im Radius 7 m; Killfeed zeigt „Shock-Combo“.
+- **Waffenbesitz:** Die neuen Waffen muss man in der Map finden (`WeaponData.start_owned = false`). Beim Einsammeln wird automatisch gewechselt; beim Respawn sind sie wieder weg. Fehlende Waffen werden beim Wechseln (Tasten, Mausrad) übersprungen.
+- **Alt-Feuer** auf der rechten Maustaste (`WeaponBase.try_fire_alt`, `WeaponData.alt_cooldown`). Slots 1–7 in Quake-Reihenfolge.
+- **Waffen-Pickups** (`scenes/items/weapon_pickup.tscn`): Das echte Waffenmodell schwebt vergrößert über einem Leuchtsockel. Ansage mit dem Waffennamen in Waffenfarbe. In der Neon Foundry: Plasma auf dem Nord-Ring, Lightning Gun am Boden unter dem Ost-Ring, Shock Rifle auf dem Süd-Ring.
+- **HUD:** Slots 1–7, aktive Waffe in ihrer Farbe, fehlende Waffen fast unsichtbar.
+- Explosionen lassen sich einfärben (`tint`), Leuchtspuren haben eine einstellbare Dauer, neue Sounds für Plasma, Lightning, Shock-Strahl, Shock-Kugel und Combo.
+- **Fehler behoben:** Bots galten 2 m vor einem Item als angekommen. Landeten sie per Jump-Pad knapp neben dem Quad, wählten sie es immer wieder, ohne es zu berühren. Jetzt müssen sie Items wirklich erreichen (0,5 m).
+- Tests: Neon-Foundry-Test auf 31 Prüfungen erweitert (Besitz, Einsammeln, Treffer aller drei Waffen, Combo-Kill, Waffenverlust beim Respawn). Rauchtest 38/38.
+
+---
+
 # Änderungen (Runde 12: Power-ups)
 
 - **Quad Damage** (`scenes/items/quad_damage_pickup.tscn`): dreifacher Schaden für 30 s, Respawn nach 60 s. Neue Komponente `PowerupComponent` an Spieler und Bots; `DamageInfo.create()` multipliziert mit dem Faktor des Angreifers. Bots mit Quad leuchten violett und pulsieren in den letzten 3 s schneller. Beim Tod ist das Quad weg.

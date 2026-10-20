@@ -60,8 +60,8 @@ Dazu:
 
 | # | Aufgabe | Aufwand |
 |---|---|---|
-| 2.1 | Waffen als Pickups in der Map, nicht alle von Anfang an (Start nur MG + Nahkampf) | M |
-| 2.2 | Alt-Feuer (rechte Maustaste) im `WeaponBase` vorsehen | S |
+| 2.1 | ✅ teilweise: Plasma, Lightning Gun und Shock Rifle als Pickups, beim Respawn wieder weg. Waffen als Pickups in der Map, nicht alle von Anfang an (Start nur MG + Nahkampf) | M |
+| 2.2 | ✅ Alt-Feuer (rechte Maustaste) im `WeaponBase` vorsehen | S |
 | 2.3 | Waffenwechsel mit Ab-/Aufzieh-Animation und schnellem „Weapon Switch“ wie in Q3 | S |
 | 2.4 | Object-Pooling für Projektile, Funken, Einschläge | S |
 | 2.5 | Headshots für Hitscan (Railgun/Shock) mit eigenem Hitsound | S |

@@ -341,7 +341,7 @@ value = 100.0
 show_percentage = false
 
 [node name="WeaponCell" type="PanelContainer" parent="BottomBar/HBox"]
-custom_minimum_size = Vector2(190, 0)
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("Style_Cell")
 
@@ -362,31 +362,52 @@ theme_override_constants/separation = 6
 alignment = 1
 
 [node name="Slot1" type="Label" parent="BottomBar/HBox/WeaponCell/VBox/Slots"]
-custom_minimum_size = Vector2(26, 0)
+custom_minimum_size = Vector2(18, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "1"
 horizontal_alignment = 1
 
 [node name="Slot2" type="Label" parent="BottomBar/HBox/WeaponCell/VBox/Slots"]
-custom_minimum_size = Vector2(26, 0)
+custom_minimum_size = Vector2(18, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "2"
 horizontal_alignment = 1
 
 [node name="Slot3" type="Label" parent="BottomBar/HBox/WeaponCell/VBox/Slots"]
-custom_minimum_size = Vector2(26, 0)
+custom_minimum_size = Vector2(18, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "3"
 horizontal_alignment = 1
 
 [node name="Slot4" type="Label" parent="BottomBar/HBox/WeaponCell/VBox/Slots"]
-custom_minimum_size = Vector2(26, 0)
+custom_minimum_size = Vector2(18, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "4"
+horizontal_alignment = 1
+
+[node name="Slot5" type="Label" parent="BottomBar/HBox/WeaponCell/VBox/Slots"]
+custom_minimum_size = Vector2(18, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "5"
+horizontal_alignment = 1
+
+[node name="Slot6" type="Label" parent="BottomBar/HBox/WeaponCell/VBox/Slots"]
+custom_minimum_size = Vector2(18, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "6"
+horizontal_alignment = 1
+
+[node name="Slot7" type="Label" parent="BottomBar/HBox/WeaponCell/VBox/Slots"]
+custom_minimum_size = Vector2(18, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "7"
 horizontal_alignment = 1
 
 [node name="ControlHints" type="Label" parent="."]
@@ -402,7 +423,7 @@ offset_bottom = -102.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 13
-text = "[WASD] Bewegen | [Leertaste] Springen & Doppelsprung | [Shift] Sprint | [1-4 / Mausrad] Waffe | [Tab] Punkte | [ESC] Pause"
+text = "[WASD] Bewegen | [Leertaste] Springen & Doppelsprung | [Shift] Sprint | [1-7 / Mausrad] Waffe | [Rechtsklick] Alt-Feuer | [Tab] Punkte | [ESC] Pause"
 horizontal_alignment = 1
 
 [node name="DeathOverlay" type="Control" parent="."]
