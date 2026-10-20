@@ -1,3 +1,15 @@
+# Änderungen (Runde 14: Match-Ablauf)
+
+- **Frag- und Zeitlimit** im Match-Fenster (gespeichert). Erreicht jemand das Frag-Limit oder läuft die Uhr ab, endet das Match.
+- **Countdown** „3 – 2 – 1 – FIGHT!“ vor jedem Match; währenddessen können weder Spieler noch Bots laufen oder schießen. Pause ist auch im Countdown möglich.
+- **HUD:** Restzeit oben in der Mitte (letzte 30 s rot), Frags mit Limit („Frags: 3 / 15“), Tacho etwas kleiner darunter.
+- **Ansagen** für den Spieler: Multi-Kills (2–5+ Kills in je 3 s) und Serien (5, 10, 15, 20, 25 Kills ohne Tod).
+- **Siegerbildschirm** (`scenes/ui/match_end.tscn`): „SIEG!“ oder „NIEDERLAGE“, Grund, Rangliste mit Frags, Tode, Schaden und eigene Statistik (Treffsicherheit, K/D, Schaden verursacht/erhalten, beste Serie, Lieblingswaffe). „Nochmal“ startet dieselbe Arena neu, „Hauptmenü“ geht zurück.
+- **Statistik** im GameManager: Schaden pro Teilnehmer (ohne Überschaden), Kills pro Waffe, Serien, Schüsse und direkte Treffer des Spielers.
+- **Neuer Test** `tests/match_test.gd` (18 Prüfungen): Countdown friert ein, Ansagen, Fraglimit, Siegerbildschirm, Neustart, Zeitlimit, Rückkehr ins Menü. Die anderen Tests schalten Countdown und Limits ab. Alle grün (38 / 31 / 18).
+
+---
+
 # Änderungen (Runde 13: Neue Waffen)
 
 - **Plasma** (Slot 3): Energie-Bolzen mit 10 Schuss/s, 20 Direktschaden plus kleiner Splash. Neues gemeinsames Projektil `EnergyProjectile` mit farbigem Einschlag (`scenes/effects/energy_impact.tscn`).

@@ -10,6 +10,8 @@ extends Control
 @onready var bot_slider: HSlider = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/BotsContainer/HBox/BotSlider
 @onready var bot_value_label: Label = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/BotsContainer/HBox/BotValueLabel
 @onready var map_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/MapContainer/MapOption
+@onready var frag_limit_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/FragBox/FragLimitOption
+@onready var time_limit_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/TimeBox/TimeLimitOption
 @onready var skill_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/SkillContainer/SkillOption
 @onready var fight_button: Button = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/FightButton
 @onready var match_back_button: Button = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/MatchBackButton
@@ -51,6 +53,15 @@ func _ready() -> void:
 		map_option.add_item(map_info.name)
 	map_option.selected = GameManager.selected_map
 	map_option.item_selected.connect(func(index: int): GameManager.selected_map = index)
+	# Frag- und Zeit-Limit (0 = kein Limit)
+	for limit in GameManager.FRAG_LIMITS:
+		frag_limit_option.add_item(str(limit) if limit > 0 else "Kein")
+	frag_limit_option.selected = maxi(GameManager.FRAG_LIMITS.find(GameManager.frag_limit), 0)
+	frag_limit_option.item_selected.connect(func(i: int): GameManager.frag_limit = GameManager.FRAG_LIMITS[i])
+	for minutes in GameManager.TIME_LIMITS:
+		time_limit_option.add_item("%d Min" % minutes if minutes > 0 else "Kein")
+	time_limit_option.selected = maxi(GameManager.TIME_LIMITS.find(int(GameManager.time_limit_minutes)), 0)
+	time_limit_option.item_selected.connect(func(i: int): GameManager.time_limit_minutes = GameManager.TIME_LIMITS[i])
 	for skill_name in Bot.SKILL_NAMES:
 		skill_option.add_item(skill_name)
 	skill_option.selected = GameManager.bot_skill

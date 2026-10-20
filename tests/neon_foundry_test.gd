@@ -35,7 +35,12 @@ func run() -> void:
 	await process_frame
 	var gm = root.get_node("GameManager")
 	var orig_count: int = gm.bot_count
+	var orig_frag_limit: int = gm.frag_limit
+	var orig_time_limit: float = gm.time_limit_minutes
 	gm.bot_count = 1
+	gm.match_countdown = 0.0
+	gm.frag_limit = 0
+	gm.time_limit_minutes = 0.0
 	gm.reset_game()
 	change_scene_to_file("res://levels/neon_foundry.tscn")
 	await create_timer(1.0).timeout
@@ -249,5 +254,7 @@ func run() -> void:
 	player.add_to_group("player")
 
 	gm.bot_count = orig_count
+	gm.frag_limit = orig_frag_limit
+	gm.time_limit_minutes = orig_time_limit
 	print("FEHLER: ", fails)
 	quit(1 if fails > 0 else 0)

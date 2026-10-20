@@ -51,6 +51,16 @@ Alle Tasten laufen über die InputMap (Projekt → Projekteinstellungen → Eing
 
 ---
 
+## 🏁 Match-Ablauf
+
+Im Match-Fenster wählst du neben Arena, Bots und Schwierigkeit auch **Frag-Limit** (5, 10, 15, 20, 30 oder keins) und **Zeit-Limit** (5, 10, 15, 20 Minuten oder keins).
+- Start mit Countdown **3 – 2 – 1 – FIGHT!**, solange ist alles eingefroren.
+- Oben in der Mitte läuft die Restzeit (letzte 30 s rot), oben rechts stehen die Frags mit Limit.
+- Ansagen: **DOUBLE / MULTI / MEGA / MONSTER KILL** (Kills innerhalb von 3 s) und **KILLING SPREE / RAMPAGE / DOMINATING / UNSTOPPABLE / GODLIKE** (5/10/15/20/25 Kills ohne Tod).
+- Erreicht jemand das Frag-Limit oder läuft die Zeit ab: **Siegerbildschirm** mit Rangliste (Frags, Tode, Schaden) und deiner Statistik (Treffsicherheit, K/D, Schaden verursacht/erhalten, beste Serie, Lieblingswaffe). Knöpfe „Nochmal“ und „Hauptmenü“.
+
+---
+
 ## 🤖 Gegner-Bots (KI)
 
 Nach „Spiel starten“ wählst du **Anzahl (1–7)** und **Schwierigkeit** der Bots: Anfänger, Normal, Erfahren, Profi, Gott. Die Stufe bestimmt Treffgenauigkeit, Reaktionszeit, Feuerrate, Ausweichtempo und Sichtweite. Es gilt **jeder gegen jeden**: Bots greifen den nächsten sichtbaren Gegner an, auch andere Bots, und rächen sich an dem, der sie beschießt. Gespawnt wird am Punkt mit dem größten Abstand zu allen anderen.
@@ -191,6 +201,8 @@ Godot_v4.7.2-stable_win64_console.exe --headless --path . -s res://tests/smoke_t
 ```
 
 Exit-Code 0 bedeutet: alles bestanden.
+
+Für den Match-Ablauf (Countdown, Fraglimit, Siegerbildschirm, Neustart, Zeitlimit): `-s res://tests/match_test.gd`
 
 Für die Neon Foundry gibt es einen eigenen Begehbarkeitstest (Treppen, Brücke, Tür, Jump-Pads, Bot-Wege, Bot läuft auf einen Turm):
 

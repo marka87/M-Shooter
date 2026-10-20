@@ -117,8 +117,8 @@ Heute können Bots nur patrouillieren, verfolgen und mit einer Waffe schießen.
 
 | # | Aufgabe | Aufwand |
 |---|---|---|
-| 6.1 | **Deathmatch** mit Frag-Limit und Zeitlimit, Warmup, Countdown, Endbildschirm mit Statistik | M |
-| 6.2 | ✅ teilweise: Scoreboard und Killfeed, Multi-Kill/Spree fehlt. **Scoreboard** (Tab), **Killfeed** oben rechts, Multi-Kill-/Spree-System | M |
+| 6.1 | ✅ Frag- und Zeitlimit, Countdown, Siegerbildschirm mit Statistik (Warmup fehlt). **Deathmatch** mit Frag-Limit und Zeitlimit, Warmup, Countdown, Endbildschirm mit Statistik | M |
+| 6.2 | ✅ Scoreboard, Killfeed, Multi-Kill- und Serien-Ansagen. **Scoreboard** (Tab), **Killfeed** oben rechts, Multi-Kill-/Spree-System | M |
 | 6.3 | ✅ teilweise: Quad Damage und Mega Health. **Power-ups**: Quad Damage / UDamage, Mega Health, Red Armor, Shield Belt, Invisibility. Große Items erzeugen die typische Map-Kontrolle | M |
 | 6.4 | **Instagib** (nur Railgun, ein Treffer tötet), ideal als schneller Zusatzmodus | S |
 | 6.5 | **Team Deathmatch**, danach **Capture the Flag** | L |

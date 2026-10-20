@@ -158,6 +158,15 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
+	# Countdown / Siegerbildschirm: stehen bleiben, nur Schwerkraft
+	if GameManager.is_frozen():
+		velocity.x = 0.0
+		velocity.z = 0.0
+		if not is_on_floor():
+			velocity.y -= gravity * delta
+		move_and_slide()
+		return
+
 	# Eingaberichtung aus der InputMap lesen (standardmaessig WASD)
 	var wish_dir: Vector3 = get_input_direction()
 
@@ -331,6 +340,7 @@ func launch(launch_velocity: Vector3) -> void:
 func take_damage(info: DamageInfo) -> void:
 	if is_dead:
 		return
+	GameManager.register_damage(info, self)
 	health.apply_damage(info)
 
 	# Physikalischer Impuls auf den Spieler

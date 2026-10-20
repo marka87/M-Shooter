@@ -30,6 +30,7 @@ func _ready() -> void:
 				GameManager.register_spawn_point(spawn)
 
 	_spawn_bots()
+	GameManager.start_match()
 
 
 ## Bots nach Match-Einstellungen erzeugen, jeweils am freiesten Spawnpunkt

@@ -46,6 +46,12 @@ func run() -> void:
 	var orig_bot_skill: int = gm.bot_skill
 	gm.bot_count = 2
 	gm.bot_skill = 4
+	# Ohne Countdown und Limits, sonst endet das Match mitten im Test
+	var orig_frag_limit: int = gm.frag_limit
+	var orig_time_limit: float = gm.time_limit_minutes
+	gm.match_countdown = 0.0
+	gm.frag_limit = 0
+	gm.time_limit_minutes = 0.0
 	gm.reset_game()
 	change_scene_to_file("res://levels/test_arena.tscn")
 	await wait(1.5)
@@ -248,6 +254,8 @@ func run() -> void:
 	# Einstellungen (echte Werte wiederherstellen, damit der Test sie nicht ueberschreibt)
 	gm.bot_count = orig_bot_count
 	gm.bot_skill = orig_bot_skill
+	gm.frag_limit = orig_frag_limit
+	gm.time_limit_minutes = orig_time_limit
 	gm.save_settings()
 	check(FileAccess.file_exists("user://settings.cfg"), "Einstellungen gespeichert")
 

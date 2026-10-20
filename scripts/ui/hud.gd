@@ -18,6 +18,8 @@ class_name HUD
 @onready var control_hints: Label = $ControlHints
 @onready var announce_label: Label = $AnnounceLabel
 @onready var quad_label: Label = $QuadLabel
+@onready var timer_label: Label = $TimerLabel
+var _announce_tween: Tween = null
 @onready var damage_flash: ColorRect = $DamageFlash
 @onready var hitmarker: Control = $CrosshairContainer/Hitmarker
 @onready var death_overlay: Control = $DeathOverlay
@@ -47,6 +49,8 @@ func bind(p: Player) -> void:
 	GameManager.score_updated.connect(_on_score_updated)
 	GameManager.kill_registered.connect(add_kill_entry)
 	GameManager.scoreboard_changed.connect(_refresh_scoreboard)
+	GameManager.countdown_tick.connect(_on_countdown_tick)
+	GameManager.player_announcement.connect(announce)
 	_refresh_scoreboard()
 
 	health_bar.max_value = player.health.max_health
@@ -68,6 +72,7 @@ func _process(_delta: float) -> void:
 		return
 	_update_speed()
 	_update_quad()
+	_update_timer()
 	# Scoreboard nur solange Tab gehalten wird
 	scoreboard.visible = Input.is_action_pressed("scoreboard")
 	# Countdown im Todes-Overlay (death_timer pausiert mit dem Spiel)
@@ -88,17 +93,37 @@ func _update_quad() -> void:
 		(crt.material as ShaderMaterial).set_shader_parameter("quad_glow", 0.6 if t > 0.0 else 0.0)
 
 
+## Restzeit oben (mm:ss), letzte 30 Sekunden rot. Ohne Zeitlimit ausgeblendet.
+func _update_timer() -> void:
+	timer_label.visible = GameManager.time_limit_minutes > 0.0
+	if not timer_label.visible:
+		return
+	var t: int = ceili(GameManager.match_time_left)
+	timer_label.text = "%d:%02d" % [t / 60, t % 60]
+	timer_label.modulate = Color(1.0, 0.35, 0.3) if t <= 30 else Color.WHITE
+
+
+## Countdown vor dem Start: 3, 2, 1, FIGHT!
+func _on_countdown_tick(seconds_left: int) -> void:
+	if seconds_left > 0:
+		announce(str(seconds_left), Color(0.85, 0.95, 1.0))
+	else:
+		announce("FIGHT!", Color(1.0, 0.45, 0.15))
+
+
 ## Grosse Ansage in der Bildmitte, blendet nach kurzer Zeit aus
 func announce(text: String, color: Color) -> void:
+	if _announce_tween and _announce_tween.is_valid():
+		_announce_tween.kill()
 	announce_label.text = text
 	announce_label.add_theme_color_override("font_color", color)
 	announce_label.modulate.a = 1.0
 	announce_label.scale = Vector2.ONE * 1.3
 	announce_label.pivot_offset = announce_label.size / 2.0
-	var tween := create_tween()
-	tween.tween_property(announce_label, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.tween_interval(1.4)
-	tween.tween_property(announce_label, "modulate:a", 0.0, 0.6)
+	_announce_tween = create_tween()
+	_announce_tween.tween_property(announce_label, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_announce_tween.tween_interval(0.6 if text.length() <= 2 else 1.4)
+	_announce_tween.tween_property(announce_label, "modulate:a", 0.0, 0.4)
 
 
 func _on_item_picked(pickup_type: int, item_name: String) -> void:
@@ -199,7 +224,10 @@ func _on_ammo_updated(current_ammo: int, max_ammo: int) -> void:
 
 
 func _on_score_updated(frags: int, _deaths: int) -> void:
-	frags_label.text = "Frags: %d" % frags
+	if GameManager.frag_limit > 0:
+		frags_label.text = "Frags: %d / %d" % [frags, GameManager.frag_limit]
+	else:
+		frags_label.text = "Frags: %d" % frags
 
 
 ## Neue Zeile im Killfeed oben rechts, verschwindet nach ein paar Sekunden

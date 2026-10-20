@@ -1,8 +1,8 @@
 extends Node
 
 ## GameManager Autoload-Singleton
-## Verwaltet den globalen Spielzustand, Punktestand (Frags, Tode),
-## Respawn-Logik und Benutzereinstellungen (Sensitivitaet, Lautstaerke).
+## Verwaltet den globalen Spielzustand, den Match-Ablauf (Countdown, Frag- und Zeitlimit,
+## Siegerbildschirm), Punktestand und Statistik, Respawn-Logik und Benutzereinstellungen.
 
 # Signale fuer UI und Spielereignisse
 signal score_updated(player_frags: int, player_deaths: int)
@@ -12,10 +12,41 @@ signal player_died()
 signal kill_registered(killer_name: String, victim_name: String, weapon_name: String)
 ## Die Punktetabelle hat sich geaendert (fuer das Scoreboard)
 signal scoreboard_changed()
+## Countdown vor dem Start: 3, 2, 1, dann 0 = "FIGHT!"
+signal countdown_tick(seconds_left: int)
+signal match_started()
+## Match vorbei; results siehe end_match()
+signal match_ended(results: Dictionary)
+## Ansage fuer den Spieler (Multi-Kill, Serie)
+signal player_announcement(text: String, color: Color)
 
 # Spielzustand
-enum GameState { MENU, PLAYING, PAUSED, GAME_OVER }
+enum GameState { MENU, PLAYING, PAUSED, GAME_OVER, COUNTDOWN }
 var current_state: GameState = GameState.PLAYING
+var _state_before_pause: GameState = GameState.PLAYING
+
+# Match-Regeln (im Match-Fenster waehlbar, 0 = kein Limit)
+const FRAG_LIMITS: Array[int] = [5, 10, 15, 20, 30, 0]
+const TIME_LIMITS: Array[int] = [5, 10, 15, 20, 0]
+var frag_limit: int = 15
+var time_limit_minutes: float = 10.0
+## Sekunden Countdown vor dem Start (Tests setzen 0)
+var match_countdown: float = 3.0
+var match_time_left: float = 0.0
+var countdown_left: float = 0.0
+var _last_tick: int = -1
+
+# Statistik des Spielers fuer den Siegerbildschirm
+var player_shots: int = 0
+var player_hits: int = 0
+var _player_multi: int = 0
+var _player_last_kill: float = -100.0
+const MULTI_KILL_WINDOW: float = 3.0
+const MULTI_KILL_TEXT := { 2: "DOUBLE KILL", 3: "MULTI KILL", 4: "MEGA KILL", 5: "MONSTER KILL" }
+const SPREE_TEXT := { 5: "KILLING SPREE", 10: "RAMPAGE", 15: "DOMINATING", 20: "UNSTOPPABLE", 25: "GODLIKE" }
+
+const MATCH_END_SCENE: PackedScene = preload("res://scenes/ui/match_end.tscn")
+var _match_end_layer: CanvasLayer = null
 
 # Statistik
 var player_frags: int = 0
@@ -96,11 +127,120 @@ func _build_pause_overlay() -> void:
 	add_child(_pause_layer)
 
 
+## Match-Uhr und Countdown (laufen nicht, waehrend das Spiel pausiert ist)
+func _process(delta: float) -> void:
+	if get_tree().paused:
+		return
+	match current_state:
+		GameState.COUNTDOWN:
+			countdown_left -= delta
+			var n: int = ceili(countdown_left)
+			if n != _last_tick and n > 0:
+				_last_tick = n
+				countdown_tick.emit(n)
+			if countdown_left <= 0.0:
+				current_state = GameState.PLAYING
+				countdown_tick.emit(0)
+				match_started.emit()
+		GameState.PLAYING:
+			if time_limit_minutes > 0.0 and match_time_left > 0.0:
+				match_time_left -= delta
+				if match_time_left <= 0.0:
+					match_time_left = 0.0
+					end_match("Zeitlimit")
+
+
+## Wird vom Level nach dem Laden aufgerufen: Uhr stellen, Countdown starten
+func start_match() -> void:
+	match_time_left = time_limit_minutes * 60.0
+	_last_tick = -1
+	if match_countdown > 0.0:
+		current_state = GameState.COUNTDOWN
+		countdown_left = match_countdown
+	else:
+		current_state = GameState.PLAYING
+		match_started.emit()
+
+
+## Waehrend Countdown und Siegerbildschirm: keine Bewegung, kein Schiessen
+func is_frozen() -> bool:
+	return current_state == GameState.COUNTDOWN or current_state == GameState.GAME_OVER
+
+
+## Match beenden: Spiel anhalten, Ergebnisse sammeln, Siegerbildschirm zeigen
+func end_match(reason: String) -> void:
+	if current_state == GameState.GAME_OVER or current_state == GameState.MENU:
+		return
+	current_state = GameState.GAME_OVER
+	var rows := get_scoreboard()
+	var results := {
+		"reason": reason,
+		"rows": rows,
+		"winner": rows[0].name if rows.size() > 0 else "",
+		"player_won": rows.size() > 0 and rows[0].is_player,
+		"accuracy": (100.0 * player_hits / player_shots) if player_shots > 0 else 0.0,
+	}
+	for row in rows:
+		if row.is_player:
+			results["player"] = row
+	get_tree().paused = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	_pause_layer.visible = false
+	_match_end_layer = MATCH_END_SCENE.instantiate()
+	add_child(_match_end_layer)
+	_match_end_layer.show_results(results)
+	match_ended.emit(results)
+
+
+## Siegerbildschirm schliessen und Level neu starten (gleiche Einstellungen)
+func restart_match() -> void:
+	_close_match_end()
+	reset_game()
+	get_tree().reload_current_scene()
+
+
+## Siegerbildschirm schliessen und ins Hauptmenue
+func return_to_menu() -> void:
+	_close_match_end()
+	get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
+
+
+func _close_match_end() -> void:
+	if is_instance_valid(_match_end_layer):
+		_match_end_layer.queue_free()
+	_match_end_layer = null
+	get_tree().paused = false
+
+
 ## Meldet einen Teilnehmer (Spieler oder Bot) fuer die Punktetabelle an
 func register_participant(display_name: String, is_player: bool = false) -> void:
 	if not scores.has(display_name):
-		scores[display_name] = { "frags": 0, "deaths": 0, "is_player": is_player }
+		scores[display_name] = {
+			"frags": 0, "deaths": 0, "is_player": is_player,
+			"damage_dealt": 0.0, "damage_taken": 0.0,
+			"spree": 0, "best_spree": 0, "weapon_kills": {},
+		}
 		scoreboard_changed.emit()
+
+
+## Schaden fuer die Statistik (vom Ziel in take_damage aufgerufen)
+func register_damage(info: DamageInfo, victim: Node) -> void:
+	# Ueberschaden nicht mitzaehlen: hoechstens, was das Ziel noch an Leben und Ruestung hatte
+	var amount: float = info.amount
+	var victim_health = victim.get("health")
+	if victim_health:
+		amount = minf(amount, victim_health.health + victim_health.armor)
+	_score(_name_of(victim), victim is Player).damage_taken += amount
+	if is_instance_valid(info.attacker) and info.attacker != victim:
+		_score(_name_of(info.attacker), info.attacker is Player).damage_dealt += amount
+		# Treffsicherheit: nur direkte Treffer zaehlen (Flaechenschaden wuerde sie verfaelschen)
+		if info.attacker is Player and not info.is_splash:
+			player_hits += 1
+
+
+## Ein Schuss des Spielers (fuer die Treffsicherheit)
+func register_shot() -> void:
+	player_shots += 1
 
 
 ## Wertet einen Abschuss aus. killer == victim oder null = Selbstmord (-1 Frag wie in Quake)
@@ -109,11 +249,19 @@ func register_kill(killer: Node, victim: Node, weapon_name: String) -> void:
 	var suicide := killer == null or killer == victim or not is_instance_valid(killer)
 	var killer_name := victim_name if suicide else _name_of(killer)
 
-	_score(victim_name, victim is Player).deaths += 1
+	var victim_score := _score(victim_name, victim is Player)
+	victim_score.deaths += 1
+	victim_score.spree = 0
 	if suicide:
-		_score(victim_name, victim is Player).frags -= 1
+		victim_score.frags -= 1
 	else:
-		_score(killer_name, killer is Player).frags += 1
+		var killer_score := _score(killer_name, killer is Player)
+		killer_score.frags += 1
+		killer_score.spree += 1
+		killer_score.best_spree = maxi(killer_score.best_spree, killer_score.spree)
+		killer_score.weapon_kills[weapon_name] = killer_score.weapon_kills.get(weapon_name, 0) + 1
+		if killer is Player:
+			_announce_player_kill(killer_score.spree)
 
 	# Kurzwerte fuer HUD und Tests
 	if victim is Player:
@@ -130,13 +278,31 @@ func register_kill(killer: Node, victim: Node, weapon_name: String) -> void:
 	scoreboard_changed.emit()
 	if victim is Player:
 		player_died.emit()
+		_player_multi = 0
+
+	# Fraglimit erreicht? (verzoegert, damit Effekte des letzten Kills noch starten)
+	if frag_limit > 0 and not suicide and scores[killer_name].frags >= frag_limit:
+		end_match.call_deferred("Fraglimit")
+
+
+## Multi-Kill (mehrere Kills kurz hintereinander) und Serie (Kills ohne zu sterben) ansagen
+func _announce_player_kill(spree: int) -> void:
+	var now: float = Time.get_ticks_msec() / 1000.0
+	_player_multi = _player_multi + 1 if now - _player_last_kill <= MULTI_KILL_WINDOW else 1
+	_player_last_kill = now
+	if SPREE_TEXT.has(spree):
+		player_announcement.emit(SPREE_TEXT[spree], Color(1.0, 0.35, 0.2))
+	elif _player_multi >= 2:
+		player_announcement.emit(MULTI_KILL_TEXT[mini(_player_multi, 5)], Color(1.0, 0.8, 0.2))
 
 
 ## Punktetabelle sortiert nach Frags (absteigend), bei Gleichstand weniger Tode zuerst
 func get_scoreboard() -> Array:
 	var rows: Array = []
 	for n in scores:
-		rows.append({ "name": n, "frags": scores[n].frags, "deaths": scores[n].deaths, "is_player": scores[n].is_player })
+		var row: Dictionary = scores[n].duplicate()
+		row["name"] = n
+		rows.append(row)
 	rows.sort_custom(func(a, b):
 		return a.frags > b.frags or (a.frags == b.frags and a.deaths < b.deaths))
 	return rows
@@ -158,6 +324,9 @@ func reset_game() -> void:
 	player_frags = 0
 	player_deaths = 0
 	bot_frags = 0
+	player_shots = 0
+	player_hits = 0
+	_player_multi = 0
 	scores.clear()
 	score_updated.emit(player_frags, player_deaths)
 	scoreboard_changed.emit()
@@ -167,14 +336,15 @@ func reset_game() -> void:
 ## Umschalten des Pause-Zustands
 
 func toggle_pause() -> void:
-	if current_state == GameState.PLAYING:
+	if current_state == GameState.PLAYING or current_state == GameState.COUNTDOWN:
+		_state_before_pause = current_state
 		current_state = GameState.PAUSED
 		get_tree().paused = true
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		_pause_layer.visible = true
 		game_paused.emit(true)
 	elif current_state == GameState.PAUSED:
-		current_state = GameState.PLAYING
+		current_state = _state_before_pause
 		get_tree().paused = false
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		_pause_layer.visible = false
@@ -191,6 +361,8 @@ func load_settings() -> void:
 		bot_count = clampi(cfg.get_value("match", "bot_count", bot_count), 1, MAX_BOTS)
 		bot_skill = clampi(cfg.get_value("match", "bot_skill", bot_skill), 0, 4)
 		selected_map = clampi(cfg.get_value("match", "map", selected_map), 0, MAPS.size() - 1)
+		frag_limit = cfg.get_value("match", "frag_limit", frag_limit)
+		time_limit_minutes = cfg.get_value("match", "time_limit", time_limit_minutes)
 	apply_master_volume()
 
 
@@ -203,6 +375,8 @@ func save_settings() -> void:
 	cfg.set_value("match", "bot_count", bot_count)
 	cfg.set_value("match", "bot_skill", bot_skill)
 	cfg.set_value("match", "map", selected_map)
+	cfg.set_value("match", "frag_limit", frag_limit)
+	cfg.set_value("match", "time_limit", time_limit_minutes)
 	cfg.save(SETTINGS_PATH)
 
 

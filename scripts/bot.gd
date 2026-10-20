@@ -138,6 +138,15 @@ func _physics_process(delta: float) -> void:
 			move_and_slide()
 		return
 
+	# Countdown / Siegerbildschirm: nur Schwerkraft, keine KI
+	if GameManager.is_frozen():
+		velocity.x = 0.0
+		velocity.z = 0.0
+		if not is_on_floor():
+			velocity.y -= gravity * delta
+		move_and_slide()
+		return
+
 	# Flug nach Jump-Pad: nur Schwerkraft, bis der Bot wieder steht
 	if is_launched:
 		velocity.y -= gravity * delta
@@ -451,6 +460,8 @@ func take_damage(info: DamageInfo) -> void:
 			reaction_timer = reaction_time
 		if current_state == State.PATROL:
 			_switch_state(State.CHASE)
+
+	GameManager.register_damage(info, self)
 
 	# Schaden zuletzt anwenden: Bei Tod startet health.died -> _die() mit Todes-Sound,
 	# der sonst vom Treffer-Sound oben ueberschrieben wuerde

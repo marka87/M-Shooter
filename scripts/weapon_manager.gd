@@ -121,20 +121,20 @@ func _process(delta: float) -> void:
 
 func fire_current_weapon() -> void:
 	# Tote Spieler duerfen nicht schiessen
-	if player and player.get("is_dead") == true:
+	if player and player.get("is_dead") == true or GameManager.is_frozen():
 		return
 	var weapon := get_current_weapon()
-	if weapon:
-		weapon.try_fire(player, camera)
+	if weapon and weapon.try_fire(player, camera):
+		GameManager.register_shot()
 
 
 ## Alt-Feuer der aktiven Waffe (rechte Maustaste)
 func fire_current_weapon_alt() -> void:
-	if player and player.get("is_dead") == true:
+	if player and player.get("is_dead") == true or GameManager.is_frozen():
 		return
 	var weapon := get_current_weapon()
-	if weapon:
-		weapon.try_fire_alt(player, camera)
+	if weapon and weapon.try_fire_alt(player, camera):
+		GameManager.register_shot()
 
 
 ## Wechselt zu einem Waffen-Index (0 MG, 1 Shotgun, 2 Plasma, 3 Raketenwerfer,
