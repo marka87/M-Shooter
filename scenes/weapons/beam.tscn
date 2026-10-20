@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3 uid="uid://rail_beam_001"]
+
+[ext_resource type="Script" path="res://scripts/weapons/beam.gd" id="1_beam"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_BeamGlow"]
+transparency = 1
+blend_mode = 1
+cull_mode = 2
+albedo_color = Color(0.2, 0.85, 1, 0.9)
+emission_enabled = true
+emission = Color(0.1, 0.75, 1, 1)
+emission_energy_multiplier = 6.0
+
+[sub_resource type="CylinderMesh" id="Mesh_BeamCylinder"]
+material = SubResource("Mat_BeamGlow")
+top_radius = 0.035
+bottom_radius = 0.035
+height = 1.0
+radial_segments = 12
+
+[node name="RailBeam" type="Node3D"]
+script = ExtResource("1_beam")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_BeamCylinder")

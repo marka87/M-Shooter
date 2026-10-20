@@ -1,0 +1,54 @@
+[gd_scene load_steps=6 format=3 uid="uid://explosion_scene_001"]
+
+[ext_resource type="Script" path="res://scripts/weapons/explosion.gd" id="1_expl"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_BlastSphere"]
+transparency = 1
+blend_mode = 1
+albedo_color = Color(1, 0.45, 0.1, 0.75)
+emission_enabled = true
+emission = Color(1, 0.35, 0.05, 1)
+emission_energy_multiplier = 3.0
+
+[sub_resource type="SphereMesh" id="Mesh_BlastSphere"]
+material = SubResource("Mat_BlastSphere")
+radius = 1.0
+height = 2.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_Debris"]
+albedo_color = Color(1, 0.7, 0.2, 1)
+emission_enabled = true
+emission = Color(1, 0.5, 0.1, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="BoxMesh" id="Mesh_Debris"]
+material = SubResource("Mat_Debris")
+size = Vector3(0.12, 0.12, 0.12)
+
+[node name="Explosion" type="Node3D"]
+script = ExtResource("1_expl")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+light_color = Color(1, 0.65, 0.2, 1)
+light_energy = 5.0
+omni_range = 12.0
+
+[node name="BlastSphere" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_BlastSphere")
+
+[node name="CPUParticles3D" type="CPUParticles3D" parent="."]
+emitting = false
+amount = 25
+lifetime = 0.5
+one_shot = true
+explosiveness = 0.95
+mesh = SubResource("Mesh_Debris")
+spread = 180.0
+initial_velocity_min = 6.0
+initial_velocity_max = 16.0
+scale_amount_min = 0.8
+scale_amount_max = 2.0
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+unit_size = 10.0
+max_distance = 80.0

@@ -1,0 +1,80 @@
+[gd_scene load_steps=10 format=3 uid="uid://bot_enemy_001"]
+
+[ext_resource type="Script" path="res://scripts/bot.gd" id="1_bot"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
+radius = 0.45
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="Mat_BotArmor"]
+albedo_color = Color(0.85, 0.18, 0.15, 1)
+metallic = 0.6
+roughness = 0.35
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_1"]
+material = SubResource("Mat_BotArmor")
+radius = 0.45
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="Mat_Visor"]
+albedo_color = Color(1, 0.85, 0.2, 1)
+emission_enabled = true
+emission = Color(1, 0.75, 0.1, 1)
+emission_energy_multiplier = 3.5
+
+[sub_resource type="BoxMesh" id="Mesh_Visor"]
+material = SubResource("Mat_Visor")
+size = Vector3(0.35, 0.1, 0.15)
+
+[sub_resource type="StandardMaterial3D" id="Mat_BotGun"]
+albedo_color = Color(0.15, 0.17, 0.2, 1)
+metallic = 0.8
+roughness = 0.3
+
+[sub_resource type="BoxMesh" id="Mesh_BotGun"]
+material = SubResource("Mat_BotGun")
+size = Vector3(0.1, 0.12, 0.5)
+
+[node name="Bot" type="CharacterBody3D" groups=["enemies"]]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_bot")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_1")
+
+[node name="BodyMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_1")
+
+[node name="Visor" type="MeshInstance3D" parent="BodyMesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, -0.42)
+mesh = SubResource("Mesh_Visor")
+
+[node name="GunMesh" type="MeshInstance3D" parent="BodyMesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.32, 0.05, -0.4)
+mesh = SubResource("Mesh_BotGun")
+
+[node name="Muzzle" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.32, 0.95, -0.7)
+
+[node name="MuzzleFlash" type="OmniLight3D" parent="Muzzle"]
+visible = false
+light_color = Color(1, 0.8, 0.2, 1)
+light_energy = 2.0
+omni_range = 3.5
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+target_desired_distance = 1.5
+
+[node name="Nameplate" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.15, 0)
+billboard = 1
+text = "BOT [Patrouille] - 100 HP"
+font_size = 28
+outline_size = 8
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+unit_size = 7.0
+max_distance = 60.0

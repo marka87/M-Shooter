@@ -1,0 +1,56 @@
+[gd_scene load_steps=8 format=3 uid="uid://rocket_projectile_001"]
+
+[ext_resource type="Script" path="res://scripts/weapons/rocket.gd" id="1_rkt"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_RocketBody"]
+albedo_color = Color(0.7, 0.72, 0.75, 1)
+metallic = 0.6
+roughness = 0.4
+
+[sub_resource type="CylinderMesh" id="Mesh_RocketBody"]
+material = SubResource("Mat_RocketBody")
+top_radius = 0.08
+bottom_radius = 0.08
+height = 0.55
+
+[sub_resource type="StandardMaterial3D" id="Mat_Nose"]
+albedo_color = Color(0.9, 0.2, 0.15, 1)
+roughness = 0.3
+
+[sub_resource type="CylinderMesh" id="Mesh_Nose"]
+material = SubResource("Mat_Nose")
+top_radius = 0.001
+bottom_radius = 0.08
+height = 0.22
+
+[sub_resource type="StandardMaterial3D" id="Mat_Exhaust"]
+albedo_color = Color(1, 0.6, 0.1, 1)
+emission_enabled = true
+emission = Color(1, 0.5, 0.05, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="SphereMesh" id="Mesh_Exhaust"]
+material = SubResource("Mat_Exhaust")
+radius = 0.07
+height = 0.14
+
+[node name="Rocket" type="Node3D"]
+script = ExtResource("1_rkt")
+
+[node name="RocketBody" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource("Mesh_RocketBody")
+
+[node name="NoseCone" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.38)
+mesh = SubResource("Mesh_Nose")
+
+[node name="TailMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.32)
+mesh = SubResource("Mesh_Exhaust")
+
+[node name="TailGlow" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.35)
+light_color = Color(1, 0.6, 0.15, 1)
+light_energy = 2.0
+omni_range = 4.0

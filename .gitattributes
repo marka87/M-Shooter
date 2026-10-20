@@ -1,0 +1,10 @@
+# Einheitliche Zeilenenden (LF), wie von Godot empfohlen
+* text=auto eol=lf
+
+# Binaerdateien
+*.png binary
+*.jpg binary
+*.wav binary
+*.ogg binary
+*.glb binary
+*.exe binary

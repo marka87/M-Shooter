@@ -1,0 +1,15 @@
+# Godot 4
+.godot/
+/android/
+
+# Exporte
+/build/
+*.pck
+*.exe
+
+# Betriebssystem
+.DS_Store
+Thumbs.db
+
+# Godot-Editor im Projektordner (zu gross fuer GitHub)
+Godot_v*.exe

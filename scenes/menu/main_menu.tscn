@@ -1,0 +1,170 @@
+[gd_scene load_steps=3 format=3 uid="uid://main_menu_scene_001"]
+
+[ext_resource type="Script" path="res://scripts/menu/main_menu.gd" id="1_menu"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_Settings"]
+bg_color = Color(0.12, 0.14, 0.19, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.9, 0.35, 0.15, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.07, 0.08, 0.12, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainButtons" type="VBoxContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="CenterContainer/MainButtons"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.35, 0.15, 1)
+theme_override_font_sizes/font_size = 54
+text = "ARENA SHOOTER"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="CenterContainer/MainButtons"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 0.9)
+theme_override_font_sizes/font_size = 18
+text = "QUAKE & UNREAL TOURNAMENT STYLE"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="CenterContainer/MainButtons"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+
+[node name="StartButton" type="Button" parent="CenterContainer/MainButtons"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "SPIEL STARTEN"
+
+[node name="SettingsButton" type="Button" parent="CenterContainer/MainButtons"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "EINSTELLUNGEN"
+
+[node name="QuitButton" type="Button" parent="CenterContainer/MainButtons"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "BEENDEN"
+
+[node name="SettingsPanel" type="PanelContainer" parent="CenterContainer"]
+visible = false
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_Settings")
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/SettingsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="SettingsTitle" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 30
+text = "EINSTELLUNGEN"
+horizontal_alignment = 1
+
+[node name="SensContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/SensContainer"]
+layout_mode = 2
+text = "Mausempfindlichkeit:"
+
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/SensContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SensSlider" type="HSlider" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/SensContainer/HBox"]
+custom_minimum_size = Vector2(240, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0005
+max_value = 0.008
+step = 0.0001
+value = 0.002
+
+[node name="SensValueLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/SensContainer/HBox"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "0.0020"
+
+[node name="VolumeContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/VolumeContainer"]
+layout_mode = 2
+text = "Gesamtlautstärke:"
+
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/VolumeContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="VolumeSlider" type="HSlider" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/VolumeContainer/HBox"]
+custom_minimum_size = Vector2(240, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="VolumeValueLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/VolumeContainer/HBox"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "100%"
+
+[node name="Spacer" type="Control" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+
+[node name="BackButton" type="Button" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "ZURÜCK"
+
+[connection signal="pressed" from="CenterContainer/MainButtons/StartButton" to="." method="_on_start_button_pressed"]
+[connection signal="pressed" from="CenterContainer/MainButtons/SettingsButton" to="." method="_on_settings_button_pressed"]
+[connection signal="pressed" from="CenterContainer/MainButtons/QuitButton" to="." method="_on_quit_button_pressed"]
+[connection signal="pressed" from="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/BackButton" to="." method="_on_back_button_pressed"]

@@ -1,0 +1,54 @@
+[gd_scene load_steps=7 format=3 uid="uid://rocket_launcher_001"]
+
+[ext_resource type="Script" path="res://scripts/weapons/rocket_launcher.gd" id="1_rpg"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_LauncherDark"]
+albedo_color = Color(0.2, 0.22, 0.26, 1)
+metallic = 0.7
+roughness = 0.35
+
+[sub_resource type="CylinderMesh" id="Mesh_MainTube"]
+material = SubResource("Mat_LauncherDark")
+top_radius = 0.085
+bottom_radius = 0.085
+height = 0.8
+
+[sub_resource type="StandardMaterial3D" id="Mat_AccentOrange"]
+albedo_color = Color(0.9, 0.45, 0.1, 1)
+roughness = 0.4
+
+[sub_resource type="BoxMesh" id="Mesh_Shield"]
+material = SubResource("Mat_AccentOrange")
+size = Vector3(0.22, 0.22, 0.15)
+
+[sub_resource type="BoxMesh" id="Mesh_Handle"]
+material = SubResource("Mat_LauncherDark")
+size = Vector3(0.08, 0.18, 0.08)
+
+[node name="RocketLauncher" type="Node3D"]
+script = ExtResource("1_rpg")
+weapon_name = "Raketenwerfer"
+damage = 100.0
+cooldown = 0.8
+max_ammo = 35
+current_ammo = 18
+recoil_distance = 0.12
+
+[node name="MainTube" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.2)
+mesh = SubResource("Mesh_MainTube")
+
+[node name="Shield" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.05)
+mesh = SubResource("Mesh_Shield")
+
+[node name="Handle" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, -0.14, 0.05)
+mesh = SubResource("Mesh_Handle")
+
+[node name="Muzzle" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.65)
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+unit_size = 6.0
+max_distance = 70.0
