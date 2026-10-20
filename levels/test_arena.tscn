@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://test_arena_001"]
+[gd_scene load_steps=35 format=3 uid="uid://test_arena_001"]
 
 [ext_resource type="Script" path="res://scripts/levels/arena.gd" id="1_arena"]
 [ext_resource type="PackedScene" uid="uid://bplayer_character_001" path="res://scenes/player.tscn" id="2_player"]
@@ -7,12 +7,17 @@
 [ext_resource type="PackedScene" uid="uid://armor_pickup_001" path="res://scenes/items/armor_pickup.tscn" id="6_armor"]
 [ext_resource type="Shader" path="res://assets/shaders/arena_grid.gdshader" id="7_grid"]
 [ext_resource type="PackedScene" path="res://scenes/items/jump_pad.tscn" id="8_pad"]
+[ext_resource type="Shader" path="res://assets/shaders/space_sky.gdshader" id="9_sky"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
-sky_top_color = Color(0.04, 0.06, 0.12, 1)
-sky_horizon_color = Color(0.22, 0.18, 0.3, 1)
-ground_bottom_color = Color(0.08, 0.09, 0.12, 1)
-ground_horizon_color = Color(0.2, 0.22, 0.28, 1)
+[sub_resource type="ShaderMaterial" id="ProceduralSkyMaterial_1"]
+shader = ExtResource("9_sky")
+shader_parameter/zenith_color = Color(0.01, 0.015, 0.04, 1)
+shader_parameter/horizon_color = Color(0.12, 0.08, 0.2, 1)
+shader_parameter/horizon_glow = Color(1, 0.35, 0.15, 1)
+shader_parameter/nebula_color = Color(0.2, 0.45, 0.9, 1)
+shader_parameter/star_density = 0.5
+shader_parameter/star_brightness = 6.0
+shader_parameter/nebula_strength = 0.35
 
 [sub_resource type="Sky" id="Sky_1"]
 sky_material = SubResource("ProceduralSkyMaterial_1")
@@ -86,13 +91,17 @@ size = Vector3(90, 8, 2)
 [sub_resource type="BoxShape3D" id="Shape_Wall"]
 size = Vector3(90, 8, 2)
 
-[sub_resource type="StandardMaterial3D" id="Mat_Platform"]
-albedo_color = Color(0.9, 0.4, 0.1, 1)
-metallic = 0.3
-roughness = 0.4
-emission_enabled = true
-emission = Color(1, 0.35, 0.05, 1)
-emission_energy_multiplier = 0.25
+[sub_resource type="ShaderMaterial" id="Mat_Platform"]
+render_priority = 0
+shader = ExtResource("7_grid")
+shader_parameter/base_color = Color(0.32, 0.13, 0.05, 1)
+shader_parameter/line_color = Color(1, 0.45, 0.08, 1)
+shader_parameter/cell_size = 1.0
+shader_parameter/line_width = 0.02
+shader_parameter/line_emission = 1.4
+shader_parameter/major_every = 7
+shader_parameter/roughness_value = 0.45
+shader_parameter/metallic_value = 0.3
 
 [sub_resource type="BoxMesh" id="Mesh_Platform"]
 material = SubResource("Mat_Platform")
@@ -101,9 +110,49 @@ size = Vector3(14, 2, 14)
 [sub_resource type="BoxShape3D" id="Shape_Platform"]
 size = Vector3(14, 2, 14)
 
-[sub_resource type="StandardMaterial3D" id="Mat_Pillar"]
-albedo_color = Color(0.24, 0.27, 0.32, 1)
-roughness = 0.5
+[sub_resource type="ShaderMaterial" id="Mat_Pillar"]
+render_priority = 0
+shader = ExtResource("7_grid")
+shader_parameter/base_color = Color(0.16, 0.18, 0.22, 1)
+shader_parameter/line_color = Color(0.2, 0.75, 1, 1)
+shader_parameter/cell_size = 1.0
+shader_parameter/line_width = 0.012
+shader_parameter/line_emission = 0.6
+shader_parameter/major_every = 7
+shader_parameter/roughness_value = 0.5
+shader_parameter/metallic_value = 0.4
+
+[sub_resource type="StandardMaterial3D" id="Mat_RingGlow"]
+shading_mode = 0
+albedo_color = Color(0.2, 0.75, 1, 1)
+emission_enabled = true
+emission = Color(0.2, 0.75, 1, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="TorusMesh" id="Mesh_PillarRing"]
+material = SubResource("Mat_RingGlow")
+inner_radius = 1.38
+outer_radius = 1.5
+
+[sub_resource type="CylinderMesh" id="Mesh_Support"]
+material = SubResource("Mat_Pillar")
+top_radius = 0.45
+bottom_radius = 0.6
+height = 1.5
+
+[sub_resource type="CylinderShape3D" id="Shape_Support"]
+height = 1.5
+radius = 0.55
+
+[sub_resource type="CylinderMesh" id="Mesh_TowerColumn"]
+material = SubResource("Mat_Pillar")
+top_radius = 1.4
+bottom_radius = 1.8
+height = 5.0
+
+[sub_resource type="CylinderShape3D" id="Shape_TowerColumn"]
+height = 5.0
+radius = 1.6
 
 [sub_resource type="CylinderMesh" id="Mesh_Pillar"]
 material = SubResource("Mat_Pillar")
@@ -172,6 +221,36 @@ cast_shadow = 0
 [node name="StripWest" type="MeshInstance3D" parent="Neon"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -43.9, 0.4, 0)
 mesh = SubResource("Mesh_NeonStrip")
+cast_shadow = 0
+
+[node name="PillarRing1Low" type="MeshInstance3D" parent="Neon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0.3, -16)
+mesh = SubResource("Mesh_PillarRing")
+cast_shadow = 0
+
+[node name="PillarRing1High" type="MeshInstance3D" parent="Neon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 6.6, -16)
+mesh = SubResource("Mesh_PillarRing")
+cast_shadow = 0
+
+[node name="PillarRing2Low" type="MeshInstance3D" parent="Neon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0.3, 16)
+mesh = SubResource("Mesh_PillarRing")
+cast_shadow = 0
+
+[node name="PillarRing2High" type="MeshInstance3D" parent="Neon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 6.6, 16)
+mesh = SubResource("Mesh_PillarRing")
+cast_shadow = 0
+
+[node name="PillarRing3Low" type="MeshInstance3D" parent="Neon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0.3, 16)
+mesh = SubResource("Mesh_PillarRing")
+cast_shadow = 0
+
+[node name="PillarRing3High" type="MeshInstance3D" parent="Neon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 6.6, 16)
+mesh = SubResource("Mesh_PillarRing")
 cast_shadow = 0
 
 [node name="AccentHigh" type="OmniLight3D" parent="Neon"]
@@ -309,6 +388,51 @@ mesh = SubResource("Mesh_Tower")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/TowerPlatform"]
 shape = SubResource("Shape_Tower")
+
+[node name="HighSupport1" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.5, 0.75, -25.5)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/HighSupport1"]
+mesh = SubResource("Mesh_Support")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/HighSupport1"]
+shape = SubResource("Shape_Support")
+
+[node name="HighSupport2" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.5, 0.75, -25.5)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/HighSupport2"]
+mesh = SubResource("Mesh_Support")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/HighSupport2"]
+shape = SubResource("Shape_Support")
+
+[node name="HighSupport3" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.5, 0.75, -14.5)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/HighSupport3"]
+mesh = SubResource("Mesh_Support")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/HighSupport3"]
+shape = SubResource("Shape_Support")
+
+[node name="HighSupport4" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.5, 0.75, -14.5)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/HighSupport4"]
+mesh = SubResource("Mesh_Support")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/HighSupport4"]
+shape = SubResource("Shape_Support")
+
+[node name="TowerColumn" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 2.5, -2)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/TowerColumn"]
+mesh = SubResource("Mesh_TowerColumn")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/TowerColumn"]
+shape = SubResource("Shape_TowerColumn")
 
 [node name="JumpPads" type="Node3D" parent="."]
 

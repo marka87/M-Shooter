@@ -31,6 +31,8 @@ var current_state: State = State.PATROL
 @export var gravity: float = 22.0
 ## Zeit vom Entdecken eines Ziels bis zum ersten Schuss (s)
 @export var reaction_time: float = 0.4
+## Leuchtfarbe (Visier, Brustlicht, Schulterpanzer), damit Bots gut unterscheidbar sind
+@export var skin_color: Color = Color(1.0, 0.25, 0.2)
 
 # ==============================================================================
 # SCHWIERIGKEIT
@@ -111,6 +113,7 @@ func _ready() -> void:
 
 	if muzzle_flash:
 		muzzle_flash.visible = false
+	_apply_skin_color()
 
 	nav_agent.target_desired_distance = 1.5
 	nav_agent.path_desired_distance = 1.0
@@ -377,6 +380,9 @@ func _bot_fire(fire_target: CharacterBody3D) -> void:
 			var spark := hit_spark_scene.instantiate() as Node3D
 			get_parent().add_child(spark)
 			spark.global_position = hit_pos + hit_normal * 0.05
+			# Zur Oberflaeche ausrichten, damit das Einschussloch richtig auf der Wand liegt
+			if hit_normal.length_squared() > 0.001:
+				spark.look_at(spark.global_position + hit_normal, Vector3.UP if absf(hit_normal.y) < 0.98 else Vector3.FORWARD)
 
 		# Schaden am Getroffenen anrichten
 		if hit_collider and hit_collider.has_method("take_damage"):
@@ -441,14 +447,41 @@ func take_damage(info: DamageInfo) -> void:
 	health.apply_damage(info)
 
 
-## Kurzes optisches Aufblitzen bei Treffern
-
+## Kurzes optisches Aufblitzen bei Treffern (ganzes Modell kurz weiss)
 func _flash_hit() -> void:
-	body_mesh.material_override = flash_mat
+	var meshes := _model_meshes()
+	for mesh in meshes:
+		mesh.material_override = flash_mat
 	get_tree().create_timer(0.08, false).timeout.connect(func():
-		if is_instance_valid(body_mesh):
-			body_mesh.material_override = null
+		for mesh in meshes:
+			if is_instance_valid(mesh):
+				mesh.material_override = null
 	)
+
+
+## Alle sichtbaren Teile des Roboters
+func _model_meshes() -> Array[MeshInstance3D]:
+	var result: Array[MeshInstance3D] = [body_mesh]
+	for child in body_mesh.get_children():
+		if child is MeshInstance3D:
+			result.append(child)
+	return result
+
+
+## Leuchtteile (Material Mat_BotAccent) und Lackteile (Mat_BotPaint) in skin_color einfaerben.
+## Jeder Bot bekommt eigene Kopien, die Szene selbst bleibt unveraendert.
+func _apply_skin_color() -> void:
+	var recolored: Dictionary = {}
+	for mesh in _model_meshes():
+		var mat := mesh.mesh.surface_get_material(0) as StandardMaterial3D
+		if mat == null or not mat.emission_enabled or mesh.name == "GunMesh":
+			continue
+		if not recolored.has(mat):
+			var copy: StandardMaterial3D = mat.duplicate()
+			copy.albedo_color = skin_color
+			copy.emission = skin_color
+			recolored[mat] = copy
+		mesh.set_surface_override_material(0, recolored[mat])
 
 
 ## Tod des Bots: Kollision abschalten, Sound, Frag fuer Spieler und Respawn-Timer

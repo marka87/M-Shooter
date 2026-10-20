@@ -1,3 +1,16 @@
+# Änderungen (Runde 8: Grafik ohne externe Assets)
+
+Alles prozedural in Godot gebaut, keine Downloads.
+
+- **Bots als Roboter** statt Kapseln: Kopf mit Visier, Rumpf mit Brustlicht, Schulterpanzer, Arme, Beine, Rucksack. Jeder Bot hat eine eigene **Leuchtfarbe** (Brightskins wie in Quake 3), damit man ihn auf Distanz erkennt. Der Trefferblitz färbt jetzt das ganze Modell weiß.
+- **Waffen in der Hand richtig beleuchtet:** Sie liegen auf einem eigenen Render-Layer mit eigenem Licht, das nur sie aufhellt. Weniger Metallik, damit sie nicht nur schwarzen Himmel spiegeln. Das Rohr des Raketenwerfers ist kürzer und ragt nicht mehr hinter die Kamera.
+- **Sternenhimmel-Shader** (`assets/shaders/space_sky.gdshader`): Farbverlauf, glühender Horizont, Nebelband, funkelnde Sterne in unterschiedlicher Größe und Farbe.
+- **Arena:** Plattformen und Rampen mit orangem Raster, Säulen mit feinem cyanfarbenem Raster und Leuchtringen. Die hohe Plattform hat vier Stützen, der Turm eine Säule (vorher schwebten beide).
+- **Einschusslöcher** (Decals) mit glühendem Rand, der abkühlt. Bleiben 6 s, maximal 60 gleichzeitig.
+- Rauchtest: 38/38 bestanden. Dauerlauf mit 7 Bots und echtem Renderer: keine Fehler. Im Headless-Modus meldet der Dummy-Renderer gelegentlich „material is null“; das betrifft nur Tests ohne Grafik.
+
+---
+
 # Änderungen (Runde 7: Bot-Anzahl und Schwierigkeit)
 
 - **Match-Fenster** nach „Spiel starten“: Anzahl Bots (1–7) und Schwierigkeit (Anfänger, Normal, Erfahren, Profi, Gott). Wird gespeichert.

@@ -65,7 +65,7 @@ Dazu:
 | 2.3 | Waffenwechsel mit Ab-/Aufzieh-Animation und schnellem „Weapon Switch“ wie in Q3 | S |
 | 2.4 | Object-Pooling für Projektile, Funken, Einschläge | S |
 | 2.5 | Headshots für Hitscan (Railgun/Shock) mit eigenem Hitsound | S |
-| 2.6 | Einschusslöcher als Decals, Rauchspuren hinter Raketen, Hülsen beim MG | M |
+| 2.6 | ✅ teilweise: glühende Einschusslöcher. Einschusslöcher als Decals, Rauchspuren hinter Raketen, Hülsen beim MG | M |
 
 ---
 
@@ -76,13 +76,13 @@ Der aktuelle Stand sind einfache Meshes und prozedurale Effekte. Für einen mode
 | # | Aufgabe | Aufwand |
 |---|---|---|
 | 3.1 | **Maps mit TrenchBroom + [func_godot](https://github.com/func-godot/func_godot_plugin)** bauen. Das ist der klassische Quake-Workflow: Brushes, Rampen, Jump-Pads als Entities, schnelle Iteration | M (Setup) |
-| 3.2 | ✅ teilweise: AgX, Bloom, SSAO, Volumetric Fog, Neon-Raster-Shader; SSR und Skybox-Shader fehlen. `WorldEnvironment`: Tonemapping (AgX), Glow/Bloom, SSAO, SSR, leichter Volumetric Fog, eigener Skybox-Shader | S |
+| 3.2 | ✅ AgX, Bloom, SSAO, Volumetric Fog, Neon-Raster-Shader, Sternenhimmel-Shader (SSR bewusst weggelassen). `WorldEnvironment`: Tonemapping (AgX), Glow/Bloom, SSAO, SSR, leichter Volumetric Fog, eigener Skybox-Shader | S |
 | 3.3 | Licht: **LightmapGI** backen (beste Qualität bei statischer Arena) oder SDFGI für schnelle Iteration | M |
 | 3.4 | Stilrichtung festlegen. Empfehlung: **Sci-Fi-Industrial mit Neon-Akzenten** (UT99/UT4-Anmutung), das kaschiert einfache Geometrie und ist gut lesbar | – |
 | 3.5 | Modelle: Waffen und Bots aus Blender oder CC0-Paketen (z. B. Kenney, Quaternius), Bots mit Lauf-/Schuss-/Todes-Animation und Ragdoll | L |
 | 3.6 | Shader: leuchtende Pickups mit Fresnel-Rand, Schild-Effekt bei Rüstung, Teleporter-Portal, Hologramm-Respawn | M |
 | 3.7 | GPUParticles statt CPUParticles für Explosionen, Funken, Rauch | S |
-| 3.8 | **Lesbarkeit vor Schönheit**: Gegner in Team-/Hervorhebungsfarbe (Brightskins wie in Q3), optional abschaltbar | S |
+| 3.8 | ✅ **Lesbarkeit vor Schönheit**: Gegner in Team-/Hervorhebungsfarbe (Brightskins wie in Q3), optional abschaltbar | S |
 
 ---
 

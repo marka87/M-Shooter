@@ -6,6 +6,11 @@ extends Node3D
 
 const BOT_SCENE: PackedScene = preload("res://scenes/bot.tscn")
 const BOT_NAMES: Array[String] = ["Vex", "Kortex", "Rhea", "Nyx", "Talon", "Orbit", "Grimm"]
+## Leuchtfarbe je Bot (gut unterscheidbar, keine davon nahe am Cyan des Bodens)
+const BOT_COLORS: Array[Color] = [
+	Color(1.0, 0.22, 0.18), Color(1.0, 0.8, 0.1), Color(0.55, 1.0, 0.2), Color(0.8, 0.3, 1.0),
+	Color(1.0, 0.45, 0.05), Color(1.0, 0.3, 0.75), Color(0.95, 0.95, 0.95),
+]
 
 @onready var spawn_points_container: Node3D = $SpawnPoints
 
@@ -33,6 +38,7 @@ func _spawn_bots() -> void:
 		var bot: Bot = BOT_SCENE.instantiate()
 		bot.name = "Bot%d" % (i + 1)
 		bot.display_name = BOT_NAMES[i]
+		bot.skin_color = BOT_COLORS[i]
 		bot.apply_skill(GameManager.bot_skill)
 		add_child(bot)
 		bot.global_transform = GameManager.get_spawn_transform(bot)

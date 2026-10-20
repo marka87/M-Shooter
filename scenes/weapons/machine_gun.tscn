@@ -5,7 +5,7 @@
 
 [sub_resource type="StandardMaterial3D" id="Mat_GunMetal"]
 albedo_color = Color(0.18, 0.2, 0.23, 1)
-metallic = 0.8
+metallic = 0.45
 roughness = 0.3
 
 [sub_resource type="BoxMesh" id="Mesh_GunBody"]

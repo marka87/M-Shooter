@@ -44,11 +44,39 @@ func _ready() -> void:
 			child.unequip()
 			child.ammo_changed.connect(_on_weapon_ammo_changed.bind(child))
 	
+	_setup_viewmodel_lighting()
+
 	# Erste Waffe (Maschinengewehr) ausruesten
 	if not weapons.is_empty():
 		switch_to_weapon(0)
 	
 	GameManager.game_paused.connect(_on_game_paused)
+
+
+## Waffen in der Hand auf eigenen Render-Layer legen und mit einem eigenen Licht aufhellen.
+## Sonst sind sie in dunklen Ecken fast schwarz. Das Licht wirkt nur auf diesen Layer,
+## die Welt bleibt unveraendert. Schatten der Waffen sind aus (wirken sonst falsch).
+const VIEWMODEL_LAYER: int = 1 << 1
+
+func _setup_viewmodel_lighting() -> void:
+	_apply_viewmodel_layer(self)
+	var light := OmniLight3D.new()
+	light.name = "ViewmodelLight"
+	light.light_cull_mask = VIEWMODEL_LAYER
+	light.light_color = Color(0.85, 0.9, 1.0)
+	light.light_energy = 2.5
+	light.omni_range = 2.5
+	light.shadow_enabled = false
+	camera.add_child.call_deferred(light)
+	light.position = Vector3(0.5, 0.45, 0.2)
+
+
+func _apply_viewmodel_layer(node: Node) -> void:
+	for child in node.get_children():
+		if child is GeometryInstance3D:
+			child.layers = VIEWMODEL_LAYER
+			child.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_apply_viewmodel_layer(child)
 
 
 func _unhandled_input(event: InputEvent) -> void:
