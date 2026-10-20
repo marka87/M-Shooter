@@ -1,3 +1,13 @@
+# Änderungen (Runde 17: Windows-Build, Version 0.9.0)
+
+- **Versionsnummer** 0.9.0 in `project.godot` (`application/config/version`), unten rechts im Hauptmenü zusammen mit der Godot-Version.
+- **Export-Preset „Windows“** (`export_presets.cfg`): eine einzelne `ArenaShooter.exe` (x86_64, Spieldaten eingebettet) nach `build/windows/`, ohne `tests/` und `tools/`. Datei-Infos: Produktname „Arena Shooter“, Version 0.9.0.0.
+- Godot-Export-Vorlagen 4.7.2 installiert (nur Windows x86_64), Build erstellt: 113 MB, davon ca. 109 MB Engine.
+- Geprüft: Die exe startet ins Hauptmenü mit Versionsanzeige. Ein Debug-Export mit denselben Spieldaten lief in der Neon Foundry mit Grafik, HUD, Countdown und Musik.
+- README: Abschnitt „Windows-Build“ mit Export-Befehl.
+
+---
+
 # Änderungen (Runde 16: Movement – Dodge, Teleporter, Kamera)
 
 - **UT-Dodge:** Richtungstaste zweimal innerhalb 0,25 s → Sprung mit 13 m/s in diese Richtung (5 m/s nach oben), danach noch ein Luftsprung möglich (Dodge-Jump). Abklingzeit 0,35 s. Eigener Sound.
