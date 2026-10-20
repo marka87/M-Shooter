@@ -1,3 +1,27 @@
+# Änderungen (Runde 10: Look „Neon-Brutalism“)
+
+Mischung aus Low-Poly (Bild 2) und Wireframe (Bild 4): dunkle Körper mit Neonkanten.
+
+- **Neon-Kanten** (`assets/shaders/neon_edges.gdshader`, `scenes/effects/neon_edges.tscn` an der Spielerkamera): Kanten werden aus Tiefen- und Normalensprüngen erkannt und leuchten im Farbton der Fläche. Wirkt automatisch auf Arena, Bots und Waffen.
+- **Neue Palette:** Boden dunkles Petrol, Wände dunkler Schiefer mit grünem Stich, Plattformen dunkles Orange, Säulen Petrol. Die Raster sind nur noch dezent, die Kanten bestimmen das Bild.
+- **Bots** sind dunkel in ihrer Farbe getönt, dadurch leuchten auch ihre Kanten in Bot-Farbe.
+- **CRT-Look** (`assets/shaders/crt_overlay.gdshader`): Farbsaum zum Rand, Vignette, feine Scanlines, leichtes Rauschen. Bei Treffern pulsiert ein roter Rand, das Spielerbild im HUD zuckt rot.
+- **Würfel-Explosion:** Bots zerplatzen beim Tod in 48 leuchtende Würfel ihrer Farbe, die über den Boden springen (`scenes/effects/voxel_burst.tscn`).
+- **Leuchtspuren** für MG, Shotgun (pro Kugel) und Bot-Schüsse in Bot-Farbe (`scenes/effects/tracer.tscn`).
+- **Neues HUD:** Panel-Leiste unten mit HP- und Rüstungsbalken, Spielerbild, Munitionsbalken (orange bei wenig Munition), Waffenname und Slots 1–4. Die Tastenhilfe blendet nach 8 s aus.
+- **Fehler behoben:** Ein Bot, der nach einem Jump-Pad starb, blieb nach dem Respawn im Flugmodus hängen. Und: „material is null“ beim Szenenwechsel oder Beenden während eines Trefferblitzes. Ursache war das Blitz-Material der Bots. Dazu neu `GameManager.quit_game()` für sauberes Beenden.
+- **Rauchtest stabiler:** Bots bleiben bis zum Bot-gegen-Bot-Test eingefroren (vorher töteten sie auf „Gott“ manchmal den Spieler mitten im Jump-Pad-Test). 3 × 38/38 bestanden.
+
+---
+
+# Änderungen (Runde 9: func_godot)
+
+- **func_godot 2025.12** installiert (`addons/func_godot/`, MIT-Lizenz, Quelle: github.com/func-godot/func_godot_plugin) und in den Projekteinstellungen aktiviert. Nur GDScript, keine Binärdateien.
+- Funktionstest: Eine selbst erzeugte `.map`-Datei mit zwei Blöcken wird zu Mesh und Kollisionsformen gebaut (8 m × 8 m Boden, korrekter Maßstab).
+- Rauchtest weiterhin 38/38.
+
+---
+
 # Änderungen (Runde 8: Grafik ohne externe Assets)
 
 Alles prozedural in Godot gebaut, keine Downloads.

@@ -87,6 +87,7 @@ var is_launched: bool = false
 var original_mesh_transform: Transform3D
 var hit_spark_scene: PackedScene = preload("res://scenes/weapons/hit_spark.tscn")
 var floating_number_scene: PackedScene = preload("res://scenes/effects/floating_number.tscn")
+var voxel_burst_scene: PackedScene = preload("res://scenes/effects/voxel_burst.tscn")
 # Vorgenerierte Sounds und Trefferfarbe (einmal pro Bot statt bei jedem Schuss)
 var snd_shot: AudioStream
 var snd_hurt: AudioStream
@@ -370,6 +371,8 @@ func _bot_fire(fire_target: CharacterBody3D) -> void:
 	query.exclude = [get_rid()]
 
 	var hit := space_state.intersect_ray(query)
+	# Leuchtspur in der Farbe des Bots (zeigt, woher geschossen wird)
+	Tracer.spawn(get_parent(), from, hit.position if hit else to, skin_color, 0.035)
 	if hit:
 		var hit_collider: Object = hit.collider
 		var hit_pos: Vector3 = hit.position
@@ -459,6 +462,13 @@ func _flash_hit() -> void:
 	)
 
 
+## Beim Verlassen der Szene einen laufenden Trefferblitz entfernen. Sonst gibt Godot
+## flash_mat frei, waehrend die Roboterteile es noch benutzen ("material is null").
+func _exit_tree() -> void:
+	for mesh in _model_meshes():
+		mesh.material_override = null
+
+
 ## Alle sichtbaren Teile des Roboters
 func _model_meshes() -> Array[MeshInstance3D]:
 	var result: Array[MeshInstance3D] = [body_mesh]
@@ -468,18 +478,22 @@ func _model_meshes() -> Array[MeshInstance3D]:
 	return result
 
 
-## Leuchtteile (Material Mat_BotAccent) und Lackteile (Mat_BotPaint) in skin_color einfaerben.
-## Jeder Bot bekommt eigene Kopien, die Szene selbst bleibt unveraendert.
+## Leuchtteile (Visier, Brustlicht) und Lackteile (Schultern) in skin_color einfaerben,
+## den Panzer dunkel in derselben Farbe toenen. So leuchten auch die Neonkanten
+## (neon_edges.gdshader) in der Bot-Farbe. Jeder Bot bekommt eigene Material-Kopien.
 func _apply_skin_color() -> void:
 	var recolored: Dictionary = {}
 	for mesh in _model_meshes():
 		var mat := mesh.mesh.surface_get_material(0) as StandardMaterial3D
-		if mat == null or not mat.emission_enabled or mesh.name == "GunMesh":
+		if mat == null or mesh.name == "GunMesh":
 			continue
 		if not recolored.has(mat):
 			var copy: StandardMaterial3D = mat.duplicate()
-			copy.albedo_color = skin_color
-			copy.emission = skin_color
+			if mat.emission_enabled:
+				copy.albedo_color = skin_color
+				copy.emission = skin_color
+			else:
+				copy.albedo_color = mat.albedo_color.lerp(skin_color.darkened(0.45), 0.85)
 			recolored[mat] = copy
 		mesh.set_surface_override_material(0, recolored[mat])
 
@@ -500,9 +514,13 @@ func _die(info: DamageInfo) -> void:
 	if collision_shape:
 		collision_shape.disabled = true
 
-	# Umfall-Animation per Tween
-	var tween := create_tween()
-	tween.tween_property(body_mesh, "rotation_degrees:x", 85.0, 0.3)
+	# Zerplatzen in leuchtende Wuerfel in der Farbe des Bots
+	body_mesh.visible = false
+	nameplate.visible = false
+	var burst := voxel_burst_scene.instantiate() as VoxelBurst
+	get_parent().add_child(burst)
+	burst.global_position = global_position
+	burst.burst(skin_color)
 
 	# Respawn nach Verzoegerung
 	get_tree().create_timer(respawn_delay, false).timeout.connect(_respawn)
@@ -518,10 +536,13 @@ func _respawn() -> void:
 
 	# Mesh-Drehung und Kollision zuruecksetzen
 	body_mesh.transform = original_mesh_transform
+	body_mesh.visible = true
+	nameplate.visible = true
 	if collision_shape:
 		collision_shape.disabled = false
 
 	velocity = Vector3.ZERO
+	is_launched = false
 	_switch_state(State.PATROL)
 	_pick_new_patrol_point()
 

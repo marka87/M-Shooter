@@ -59,6 +59,19 @@ func _ready() -> void:
 	_build_pause_overlay()
 
 
+## Spiel sauber beenden: erst die laufende Szene freigeben, dann schliessen.
+## Direktes quit() mitten im Match meldet sonst "material is null", weil Godot
+## Materialien vor den Objekten freigibt, die sie noch benutzen.
+func quit_game() -> void:
+	get_tree().paused = false
+	var scene := get_tree().current_scene
+	if scene:
+		scene.queue_free()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	get_tree().quit()
+
+
 func _exit_tree() -> void:
 	SoundGenerator.clear_cache()
 

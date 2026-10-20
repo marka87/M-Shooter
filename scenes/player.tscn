@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://bplayer_character_001"]
+[gd_scene load_steps=14 format=3 uid="uid://bplayer_character_001"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/weapon_manager.gd" id="2_wmgr"]
@@ -8,6 +8,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="6_hud"]
 [ext_resource type="Script" path="res://scripts/components/health_component.gd" id="7_health"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/shotgun.tscn" id="8_sg"]
+[ext_resource type="PackedScene" path="res://scenes/effects/neon_edges.tscn" id="10_edges"]
+[ext_resource type="PackedScene" path="res://scenes/effects/crt_overlay.tscn" id="11_crt"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -41,6 +43,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 [node name="Camera3D" type="Camera3D" parent="Head"]
 fov = 85.0
 
+[node name="NeonEdges" parent="Head/Camera3D" instance=ExtResource("10_edges")]
+
 [node name="WeaponHolder" type="Node3D" parent="Head/Camera3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.24, -0.22, -0.45)
 script = ExtResource("2_wmgr")
@@ -54,6 +58,8 @@ script = ExtResource("2_wmgr")
 [node name="Railgun" parent="Head/Camera3D/WeaponHolder" instance=ExtResource("5_rail")]
 
 [node name="SwitchAudioPlayer" type="AudioStreamPlayer" parent="Head/Camera3D/WeaponHolder"]
+
+[node name="CRTOverlay" parent="." instance=ExtResource("11_crt")]
 
 [node name="HUD" parent="." instance=ExtResource("6_hud")]
 

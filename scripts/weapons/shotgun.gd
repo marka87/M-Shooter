@@ -46,6 +46,7 @@ func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
 		var query := PhysicsRayQueryParameters3D.create(from, to, Layers.HITTABLE)
 		query.exclude = [shooter.get_rid()]
 		var result := space_state.intersect_ray(query)
+		Tracer.spawn(shooter.get_parent(), muzzle.global_position, result.position if result else to, Color(1.0, 0.55, 0.15), 0.018)
 		if not result:
 			continue
 

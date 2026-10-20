@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/crt_overlay.gdshader" id="1_crt"]
+
+[sub_resource type="ShaderMaterial" id="Mat_CRT"]
+shader = ExtResource("1_crt")
+shader_parameter/aberration = 0.0025
+shader_parameter/vignette = 0.55
+shader_parameter/scanline_strength = 0.06
+shader_parameter/noise_strength = 0.02
+shader_parameter/damage_pulse = 0.0
+
+[node name="CRTOverlay" type="CanvasLayer"]
+layer = 0
+
+[node name="Screen" type="ColorRect" parent="."]
+material = SubResource("Mat_CRT")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

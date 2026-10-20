@@ -6,10 +6,16 @@ class_name HUD
 
 @onready var speed_label: Label = $SpeedLabel
 @onready var frags_label: Label = $FragsLabel
-@onready var health_label: Label = $StatsContainer/HealthLabel
-@onready var armor_label: Label = $StatsContainer/ArmorLabel
-@onready var weapon_name_label: Label = $WeaponInfo/WeaponNameLabel
-@onready var ammo_label: Label = $WeaponInfo/AmmoLabel
+@onready var health_label: Label = $BottomBar/HBox/HealthCell/VBox/Row/HealthLabel
+@onready var health_bar: ProgressBar = $BottomBar/HBox/HealthCell/VBox/HealthBar
+@onready var armor_label: Label = $BottomBar/HBox/ArmorCell/VBox/Row/ArmorLabel
+@onready var armor_bar: ProgressBar = $BottomBar/HBox/ArmorCell/VBox/ArmorBar
+@onready var ammo_label: Label = $BottomBar/HBox/AmmoCell/VBox/Row/AmmoLabel
+@onready var ammo_bar: ProgressBar = $BottomBar/HBox/AmmoCell/VBox/AmmoBar
+@onready var weapon_name_label: Label = $BottomBar/HBox/WeaponCell/VBox/WeaponNameLabel
+@onready var weapon_slots: HBoxContainer = $BottomBar/HBox/WeaponCell/VBox/Slots
+@onready var portrait_face: Control = $BottomBar/HBox/Portrait/Face
+@onready var control_hints: Label = $ControlHints
 @onready var damage_flash: ColorRect = $DamageFlash
 @onready var hitmarker: Control = $CrosshairContainer/Hitmarker
 @onready var death_overlay: Control = $DeathOverlay
@@ -39,7 +45,14 @@ func bind(p: Player) -> void:
 	GameManager.scoreboard_changed.connect(_refresh_scoreboard)
 	_refresh_scoreboard()
 
+	health_bar.max_value = player.health.max_health
+	armor_bar.max_value = player.health.max_armor
 	_on_health_changed(player.health.health, player.health.armor)
+
+	# Tastenhilfe nach ein paar Sekunden ausblenden
+	var hints_tween := create_tween()
+	hints_tween.tween_interval(8.0)
+	hints_tween.tween_property(control_hints, "modulate:a", 0.0, 1.5)
 	_on_score_updated(GameManager.player_frags, GameManager.player_deaths)
 	var weapon := player.weapon_manager.get_current_weapon()
 	if weapon:
@@ -74,17 +87,28 @@ func _on_health_changed(health: float, armor: float) -> void:
 	# Nach dem Respawn (health.reset) das Todes-Overlay wieder ausblenden
 	if not player.is_dead:
 		death_overlay.hide()
-	health_label.text = "HP: %d" % int(maxf(health, 0.0))
-	health_label.modulate = Color(1.0, 0.2, 0.2) if health <= 25.0 else Color(0.2, 1.0, 0.5)
-	armor_label.text = "RÜSTUNG: %d" % int(maxf(armor, 0.0))
-	armor_label.modulate = Color(0.2, 0.8, 1.0)
+	health_label.text = str(int(maxf(health, 0.0)))
+	health_bar.value = health
+	# Wenig Leben: Zahl rot
+	health_label.modulate = Color(1.0, 0.3, 0.3) if health <= 25.0 else Color.WHITE
+	armor_label.text = str(int(maxf(armor, 0.0)))
+	armor_bar.value = armor
 
 
-## Roter Bildschirmblitz bei Treffern
-func _on_damaged(_info: DamageInfo, _health_lost: float) -> void:
-	damage_flash.color = Color(0.9, 0.1, 0.1, 0.35)
+## Roter Bildschirmblitz bei Treffern, dazu ein kurzer Puls im CRT-Overlay (roter Rand, Farbsaum)
+## und das Spielerbild zuckt rot
+func _on_damaged(_info: DamageInfo, health_lost: float) -> void:
+	portrait_face.modulate = Color(1.0, 0.3, 0.3)
+	create_tween().tween_property(portrait_face, "modulate", Color.WHITE, 0.3)
+	damage_flash.color = Color(0.9, 0.1, 0.1, 0.18)
 	var tween := create_tween()
 	tween.tween_property(damage_flash, "color:a", 0.0, 0.25)
+	var crt := player.get_node_or_null("CRTOverlay/Screen") as ColorRect
+	if crt and crt.material:
+		var mat := crt.material as ShaderMaterial
+		mat.set_shader_parameter("damage_pulse", clampf(0.3 + health_lost / 40.0, 0.3, 1.0))
+		var pulse := create_tween()
+		pulse.tween_method(func(v: float): mat.set_shader_parameter("damage_pulse", v), mat.get_shader_parameter("damage_pulse"), 0.0, 0.4)
 
 
 ## Roter Hitmarker am Fadenkreuz
@@ -99,10 +123,19 @@ func show_hitmarker() -> void:
 func _on_weapon_switched(w_name: String, current_ammo: int, max_ammo: int) -> void:
 	weapon_name_label.text = w_name
 	_on_ammo_updated(current_ammo, max_ammo)
+	# Aktiven Slot hervorheben
+	var active: int = player.weapon_manager.current_weapon_index
+	for i in weapon_slots.get_child_count():
+		var slot := weapon_slots.get_child(i) as Label
+		slot.modulate = Color(1.0, 0.8, 0.25) if i == active else Color(1, 1, 1, 0.35)
 
 
 func _on_ammo_updated(current_ammo: int, max_ammo: int) -> void:
-	ammo_label.text = "Munition: %d / %d" % [current_ammo, max_ammo]
+	ammo_label.text = str(current_ammo)
+	ammo_bar.max_value = max_ammo
+	ammo_bar.value = current_ammo
+	# Wenig Munition: Zahl orange
+	ammo_label.modulate = Color(1.0, 0.55, 0.2) if current_ammo <= max_ammo * 0.15 else Color.WHITE
 
 
 func _on_score_updated(frags: int, _deaths: int) -> void:

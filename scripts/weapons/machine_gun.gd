@@ -51,6 +51,8 @@ func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
 	query.collide_with_bodies = true
 	
 	var result := space_state.intersect_ray(query)
+	# Leuchtspur von der Muendung zum Treffpunkt (oder bis zur maximalen Reichweite)
+	Tracer.spawn(shooter.get_parent(), muzzle.global_position, result.position if result else to, Color(1.0, 0.75, 0.25))
 	if result:
 		var hit_pos: Vector3 = result.position
 		var hit_normal: Vector3 = result.normal

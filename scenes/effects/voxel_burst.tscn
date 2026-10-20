@@ -1,0 +1,63 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/effects/voxel_burst.gd" id="1_burst"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_Voxel"]
+albedo_color = Color(1, 0.3, 0.2, 1)
+emission_enabled = true
+emission = Color(1, 0.3, 0.2, 1)
+emission_energy_multiplier = 2.5
+vertex_color_use_as_albedo = true
+
+[sub_resource type="BoxMesh" id="Mesh_Voxel"]
+material = SubResource("Mat_Voxel")
+size = Vector3(0.14, 0.14, 0.14)
+
+[sub_resource type="Curve" id="Curve_Shrink"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.7, 0.85), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="Tex_Shrink"]
+curve = SubResource("Curve_Shrink")
+
+[sub_resource type="ParticleProcessMaterial" id="Process_Burst"]
+emission_shape = 3
+emission_box_extents = Vector3(0.3, 0.8, 0.25)
+direction = Vector3(0, 1, 0)
+spread = 75.0
+initial_velocity_min = 3.0
+initial_velocity_max = 9.0
+angular_velocity_min = -540.0
+angular_velocity_max = 540.0
+gravity = Vector3(0, -14, 0)
+damping_min = 0.5
+damping_max = 1.5
+scale_min = 0.6
+scale_max = 1.8
+scale_curve = SubResource("Tex_Shrink")
+collision_mode = 1
+collision_friction = 0.4
+collision_bounce = 0.35
+
+[node name="VoxelBurst" type="Node3D"]
+script = ExtResource("1_burst")
+
+[node name="Cubes" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+emitting = false
+amount = 48
+lifetime = 1.6
+one_shot = true
+explosiveness = 0.95
+visibility_aabb = AABB(-8, -4, -8, 16, 12, 16)
+process_material = SubResource("Process_Burst")
+draw_pass_1 = SubResource("Mesh_Voxel")
+
+[node name="Collision" type="GPUParticlesCollisionHeightField3D" parent="."]
+size = Vector3(16, 8, 16)
+
+[node name="Flash" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+light_color = Color(1, 0.3, 0.2, 1)
+light_energy = 6.0
+omni_range = 7.0

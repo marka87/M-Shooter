@@ -142,6 +142,24 @@ Booter/
 
 ---
 
+## 🎨 Look: „Neon-Brutalism“
+
+Dunkle Low-Poly-Körper mit leuchtenden Wireframe-Kanten. Der Nachbearbeitungs-Shader `assets/shaders/neon_edges.gdshader` findet Kanten über Tiefen- und Normalensprünge und färbt sie im Farbton der jeweiligen Fläche: orange Plattformen bekommen orange Kanten, Bots die Kanten in ihrer eigenen Farbe. Dazu:
+- CRT-Look (`crt_overlay.gdshader`): Farbsaum, Vignette, feine Scanlines, roter Puls bei Treffern
+- Bots zerplatzen beim Tod in leuchtende Würfel (`scenes/effects/voxel_burst.tscn`)
+- Leuchtspuren für MG, Shotgun und Bot-Schüsse (`scenes/effects/tracer.tscn`)
+- HUD als Panel-Leiste unten: HP und Rüstung mit Balken, Spielerbild, Munition mit Balken, Waffe und Slots 1–4
+
+Neue Flächen bekommen den Look automatisch: dunkle, leicht farbige Grundfarbe wählen, die Kanten erledigt der Shader.
+
+---
+
+## 🗺️ Maps bauen (func_godot + TrenchBroom)
+
+Das Addon **func_godot** (Version 2025.12, MIT-Lizenz, `addons/func_godot/`) wandelt Quake-`.map`-Dateien in Godot-Geometrie mit Kollision um. Maps baut man im kostenlosen Editor **TrenchBroom** (https://trenchbroom.github.io), den du selbst installierst. In Godot einen `FuncGodotMap`-Knoten anlegen, die `.map`-Datei eintragen und „Build Map“ drücken. 32 Quake-Einheiten entsprechen 1 m.
+
+---
+
 ## 🧪 Automatischer Test
 
 Ein Rauchtest lädt die Arena und prüft Treffer, Feuerrate, Rocket-Jump, Pickups, Tod, Respawn, Pause und Einstellungen:

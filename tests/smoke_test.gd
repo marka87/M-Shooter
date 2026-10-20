@@ -127,8 +127,7 @@ func run() -> void:
 	check(feed.get_child_count() >= 1 and b1.display_name in feed.get_child(feed.get_child_count() - 1).text, "Killfeed zeigt Abschuss")
 	var board: Array = gm.get_scoreboard()
 	check(board.size() == 3 and board[0].name == player.display_name, "Scoreboard: 3 Eintraege, Spieler vorn")
-	for b in bots:
-		b.set_physics_process(true)
+	# Bots bleiben bis zum Bot-gegen-Bot-Test eingefroren, sonst stoeren sie die folgenden Pruefungen
 
 	# Rocket-Jump: nach unten schiessen
 	wm.switch_to_weapon_id(&"rocket_launcher")
@@ -173,7 +172,7 @@ func run() -> void:
 	check(not health_pickup.is_active, "Pickup danach inaktiv")
 
 	# HUD zeigt die Lebenspunkte
-	check(player.hud.health_label.text == "HP: %d" % int(player.health.health), "HUD zeigt HP (%s)" % player.hud.health_label.text)
+	check(player.hud.health_label.text == str(int(player.health.health)), "HUD zeigt HP (%s)" % player.hud.health_label.text)
 
 	# Munitionskiste: nur einsammeln, wenn etwas fehlt
 	var ammo_box: Node3D = null
