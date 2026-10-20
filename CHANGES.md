@@ -1,3 +1,14 @@
+# Änderungen (Runde 12: Power-ups)
+
+- **Quad Damage** (`scenes/items/quad_damage_pickup.tscn`): dreifacher Schaden für 30 s, Respawn nach 60 s. Neue Komponente `PowerupComponent` an Spieler und Bots; `DamageInfo.create()` multipliziert mit dem Faktor des Angreifers. Bots mit Quad leuchten violett und pulsieren in den letzten 3 s schneller. Beim Tod ist das Quad weg.
+- **Mega Health** (`scenes/items/mega_health_pickup.tscn`): +100 bis maximal 200 Leben, danach Abbau um 1 pro Sekunde (`HealthComponent.mega_heal`). Respawn nach 35 s. HP-Zahl wird bei Überheilung blau.
+- **HUD:** große Ansage „QUAD DAMAGE!“ / „MEGA HEALTH“, Quad-Countdown über der Leiste (blinkt in den letzten 3 s), violetter Bildrand im CRT-Overlay.
+- **Bots sammeln Items ein** (Leben, Rüstung, Power-ups; Munition nicht) und **steuern lohnende Items gezielt an**: Wert geteilt durch Entfernung, Power-ups vor Leben, Leben nur bei Bedarf.
+- **Neon Foundry:** Quad Damage auf der Mittelplattform, Mega Health auf dem Südwest-Turm, Rüstung auf dem Nordost-Turm.
+- Tests: Neon-Foundry-Test auf 21 Prüfungen erweitert (Quad einsammeln, Schaden ×3, Mega Health über 100 und Abbau, Bot holt sich das Quad). Rauchtest 38/38.
+
+---
+
 # Änderungen (Runde 11: Arena „Neon Foundry“)
 
 - **Neue Arena „Neon Foundry“** (`levels/neon_foundry.tscn`), 64 × 64 m auf drei Ebenen:

@@ -1,0 +1,70 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/pickup.gd" id="1_pickup"]
+
+[sub_resource type="BoxShape3D" id="Shape_Pickup"]
+size = Vector3(1.4, 1.6, 1.4)
+
+[sub_resource type="StandardMaterial3D" id="Mat_Quad"]
+albedo_color = Color(0.55, 0.2, 1, 1)
+metallic = 0.4
+roughness = 0.25
+emission_enabled = true
+emission = Color(0.6, 0.25, 1, 1)
+emission_energy_multiplier = 3.0
+
+[sub_resource type="BoxMesh" id="Mesh_Core"]
+material = SubResource("Mat_Quad")
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="Mat_Ring"]
+shading_mode = 0
+albedo_color = Color(0.85, 0.6, 1, 1)
+emission_enabled = true
+emission = Color(0.85, 0.6, 1, 1)
+emission_energy_multiplier = 5.0
+
+[sub_resource type="TorusMesh" id="Mesh_Ring"]
+material = SubResource("Mat_Ring")
+inner_radius = 0.55
+outer_radius = 0.62
+
+[sub_resource type="CylinderMesh" id="Mesh_Base"]
+material = SubResource("Mat_Ring")
+top_radius = 0.7
+bottom_radius = 0.75
+height = 0.06
+
+[node name="QuadDamagePickup" type="Area3D"]
+collision_layer = 8
+collision_mask = 6
+script = ExtResource("1_pickup")
+pickup_type = 4
+respawn_time = 60.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("Shape_Pickup")
+
+[node name="Base" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.75, 0)
+mesh = SubResource("Mesh_Base")
+
+[node name="VisualMesh" type="Node3D" parent="."]
+
+[node name="Core" type="MeshInstance3D" parent="VisualMesh"]
+transform = Transform3D(0.707107, -0.5, 0.5, 0.707107, 0.5, -0.5, 0, 0.707107, 0.707107, 0, 0, 0)
+mesh = SubResource("Mesh_Core")
+
+[node name="Ring" type="MeshInstance3D" parent="VisualMesh"]
+transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, 0, 0, 0)
+mesh = SubResource("Mesh_Ring")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+light_color = Color(0.65, 0.3, 1, 1)
+light_energy = 4.0
+light_volumetric_fog_energy = 3.0
+omni_range = 6.0
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+unit_size = 8.0
+max_distance = 60.0

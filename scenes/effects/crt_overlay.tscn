@@ -9,6 +9,7 @@ shader_parameter/vignette = 0.55
 shader_parameter/scanline_strength = 0.06
 shader_parameter/noise_strength = 0.02
 shader_parameter/damage_pulse = 0.0
+shader_parameter/quad_glow = 0.0
 
 [node name="CRTOverlay" type="CanvasLayer"]
 layer = 0

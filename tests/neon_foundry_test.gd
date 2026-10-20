@@ -88,6 +88,28 @@ func run() -> void:
 	print("Mitte-Pad Landung: ", p)
 	check(p.y > 3.8 and absf(p.x) < 5.0 and absf(p.z) < 5.0, "Jump-Pad Boden -> Mittelplattform")
 
+	# Quad Damage auf der Mittelplattform: Spieler sammelt es ein, Schaden x3
+	var quad: Node3D = current_scene.get_node("Items/QuadCenter")
+	player.velocity = Vector3.ZERO
+	player.global_position = quad.global_position - Vector3(0, 0.8, 0)
+	await create_timer(0.5).timeout
+	check(player.powerups.has_quad, "Quad Damage eingesammelt (%.0f s)" % player.powerups.quad_time_left)
+	check(not quad.is_active, "Quad-Pickup danach weg")
+	var probe := DamageInfo.create(10.0, player, Vector3.ZERO, Vector3.ZERO, "Test")
+	check(is_equal_approx(probe.amount, 30.0), "Quad verdreifacht Schaden (%.0f)" % probe.amount)
+	player.powerups.clear()
+
+	# Mega Health auf dem Suedwest-Turm: Leben ueber 100, danach langsamer Abbau
+	var mega: Node3D = current_scene.get_node("Items/MegaTowerSW")
+	player.velocity = Vector3.ZERO
+	player.global_position = mega.global_position - Vector3(0, 0.8, 0)
+	await create_timer(0.5).timeout
+	var hp_after: float = player.health.health
+	check(hp_after > 150.0, "Mega Health hebt Leben ueber 100 (%.0f)" % hp_after)
+	await create_timer(2.0).timeout
+	check(player.health.health < hp_after, "Ueberheilung baut sich ab (%.1f)" % player.health.health)
+	player.health.reset()
+
 	# Navigationsnetz: Wege vom Boden auf Ring, Mitte und Tuerme
 	var map_rid: RID = bots[0].nav_agent.get_navigation_map()
 	var from := NavigationServer3D.map_get_closest_point(map_rid, Vector3(0, 0, 25))
@@ -114,6 +136,24 @@ func run() -> void:
 			break
 	print("Bot-Position: ", bot.global_position)
 	check(reached, "Bot erreicht Turm Suedwest")
+
+	# Bot holt sich das Quad Damage, sobald es wieder da ist
+	quad._respawn()
+	await create_timer(0.2).timeout
+	bot.global_position = Vector3(0, 0.1, 18)
+	bot.velocity = Vector3.ZERO
+	bot.patrol_wait_timer = 0.0
+	bot._switch_state(bot.State.PATROL)
+	var got_quad := false
+	for i in 50:
+		await create_timer(0.5).timeout
+		if bot.patrol_wait_timer > 0.0:
+			bot.patrol_wait_timer = 0.0
+		if bot.powerups.has_quad:
+			got_quad = true
+			break
+	print("Bot nach Quad-Suche: ", bot.global_position)
+	check(got_quad, "Bot holt sich Quad Damage")
 	player.add_to_group("player")
 
 	gm.bot_count = orig_count

@@ -6,6 +6,8 @@
 [ext_resource type="PackedScene" uid="uid://health_pickup_001" path="res://scenes/items/health_pickup.tscn" id="5_health"]
 [ext_resource type="PackedScene" uid="uid://armor_pickup_001" path="res://scenes/items/armor_pickup.tscn" id="6_armor"]
 [ext_resource type="PackedScene" path="res://scenes/items/jump_pad.tscn" id="8_pad"]
+[ext_resource type="PackedScene" path="res://scenes/items/quad_damage_pickup.tscn" id="12_quad"]
+[ext_resource type="PackedScene" path="res://scenes/items/mega_health_pickup.tscn" id="13_mega"]
 [ext_resource type="Shader" path="res://assets/shaders/space_sky.gdshader" id="9_sky"]
 [ext_resource type="Script" path="res://addons/func_godot/src/map/func_godot_map.gd" id="10_map"]
 [ext_resource type="Resource" path="res://resources/map/neon_map_settings.tres" id="11_settings"]
@@ -105,8 +107,8 @@ transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 
 
 [node name="Items" type="Node3D" parent="."]
 
-[node name="ArmorCenter" parent="Items" instance=ExtResource("6_armor")]
-transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, 4.8, 0)
+[node name="QuadCenter" parent="Items" instance=ExtResource("12_quad")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, 4.9, 0)
 
 [node name="HealthUnder" parent="Items" instance=ExtResource("5_health")]
 transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, 0.8, 0)
@@ -114,8 +116,11 @@ transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 
 [node name="AmmoTowerNE" parent="Items" instance=ExtResource("4_ammo")]
 transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 27, 8.8, -27)
 
-[node name="ArmorTowerSW" parent="Items" instance=ExtResource("6_armor")]
-transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -27, 8.8, 27)
+[node name="MegaTowerSW" parent="Items" instance=ExtResource("13_mega")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -27, 8.9, 27)
+
+[node name="ArmorTowerNE" parent="Items" instance=ExtResource("6_armor")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 27, 8.8, -22)
 
 [node name="HealthRingN" parent="Items" instance=ExtResource("5_health")]
 transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -20, 4.8, -28.5)

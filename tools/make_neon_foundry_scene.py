@@ -22,10 +22,11 @@ SPAWNS = [
 ]
 # Items: (Name, Szene, x, y, z)  y = Oberflaeche + 0.8
 ITEMS = [
-    ('ArmorCenter', 'armor', 0, 4.8, 0),
+    ('QuadCenter', 'quad', 0, 4.9, 0),
     ('HealthUnder', 'health', 0, 0.8, 0),
     ('AmmoTowerNE', 'ammo', 27, 8.8, -27),
-    ('ArmorTowerSW', 'armor', -27, 8.8, 27),
+    ('MegaTowerSW', 'mega', -27, 8.9, 27),
+    ('ArmorTowerNE', 'armor', 27, 8.8, -22),
     ('HealthRingN', 'health', -20, 4.8, -28.5),
     ('AmmoRingS', 'ammo', 20, 4.8, 28.5),
     ('HealthPassageE', 'health', 21.5, 0.8, 0),
@@ -56,6 +57,8 @@ head = '''[gd_scene format=3]
 [ext_resource type="PackedScene" uid="uid://health_pickup_001" path="res://scenes/items/health_pickup.tscn" id="5_health"]
 [ext_resource type="PackedScene" uid="uid://armor_pickup_001" path="res://scenes/items/armor_pickup.tscn" id="6_armor"]
 [ext_resource type="PackedScene" path="res://scenes/items/jump_pad.tscn" id="8_pad"]
+[ext_resource type="PackedScene" path="res://scenes/items/quad_damage_pickup.tscn" id="12_quad"]
+[ext_resource type="PackedScene" path="res://scenes/items/mega_health_pickup.tscn" id="13_mega"]
 [ext_resource type="Shader" path="res://assets/shaders/space_sky.gdshader" id="9_sky"]
 [ext_resource type="Script" path="res://addons/func_godot/src/map/func_godot_map.gd" id="10_map"]
 [ext_resource type="Resource" path="res://resources/map/neon_map_settings.tres" id="11_settings"]
@@ -134,7 +137,7 @@ x, y, z, yaw = SPAWNS[0]
 body += f'[node name="Player" parent="." instance=ExtResource("2_player")]\ntransform = {tf(x, y, z, yaw)}\n\n'
 
 body += '[node name="Items" type="Node3D" parent="."]\n\n'
-res = {'ammo': '4_ammo', 'health': '5_health', 'armor': '6_armor'}
+res = {'ammo': '4_ammo', 'health': '5_health', 'armor': '6_armor', 'quad': '12_quad', 'mega': '13_mega'}
 for name, kind, x, y, z in ITEMS:
     body += f'[node name="{name}" parent="Items" instance=ExtResource("{res[kind]}")]\ntransform = {tf(x, y, z)}\n\n'
 

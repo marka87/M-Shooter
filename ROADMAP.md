@@ -106,7 +106,7 @@ Heute können Bots nur patrouillieren, verfolgen und mit einer Waffe schießen.
 |---|---|---|
 | 5.1 | ✅ Skill-Stufen (Zielgenauigkeit, Reaktionszeit, Bewegung) wie „Novice … Godlike“ | S |
 | 5.2 | Bots nutzen alle Waffen, wählen die passende nach Distanz und **zielen bei Projektilen vor** (Vorhalt) | M |
-| 5.3 | **Item-Bewusstsein**: Bots holen Health/Armor bei wenig Leben und kennen die Respawn-Zeiten großer Items | M |
+| 5.3 | ✅ teilweise: Bots steuern lohnende Items an (ohne Respawn-Timing). **Item-Bewusstsein**: Bots holen Health/Armor bei wenig Leben und kennen die Respawn-Zeiten großer Items | M |
 | 5.4 | Ausweichen: Dodge, Strafe-Jumping, Rocket-Jump auf hohe Plattformen | L |
 | 5.5 | Entscheidungslogik als **Utility-AI** statt fester Zustandsmaschine (jede Aktion bekommt eine Punktzahl, der Bot wählt die beste) | M |
 | 5.6 | Namen, Persönlichkeiten (aggressiv, vorsichtig, Camper), Sprüche im Chat | S |
@@ -119,7 +119,7 @@ Heute können Bots nur patrouillieren, verfolgen und mit einer Waffe schießen.
 |---|---|---|
 | 6.1 | **Deathmatch** mit Frag-Limit und Zeitlimit, Warmup, Countdown, Endbildschirm mit Statistik | M |
 | 6.2 | ✅ teilweise: Scoreboard und Killfeed, Multi-Kill/Spree fehlt. **Scoreboard** (Tab), **Killfeed** oben rechts, Multi-Kill-/Spree-System | M |
-| 6.3 | **Power-ups**: Quad Damage / UDamage, Mega Health, Red Armor, Shield Belt, Invisibility. Große Items erzeugen die typische Map-Kontrolle | M |
+| 6.3 | ✅ teilweise: Quad Damage und Mega Health. **Power-ups**: Quad Damage / UDamage, Mega Health, Red Armor, Shield Belt, Invisibility. Große Items erzeugen die typische Map-Kontrolle | M |
 | 6.4 | **Instagib** (nur Railgun, ein Treffer tötet), ideal als schneller Zusatzmodus | S |
 | 6.5 | **Team Deathmatch**, danach **Capture the Flag** | L |
 | 6.6 | Duel-Modus (1 gegen 1, Item-Timing entscheidet) | S |

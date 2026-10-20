@@ -74,7 +74,10 @@ Die Bots besitzen eine 4-stufige Zustandsmaschine:
   - **Munition** (Gelb): Füllt alle Waffen auf (+60 MG, +6 Raketen, +5 Railgun).
   - **Gesundheit** (Grün): Heilt +35 HP.
   - **Rüstung** (Blau): Gibt +50 Rüstung.
+  - **Quad Damage** (violett): dreifacher Schaden für 30 s, auch beim Rocket-Jump. Violetter Bildrand und Countdown im HUD; Bots mit Quad leuchten violett. Respawn nach 60 s.
+  - **Mega Health** (blaue Kugel): +100 Leben bis maximal 200, sinkt danach um 1 pro Sekunde auf 100. Respawn nach 35 s.
   - Alle Items rotieren schwebend und respawnen nach dem Einsammeln automatisch.
+  - Bots sammeln Leben, Rüstung und Power-ups ebenfalls ein und laufen gezielt zu lohnenden Items (Power-ups zuerst, Leben bei wenig HP).
 
 ---
 

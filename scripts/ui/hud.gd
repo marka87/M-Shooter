@@ -16,6 +16,8 @@ class_name HUD
 @onready var weapon_slots: HBoxContainer = $BottomBar/HBox/WeaponCell/VBox/Slots
 @onready var portrait_face: Control = $BottomBar/HBox/Portrait/Face
 @onready var control_hints: Label = $ControlHints
+@onready var announce_label: Label = $AnnounceLabel
+@onready var quad_label: Label = $QuadLabel
 @onready var damage_flash: ColorRect = $DamageFlash
 @onready var hitmarker: Control = $CrosshairContainer/Hitmarker
 @onready var death_overlay: Control = $DeathOverlay
@@ -38,6 +40,7 @@ func bind(p: Player) -> void:
 	player.health.damaged.connect(_on_damaged)
 	player.health.died.connect(func(_info: DamageInfo): death_overlay.show())
 	player.enemy_hit.connect(show_hitmarker)
+	player.item_picked.connect(_on_item_picked)
 	player.weapon_manager.weapon_switched.connect(_on_weapon_switched)
 	player.weapon_manager.ammo_updated.connect(_on_ammo_updated)
 	GameManager.score_updated.connect(_on_score_updated)
@@ -63,11 +66,46 @@ func _process(_delta: float) -> void:
 	if not player:
 		return
 	_update_speed()
+	_update_quad()
 	# Scoreboard nur solange Tab gehalten wird
 	scoreboard.visible = Input.is_action_pressed("scoreboard")
 	# Countdown im Todes-Overlay (death_timer pausiert mit dem Spiel)
 	if player.is_dead:
 		respawn_countdown_label.text = "Respawn in %.1f Sekunden..." % maxf(player.death_timer, 0.0)
+
+
+## Quad-Countdown ueber der Leiste und violetter Bildrand (CRT-Overlay)
+func _update_quad() -> void:
+	var t: float = player.powerups.quad_time_left
+	quad_label.visible = t > 0.0
+	if t > 0.0:
+		quad_label.text = "QUAD %d" % ceili(t)
+		# Letzte 3 Sekunden blinken
+		quad_label.modulate.a = 1.0 if t > 3.0 or fmod(t, 0.5) > 0.25 else 0.3
+	var crt := player.get_node_or_null("CRTOverlay/Screen") as ColorRect
+	if crt and crt.material:
+		(crt.material as ShaderMaterial).set_shader_parameter("quad_glow", 0.6 if t > 0.0 else 0.0)
+
+
+## Grosse Ansage in der Bildmitte, blendet nach kurzer Zeit aus
+func announce(text: String, color: Color) -> void:
+	announce_label.text = text
+	announce_label.add_theme_color_override("font_color", color)
+	announce_label.modulate.a = 1.0
+	announce_label.scale = Vector2.ONE * 1.3
+	announce_label.pivot_offset = announce_label.size / 2.0
+	var tween := create_tween()
+	tween.tween_property(announce_label, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_interval(1.4)
+	tween.tween_property(announce_label, "modulate:a", 0.0, 0.6)
+
+
+func _on_item_picked(pickup_type: int) -> void:
+	match pickup_type:
+		ItemPickup.PickupType.QUAD_DAMAGE:
+			announce("QUAD DAMAGE!", Color(0.8, 0.5, 1.0))
+		ItemPickup.PickupType.MEGA_HEALTH:
+			announce("MEGA HEALTH", Color(0.4, 0.75, 1.0))
 
 
 ## Tacho: gruen bei Strafe-Jump-Tempo, gelb beim Sprinten
@@ -90,7 +128,13 @@ func _on_health_changed(health: float, armor: float) -> void:
 	health_label.text = str(int(maxf(health, 0.0)))
 	health_bar.value = health
 	# Wenig Leben: Zahl rot
-	health_label.modulate = Color(1.0, 0.3, 0.3) if health <= 25.0 else Color.WHITE
+	# Wenig Leben: rot, Ueberheilung durch Mega Health: blau
+	if health <= 25.0:
+		health_label.modulate = Color(1.0, 0.3, 0.3)
+	elif health > player.health.max_health:
+		health_label.modulate = Color(0.5, 0.8, 1.0)
+	else:
+		health_label.modulate = Color.WHITE
 	armor_label.text = str(int(maxf(armor, 0.0)))
 	armor_bar.value = armor
 

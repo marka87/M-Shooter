@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://bplayer_character_001"]
+[gd_scene load_steps=15 format=3 uid="uid://bplayer_character_001"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/weapon_manager.gd" id="2_wmgr"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" path="res://scenes/weapons/shotgun.tscn" id="8_sg"]
 [ext_resource type="PackedScene" path="res://scenes/effects/neon_edges.tscn" id="10_edges"]
 [ext_resource type="PackedScene" path="res://scenes/effects/crt_overlay.tscn" id="11_crt"]
+[ext_resource type="Script" path="res://scripts/components/powerup_component.gd" id="12_pu"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -72,3 +73,7 @@ start_armor = 50.0
 [node name="HitsoundAudioPlayer" type="AudioStreamPlayer" parent="."]
 
 [node name="JumpAudioPlayer" type="AudioStreamPlayer" parent="."]
+
+[node name="Powerups" type="Node" parent="."]
+script = ExtResource("12_pu")
+show_glow = false

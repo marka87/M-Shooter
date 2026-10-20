@@ -10,6 +10,8 @@ uniform float vignette : hint_range(0.0, 2.0) = 0.55;
 uniform float scanline_strength : hint_range(0.0, 0.5) = 0.06;
 uniform float noise_strength : hint_range(0.0, 0.2) = 0.02;
 uniform float damage_pulse : hint_range(0.0, 1.0) = 0.0;
+// Violetter Bildrand, solange Quad Damage aktiv ist
+uniform float quad_glow : hint_range(0.0, 1.0) = 0.0;
 
 float rand(vec2 p) {
 	return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
@@ -38,6 +40,7 @@ void fragment() {
 	float vig = smoothstep(0.85, 0.25, dist * (1.0 + vignette * 0.5));
 	col *= mix(1.0, vig, clamp(vignette, 0.0, 1.0));
 	col = mix(col, vec3(0.8, 0.05, 0.05), damage_pulse * smoothstep(0.3, 0.75, dist) * 0.6);
+	col += vec3(0.55, 0.2, 1.0) * quad_glow * smoothstep(0.35, 0.8, dist) * 0.9;
 
 	COLOR = vec4(col, 1.0);
 }

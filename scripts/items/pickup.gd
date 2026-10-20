@@ -1,10 +1,11 @@
 extends Area3D
 class_name ItemPickup
 
-## Drehbares, schwebendes Item-Pickup fuer Munition, Leben oder Ruestung
+## Drehbares, schwebendes Item-Pickup fuer Munition, Leben, Ruestung und Power-ups.
 ## Wird beim Beruehren aufgesammelt und respawnt automatisch nach einigen Sekunden.
+## Spieler sammeln alles, Bots alles ausser Munition (sie haben keinen WeaponManager).
 
-enum PickupType { AMMO_BOX, WEAPON_AMMO, HEALTH, ARMOR }
+enum PickupType { AMMO_BOX, WEAPON_AMMO, HEALTH, ARMOR, QUAD_DAMAGE, MEGA_HEALTH }
 
 @export var pickup_type: PickupType = PickupType.AMMO_BOX
 @export var respawn_time: float = 8.0
@@ -16,6 +17,10 @@ enum PickupType { AMMO_BOX, WEAPON_AMMO, HEALTH, ARMOR }
 @export var weapon_ammo_amount: int = 10
 @export var health_amount: float = 35.0
 @export var armor_amount: float = 50.0
+## Dauer von Quad Damage (s)
+@export var quad_seconds: float = 30.0
+## Mega Health: Heilung ueber das Maximum hinaus
+@export var mega_amount: float = 100.0
 
 @onready var visual_mesh: Node3D = $VisualMesh
 @onready var light: OmniLight3D = $OmniLight3D
@@ -36,8 +41,9 @@ func _ready() -> void:
 		add_child(audio_player)
 	audio_player.stream = SoundGenerator.create_pickup_sound()
 	
-	# Signal verbinden
+	# Signal verbinden; Gruppe "pickups" nutzen die Bots zur Item-Suche
 	body_entered.connect(_on_body_entered)
+	add_to_group("pickups")
 
 
 func _process(delta: float) -> void:
@@ -55,23 +61,63 @@ func _on_body_entered(body: Node3D) -> void:
 	if not is_active:
 		return
 	
-	if not body.is_in_group("player"):
+	if not (body.is_in_group("player") or body.is_in_group("enemies")):
 		return
+	var has_weapons: bool = body.get("weapon_manager") != null
 	
-	# Nur einsammeln, wenn es dem Spieler etwas bringt (volle Werte lassen das Item liegen)
+	# Nur einsammeln, wenn es etwas bringt (volle Werte lassen das Item liegen)
 	var picked_up: bool = false
 	match pickup_type:
 		PickupType.AMMO_BOX:
-			picked_up = body.weapon_manager.add_ammo_box()
+			picked_up = has_weapons and body.weapon_manager.add_ammo_box()
 		PickupType.WEAPON_AMMO:
-			picked_up = body.weapon_manager.add_ammo(weapon_id, weapon_ammo_amount)
+			picked_up = has_weapons and body.weapon_manager.add_ammo(weapon_id, weapon_ammo_amount)
 		PickupType.HEALTH:
 			picked_up = body.health.heal(health_amount)
 		PickupType.ARMOR:
 			picked_up = body.health.add_armor(armor_amount)
-	
+		PickupType.QUAD_DAMAGE:
+			var powerups := body.get_node_or_null("Powerups") as PowerupComponent
+			if powerups and not body.health.is_dead:
+				powerups.give_quad(quad_seconds)
+				picked_up = true
+		PickupType.MEGA_HEALTH:
+			picked_up = body.health.mega_heal(mega_amount)
+
 	if picked_up:
+		if body.has_method("on_item_picked"):
+			body.on_item_picked(pickup_type)
 		_collect()
+
+
+## Lohnt es sich fuer diesen Kaempfer, das Item zu holen? (fuer die Bot-Planung)
+func is_useful_for(body: Node) -> bool:
+	if not is_active or body.get("health") == null:
+		return false
+	match pickup_type:
+		PickupType.HEALTH:
+			return body.health.health < body.health.max_health
+		PickupType.ARMOR:
+			return body.health.armor < body.health.max_armor
+		PickupType.QUAD_DAMAGE:
+			return true
+		PickupType.MEGA_HEALTH:
+			return body.health.health < body.health.overheal_max
+	return false
+
+
+## Wie wertvoll ist das Item (fuer die Bot-Planung)? Power-ups am meisten.
+func value_for(body: Node) -> float:
+	match pickup_type:
+		PickupType.QUAD_DAMAGE:
+			return 100.0
+		PickupType.MEGA_HEALTH:
+			return 80.0
+		PickupType.HEALTH:
+			return 60.0 * (1.0 - body.health.health / body.health.max_health) + 10.0
+		PickupType.ARMOR:
+			return 40.0 * (1.0 - body.health.armor / body.health.max_armor) + 10.0
+	return 0.0
 
 
 func _collect() -> void:

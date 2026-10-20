@@ -56,6 +56,7 @@ class_name Player
 @onready var camera: Camera3D = $Head/Camera3D
 @onready var weapon_manager: WeaponManager = $Head/Camera3D/WeaponHolder
 @onready var health: HealthComponent = $Health
+@onready var powerups: PowerupComponent = $Powerups
 @onready var hud: HUD = $HUD
 @onready var hurt_audio: AudioStreamPlayer = $HurtAudioPlayer
 @onready var hitsound_audio: AudioStreamPlayer = $HitsoundAudioPlayer
@@ -63,6 +64,8 @@ class_name Player
 
 ## Eigener Treffer an einem Gegner (fuer Hitmarker im HUD)
 signal enemy_hit()
+## Item eingesammelt (fuer Ansagen im HUD), Wert aus ItemPickup.PickupType
+signal item_picked(pickup_type: int)
 
 # ==============================================================================
 # STATUS
@@ -341,6 +344,7 @@ func take_damage(info: DamageInfo) -> void:
 ## Spieler stirbt: Tod zaehlen, Respawn laeuft ueber death_timer in _physics_process
 func _on_died(info: DamageInfo) -> void:
 	death_timer = respawn_delay
+	powerups.clear()
 	# Selbsttreffer (Rocket-Jump) zaehlt als Selbstmord
 	GameManager.register_kill(info.attacker, self, info.weapon_name)
 
@@ -355,6 +359,11 @@ func _respawn() -> void:
 	head.rotation.x = 0.0
 
 	velocity = Vector3.ZERO
+
+
+## Wird vom Pickup aufgerufen, das HUD zeigt dann z. B. "QUAD DAMAGE!"
+func on_item_picked(pickup_type: int) -> void:
+	item_picked.emit(pickup_type)
 
 
 ## Treffer-Feedback: Quake-Trefferton, Hitmarker zeigt das HUD

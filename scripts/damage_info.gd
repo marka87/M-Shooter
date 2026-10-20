@@ -21,6 +21,11 @@ var is_splash: bool = false
 static func create(p_amount: float, p_attacker: Node, p_position: Vector3, p_direction: Vector3, p_weapon_name: String = "", p_is_splash: bool = false) -> DamageInfo:
 	var info := DamageInfo.new()
 	info.amount = p_amount
+	# Power-ups des Angreifers (z. B. Quad Damage) verstaerken den Schaden, auch beim Selbsttreffer
+	if is_instance_valid(p_attacker):
+		var powerups := p_attacker.get_node_or_null("Powerups") as PowerupComponent
+		if powerups:
+			info.amount *= powerups.damage_multiplier
 	info.attacker = p_attacker
 	info.position = p_position
 	info.direction = p_direction

@@ -62,6 +62,7 @@ const SKILL_PRESETS: Array[Dictionary] = [
 @onready var audio_player: AudioStreamPlayer3D = $AudioStreamPlayer3D
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 @onready var health: HealthComponent = $Health
+@onready var powerups: PowerupComponent = $Powerups
 
 # ==============================================================================
 # INTERNE VARIABLEN
@@ -501,6 +502,7 @@ func _apply_skin_color() -> void:
 ## Tod des Bots: Kollision abschalten, Sound, Frag fuer Spieler und Respawn-Timer
 func _die(info: DamageInfo) -> void:
 	_switch_state(State.DEAD)
+	powerups.clear()
 
 	# Todes-Sound
 	if audio_player:
@@ -581,9 +583,15 @@ func _look_towards(target_pos: Vector3) -> void:
 		look_at(look_target, Vector3.UP)
 
 
-## Waehlt einen neuen zufaelligen, erreichbaren Punkt auf dem Navigationsnetz
+## Waehlt das naechste Patrouillenziel: bevorzugt ein lohnendes Item (Power-ups, Leben bei
+## wenig HP), sonst einen zufaelligen, erreichbaren Punkt auf dem Navigationsnetz.
 func _pick_new_patrol_point() -> void:
 	patrol_travel_timer = 0.0
+	var item := _best_item()
+	if item:
+		patrol_target = item.global_position
+		nav_agent.target_position = patrol_target
+		return
 	var nav_map: RID = nav_agent.get_navigation_map()
 	if nav_map.is_valid() and NavigationServer3D.map_get_iteration_id(nav_map) > 0:
 		patrol_target = NavigationServer3D.map_get_random_point(nav_map, nav_agent.navigation_layers, false)
@@ -592,6 +600,24 @@ func _pick_new_patrol_point() -> void:
 		patrol_target = Vector3(randf_range(-30.0, 30.0), 1.0, randf_range(-30.0, 30.0))
 	# Ziel sofort setzen, damit is_navigation_finished() nicht noch vom alten Ziel true meldet
 	nav_agent.target_position = patrol_target
+
+
+## Lohnendstes erreichbares Item: Wert geteilt durch Entfernung. Unter einer Schwelle
+## (oder zufaellig in 30 % der Faelle) wird stattdessen normal patrouilliert.
+func _best_item() -> Node3D:
+	var best: Node3D = null
+	var best_score: float = 0.0
+	for item in get_tree().get_nodes_in_group("pickups"):
+		if not item.has_method("is_useful_for") or not item.is_useful_for(self):
+			continue
+		var dist: float = global_position.distance_to(item.global_position)
+		var score: float = item.value_for(self) / (1.0 + dist / 15.0)
+		if score > best_score:
+			best_score = score
+			best = item
+	if best_score < 12.0 or randf() < 0.3:
+		return null
+	return best
 
 
 ## Aktualisiert das schwebende 3D-Namensschild ueber dem Kopf

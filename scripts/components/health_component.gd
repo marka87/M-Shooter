@@ -17,6 +17,10 @@ signal died(info: DamageInfo)
 @export var start_armor: float = 0.0
 ## Anteil des Schadens, den die Ruestung abfaengt (Quake: 66 %)
 @export_range(0.0, 1.0) var armor_absorption: float = 0.66
+## Obergrenze fuer Ueberheilung durch Mega Health
+@export var overheal_max: float = 200.0
+## Abbau pro Sekunde, solange das Leben ueber max_health liegt (Quake: 1 pro Sekunde)
+@export var overheal_decay: float = 1.0
 
 var health: float = 0.0
 var armor: float = 0.0
@@ -52,6 +56,22 @@ func apply_damage(info: DamageInfo) -> void:
 		health = 0.0
 		is_dead = true
 		died.emit(info)
+
+
+func _process(delta: float) -> void:
+	# Ueberheilung langsam wieder auf max_health abbauen
+	if not is_dead and health > max_health:
+		health = maxf(health - overheal_decay * delta, max_health)
+		changed.emit(health, armor)
+
+
+## Mega Health: heilt ueber max_health hinaus bis overheal_max. False, wenn schon dort oder tot.
+func mega_heal(amount: float) -> bool:
+	if is_dead or health >= overheal_max:
+		return false
+	health = minf(health + amount, overheal_max)
+	changed.emit(health, armor)
+	return true
 
 
 ## Heilt bis max_health. False, wenn schon voll oder tot.
