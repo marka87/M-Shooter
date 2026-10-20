@@ -33,10 +33,10 @@ Das Herz eines Arena-Shooters. Hier entscheidet sich, ob es sich „wie Quake“
 | # | Aufgabe | Aufwand |
 |---|---|---|
 | 1.1 | Luftbewegung an Quake 3 / CPMA angleichen (getrennte Werte für Strafe- und Vorwärts-Beschleunigung, Werte im Inspector zum Feintuning) | M |
-| 1.2 | **UT-Dodge**: Doppeltipp auf A/D/W/S für seitlichen Sprung, plus **Wall-Dodge** (Dodge von Wänden ab) | M |
-| 1.3 | ✅ teilweise: Jump-Pads mit NavigationLink3D für Bots, Teleporter fehlen noch. **Jump-Pads** und **Teleporter** (Area3D mit Ziel-Marker, Bots brauchen dafür NavigationLink3D) | M |
+| 1.2 | ✅ **UT-Dodge**: Doppeltipp auf A/D/W/S für seitlichen Sprung, plus **Wall-Dodge** (Dodge von Wänden ab) | M |
+| 1.3 | ✅ Jump-Pads und Teleporter (mit Telefrag), beide mit NavigationLink3D für Bots. **Jump-Pads** und **Teleporter** (Area3D mit Ziel-Marker, Bots brauchen dafür NavigationLink3D) | M |
 | 1.4 | Rampen-Sliding und sauberes Treppensteigen (Step-Up), Landung ohne Geschwindigkeitsverlust beim Bunnyhop | M |
-| 1.5 | Kamera-Feedback: Landungs-Dip, View-Punch bei Treffern, leichtes FOV-Weiten bei hoher Geschwindigkeit (abschaltbar) | S |
+| 1.5 | ✅ Kamera-Feedback: Landungs-Dip, View-Punch bei Treffern, leichtes FOV-Weiten bei hoher Geschwindigkeit (abschaltbar) | S |
 | 1.6 | Fallschaden ab großer Höhe, Schrittgeräusche abhängig vom Tempo | S |
 | 1.7 | Speedometer/Debug-Overlay für Movement-Tuning (Geschwindigkeit, Wunschrichtung, Luftzeit) | S |
 

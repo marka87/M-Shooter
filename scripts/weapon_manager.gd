@@ -126,6 +126,7 @@ func fire_current_weapon() -> void:
 	var weapon := get_current_weapon()
 	if weapon and weapon.try_fire(player, camera):
 		GameManager.register_shot()
+		player.camera_feedback.recoil(weapon.recoil_distance)
 
 
 ## Alt-Feuer der aktiven Waffe (rechte Maustaste)
@@ -135,6 +136,7 @@ func fire_current_weapon_alt() -> void:
 	var weapon := get_current_weapon()
 	if weapon and weapon.try_fire_alt(player, camera):
 		GameManager.register_shot()
+		player.camera_feedback.recoil(weapon.recoil_distance)
 
 
 ## Wechselt zu einem Waffen-Index (0 MG, 1 Shotgun, 2 Plasma, 3 Raketenwerfer,

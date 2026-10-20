@@ -42,13 +42,16 @@ var current_state: State = State.PATROL
 const SKILL_NAMES: Array[String] = ["Anfänger", "Normal", "Erfahren", "Profi", "Gott"]
 ## Werte je Stufe: Streuung (Grad), Reaktionszeit (s), Zeit zwischen Schuessen (s),
 ## Ausweichtempo im Kampf (m/s), Sichtweite (m)
+## Dodge-Chance bei jedem Richtungswechsel im Kampf
 const SKILL_PRESETS: Array[Dictionary] = [
-	{ "inaccuracy": 9.0, "reaction": 0.9, "interval": 0.45, "combat_speed": 2.0, "sight": 25.0 },
-	{ "inaccuracy": 6.0, "reaction": 0.6, "interval": 0.35, "combat_speed": 3.0, "sight": 30.0 },
-	{ "inaccuracy": 4.0, "reaction": 0.4, "interval": 0.28, "combat_speed": 3.5, "sight": 35.0 },
-	{ "inaccuracy": 2.5, "reaction": 0.25, "interval": 0.22, "combat_speed": 4.5, "sight": 45.0 },
-	{ "inaccuracy": 1.2, "reaction": 0.12, "interval": 0.18, "combat_speed": 5.5, "sight": 60.0 },
+	{ "inaccuracy": 9.0, "reaction": 0.9, "interval": 0.45, "combat_speed": 2.0, "sight": 25.0, "dodge": 0.0 },
+	{ "inaccuracy": 6.0, "reaction": 0.6, "interval": 0.35, "combat_speed": 3.0, "sight": 30.0, "dodge": 0.1 },
+	{ "inaccuracy": 4.0, "reaction": 0.4, "interval": 0.28, "combat_speed": 3.5, "sight": 35.0, "dodge": 0.25 },
+	{ "inaccuracy": 2.5, "reaction": 0.25, "interval": 0.22, "combat_speed": 4.5, "sight": 45.0, "dodge": 0.4 },
+	{ "inaccuracy": 1.2, "reaction": 0.12, "interval": 0.18, "combat_speed": 5.5, "sight": 60.0, "dodge": 0.55 },
 ]
+## Wahrscheinlichkeit, beim Richtungswechsel im Kampf seitlich zu dodgen (aus der Schwierigkeit)
+@export var dodge_chance: float = 0.25
 
 # ==============================================================================
 # KNOTEN-REFERENZEN
@@ -289,6 +292,10 @@ func _process_attack(delta: float, attack_target: CharacterBody3D, target_visibl
 		strafe_timer = 0.0
 		strafe_duration = randf_range(1.2, 2.0)
 		strafe_direction = -strafe_direction if randf() > 0.3 else strafe_direction
+		# Seitlicher Dodge wie ein UT-Spieler (schwerer zu treffen)
+		if is_on_floor() and randf() < dodge_chance:
+			launch(transform.basis.x * strafe_direction * 11.0 + Vector3.UP * 4.5)
+			return
 
 	var right_vec := transform.basis.x
 	var combat_velocity := right_vec * (strafe_direction * combat_speed)
@@ -371,6 +378,7 @@ func apply_skill(level: int) -> void:
 	shoot_interval = preset.interval
 	combat_speed = preset.combat_speed
 	sight_range = preset.sight
+	dodge_chance = preset.dodge
 
 
 ## Bot schiesst mit Streuung auf sein Ziel (trifft auch, wer im Weg steht)
@@ -437,6 +445,12 @@ func _flash_muzzle() -> void:
 # ==============================================================================
 # SCHADEN, TOD & RESPAWN
 # ==============================================================================
+
+## Nach einem Teleporter: Flug abbrechen, Weg neu berechnen lassen
+func on_teleported() -> void:
+	is_launched = false
+	nav_agent.target_position = patrol_target if current_state == State.PATROL else nav_agent.target_position
+
 
 ## Wird von Jump-Pads aufgerufen
 func launch(launch_velocity: Vector3) -> void:

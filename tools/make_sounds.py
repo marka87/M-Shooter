@@ -2,6 +2,7 @@
 
 Aufruf aus dem Projektordner:
     python tools/make_sounds.py [Ordner mit Ansager-Rohaufnahmen]
+    python tools/make_sounds.py --only dodge,teleport     (nur einzelne Effekte)
 
 - Waffen, Explosionen, Treffer, Pickups, Schritte: geschichtete Synthese (Anschlag + Koerper + Rauschen + Hall)
 - Musik: Synthwave-Loop, 120 BPM, 32 Takte (64 s), A-Moll (Am - F - C - G)
@@ -342,6 +343,21 @@ def jump_pad():
     return reverb(drive(mix(boom, air), 1.6), 1.0, 0.3, 0.25)
 
 
+def dodge():
+    d = 0.35
+    whoosh = filt(noise(d), lo=500, hi=5000) * env(d, 0.01, 0.07)
+    body = sweep(d, 160, 90, curve=2) * env(d, 0.002, 0.05) * 0.6
+    return mix(whoosh, body, click(0.003) * 0.3)
+
+
+def teleport():
+    d = 1.4
+    rise = filt(sweep(d, 200, 2400, 'saw', curve=0.5), hi=5000) * env(d, 0.01, 0.25) * 0.6
+    sparkle = sum(tone(d, f) * env(d, 0.005 + i * 0.03, 0.2) for i, f in enumerate((1568, 2093, 2637, 3136))) * 0.25
+    thump = sweep(d, 120, 50, curve=2) * env(d, 0.002, 0.08)
+    return reverb(mix(rise, sparkle, thump), 1.2, 0.35, 0.3)
+
+
 def footstep(variant):
     d = 0.16
     pitch = [1.0, 1.08, 0.93, 1.15][variant]
@@ -519,9 +535,15 @@ SFX = {
     'hitsound': hitsound, 'bot_hurt': bot_hurt, 'bot_death': bot_death, 'pickup': pickup,
     'weapon_pickup': weapon_pickup, 'quad_pickup': quad_pickup, 'mega_pickup': mega_pickup,
     'double_jump': double_jump, 'jump': jump, 'jump_pad': jump_pad, 'land': land,
+    'dodge': dodge, 'teleport': teleport,
 }
 
 if __name__ == '__main__':
+    # Nur einzelne Effekte neu erzeugen: python tools/make_sounds.py --only dodge,teleport
+    if len(sys.argv) > 2 and sys.argv[1] == '--only':
+        for name in sys.argv[2].split(','):
+            write(name, SFX[name]())
+        sys.exit(0)
     for name, fn in SFX.items():
         write(name, fn())
     for v in range(4):

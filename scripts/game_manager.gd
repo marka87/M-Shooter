@@ -72,6 +72,8 @@ var master_volume: float = 1.0
 var music_volume: float = 0.7
 ## Horizontales Sichtfeld in Grad (Quake-Spieler nutzen oft 100-110)
 var fov: float = 100.0
+## Kamera-Feedback (Wackeln, Einknicken, Tempo-Sichtfeld) an/aus
+var camera_effects: bool = true
 
 # Match-Einstellungen
 ## Anzahl Bots in der Arena (1-7)
@@ -456,6 +458,7 @@ func load_settings() -> void:
 		master_volume = cfg.get_value("audio", "master_volume", master_volume)
 		music_volume = cfg.get_value("audio", "music_volume", music_volume)
 		fov = cfg.get_value("video", "fov", fov)
+		camera_effects = cfg.get_value("video", "camera_effects", camera_effects)
 		bot_count = clampi(cfg.get_value("match", "bot_count", bot_count), 1, MAX_BOTS)
 		bot_skill = clampi(cfg.get_value("match", "bot_skill", bot_skill), 0, 4)
 		selected_map = clampi(cfg.get_value("match", "map", selected_map), 0, MAPS.size() - 1)
@@ -471,6 +474,7 @@ func save_settings() -> void:
 	cfg.set_value("audio", "master_volume", master_volume)
 	cfg.set_value("audio", "music_volume", music_volume)
 	cfg.set_value("video", "fov", fov)
+	cfg.set_value("video", "camera_effects", camera_effects)
 	cfg.set_value("match", "bot_count", bot_count)
 	cfg.set_value("match", "bot_skill", bot_skill)
 	cfg.set_value("match", "map", selected_map)

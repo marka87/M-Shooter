@@ -33,6 +33,7 @@ func _ready() -> void:
 	
 	# Flaechenschaden und Explosionswucht auf alle getroffenen Einheiten anwenden
 	_apply_blast_damage_and_impulse()
+	_shake_player_camera()
 	
 	# Visuelle Schockwelle expandieren und ausblenden
 	var tween := create_tween()
@@ -42,6 +43,17 @@ func _ready() -> void:
 	
 	# Nach Ablauf der Effekte entfernen
 	get_tree().create_timer(1.2, false).timeout.connect(queue_free)
+
+
+## Kamera des Spielers wackelt je nach Entfernung (bis zum dreifachen Explosionsradius)
+func _shake_player_camera() -> void:
+	var player := GameManager.current_player as Player
+	if not is_instance_valid(player):
+		return
+	var reach: float = blast_radius * 3.0
+	var dist: float = player.global_position.distance_to(global_position)
+	if dist < reach:
+		player.camera_feedback.add_trauma(0.7 * (1.0 - dist / reach) * clampf(max_damage / 100.0, 0.6, 1.5))
 
 
 ## Kugel, Licht und Truemmer in der Tint-Farbe einfaerben (eigene Material-Kopien)

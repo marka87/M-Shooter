@@ -33,6 +33,8 @@ static func create_quad_pickup_sound() -> AudioStream: return _cached("quad_pick
 static func create_mega_pickup_sound() -> AudioStream: return _cached("mega_pickup", _build_pickup_sound)
 static func create_jump_sound() -> AudioStream: return _cached("jump", _build_double_jump_sound)
 static func create_land_sound() -> AudioStream: return _cached("land", _build_bot_hurt_sound)
+static func create_dodge_sound() -> AudioStream: return _cached("dodge", _build_double_jump_sound)
+static func create_teleport_sound() -> AudioStream: return _cached("teleport", _build_jump_pad_sound)
 ## Vier Varianten (1-4), damit Schritte nicht maschinell gleich klingen
 static func create_footstep_sound(variant: int) -> AudioStream: return _cached("footstep_%d" % variant, _build_switch_sound)
 

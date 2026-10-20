@@ -203,6 +203,11 @@ custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 text = "100°"
 
+[node name="CameraFxCheck" type="CheckButton" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+button_pressed = true
+text = "Kamera-Effekte (Wackeln, Landung, Tempo-Sichtfeld)"
+
 [node name="Spacer" type="Control" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 8)
 layout_mode = 2

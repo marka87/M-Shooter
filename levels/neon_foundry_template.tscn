@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/items/quad_damage_pickup.tscn" id="12_quad"]
 [ext_resource type="PackedScene" path="res://scenes/items/mega_health_pickup.tscn" id="13_mega"]
 [ext_resource type="PackedScene" path="res://scenes/items/weapon_pickup.tscn" id="14_wpick"]
+[ext_resource type="PackedScene" path="res://scenes/items/teleporter.tscn" id="18_tele"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/plasma_gun.tscn" id="15_plasma"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/lightning_gun.tscn" id="16_lightning_gun"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/shock_rifle.tscn" id="17_shock_rifle"]
@@ -196,6 +197,22 @@ apex_height = 3.0
 transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, 0, 10)
 target = NodePath("../PadCenterTarget")
 apex_height = 2.5
+
+[node name="Teleporters" type="Node3D" parent="."]
+
+[node name="TeleNWExit" type="Marker3D" parent="Teleporters"]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1, 0, -1.000000, 0, 0.000000, 28, 4.05, 8)
+
+[node name="TeleSEExit" type="Marker3D" parent="Teleporters"]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1, 0, 1.000000, 0, 0.000000, -28, 4.05, -8)
+
+[node name="TeleNW" parent="Teleporters" node_paths=PackedStringArray("target") instance=ExtResource("18_tele")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -28, 0, -24)
+target = NodePath("../TeleNWExit")
+
+[node name="TeleSE" parent="Teleporters" node_paths=PackedStringArray("target") instance=ExtResource("18_tele")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 28, 0, 24)
+target = NodePath("../TeleSEExit")
 
 [node name="Lights" type="Node3D" parent="."]
 

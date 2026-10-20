@@ -12,6 +12,7 @@ Ein rasanter 3D-Arena-Shooter entwickelt in **Godot 4** mit **GDScript**. Das Sp
 | **Shift (halten)** | Sprinten (Erhöht Bodentempo von 8 auf 12 m/s) |
 | **Leertaste** | Sprung (am Boden halten für automatisches Bunnyhopping) |
 | **Leertaste (in der Luft)** | **Doppelsprung** (Unreal Tournament Style mit Richtungs-Boost!) |
+| **Richtungstaste 2× schnell** | **Dodge**: flacher, schneller Sprung in diese Richtung. In der Luft an einer Wand: **Wall-Dodge** |
 | **Maus** | Umschauen / Zielen |
 | **Linke Maustaste** | Waffe abfeuern (Halten für Maschinengewehr-Dauerfeuer) |
 | **1–7** oder **Mausrad** | Waffe wechseln (1 MG, 2 Shotgun, 3 Plasma, 4 Raketenwerfer, 5 Lightning Gun, 6 Railgun, 7 Shock Rifle) |
@@ -32,7 +33,11 @@ Alle Tasten laufen über die InputMap (Projekt → Projekteinstellungen → Eing
    - Drücke in der Luft ein zweites Mal die Leertaste für einen zweiten Höhenschub und schnellen Richtungswechsel.
 3. **Rocket-Jumping**:
    - Renne vorwärts, springe ab und feuere gleichzeitig eine Rakete direkt unter deine Füße. Die Wucht der Detonation katapultiert dich weit empor auf hohe Podeste.
-4. **Bunnyhopping**:
+4. **Dodge (UT)**:
+   - Zweimal schnell (innerhalb 0,25 s) dieselbe Richtungstaste drücken: Sprung mit 13 m/s in diese Richtung. Danach ist noch ein Doppelsprung möglich (Dodge-Jump).
+   - **Wall-Dodge**: In der Luft mit dem Rücken zur Wand von ihr wegdodgen. Einmal pro Sprung.
+5. **Teleporter** (Neon Foundry): Vom Boden in den Ecken Nordwest und Südost auf den gegenüberliegenden Ring. Man kommt mit Blick in die Arena heraus. Wer am Ausgang steht, wird **telefragged**.
+6. **Bunnyhopping**:
    - Wenn du die Leertaste gedrückt hältst, springt dein Charakter bei Bodenkontakt sofort wieder ab, ohne dass die Bodenreibung deine horizontale Geschwindigkeit abbremst.
 
 ---
@@ -171,6 +176,12 @@ Audio-Busse (`default_bus_layout.tres`): Master, Music (eigener Lautstärkeregle
 
 ---
 
+## 🎥 Kamera-Feedback
+
+Landungen lassen die Kamera einknicken, Treffer und Rückstoß rucken sie, Explosionen in der Nähe lassen sie wackeln, beim seitlichen Dodge neigt sie sich, und bei hohem Tempo (Strafe-Jumping) wird das Sichtfeld etwas weiter. Alles abschaltbar in den Einstellungen („Kamera-Effekte“). Code: `scripts/components/camera_feedback.gd`.
+
+---
+
 ## 🎨 Look: „Neon-Brutalism“
 
 Dunkle Low-Poly-Körper mit leuchtenden Wireframe-Kanten. Der Nachbearbeitungs-Shader `assets/shaders/neon_edges.gdshader` findet Kanten über Tiefen- und Normalensprünge und färbt sie im Farbton der jeweiligen Fläche: orange Plattformen bekommen orange Kanten, Bots die Kanten in ihrer eigenen Farbe. Dazu:
@@ -215,6 +226,8 @@ Godot_v4.7.2-stable_win64_console.exe --headless --path . -s res://tests/smoke_t
 Exit-Code 0 bedeutet: alles bestanden.
 
 Für den Match-Ablauf (Countdown, Fraglimit, Siegerbildschirm, Neustart, Zeitlimit): `-s res://tests/match_test.gd`
+
+Für Bewegung und Kamera (Dodge, Wall-Dodge, Landung, Tempo-Sichtfeld, Treffer, Explosion): `-s res://tests/movement_test.gd`
 
 Für die Neon Foundry gibt es einen eigenen Begehbarkeitstest (Treppen, Brücke, Tür, Jump-Pads, Bot-Wege, Bot läuft auf einen Turm):
 

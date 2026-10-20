@@ -1,0 +1,128 @@
+extends SceneTree
+
+# Bewegung und Kamera: Dodge, Wall-Dodge, Abklingzeit, Kamera-Feedback (Landung, Tempo-Sichtfeld,
+# Treffer, Explosion), Abschalten der Kamera-Effekte.
+# Start (aus dem Projektordner):
+#   Godot_v4.7.2-stable_win64_console.exe --headless --path . -s res://tests/movement_test.gd
+# Exit-Code 0 = alles bestanden.
+
+var fails := 0
+
+
+func check(cond: bool, label: String) -> void:
+	print(("PASS " if cond else "FAIL ") + label)
+	if not cond:
+		fails += 1
+
+
+func _initialize() -> void:
+	run()
+
+
+## Spieler an eine Stelle setzen, Blick nach Norden (-Z), stillstehen lassen
+func place(player, pos: Vector3) -> void:
+	player.velocity = Vector3.ZERO
+	player.global_position = pos
+	player.rotation = Vector3.ZERO
+	player._dodge_cooldown_left = 0.0
+	player._last_tap.clear()
+	for i in 6:
+		await physics_frame
+
+
+func run() -> void:
+	await process_frame
+	var gm = root.get_node("GameManager")
+	var orig := [gm.bot_count, gm.frag_limit, gm.time_limit_minutes, gm.match_countdown, gm.camera_effects]
+	gm.bot_count = 1
+	gm.frag_limit = 0
+	gm.time_limit_minutes = 0.0
+	gm.match_countdown = 0.0
+	gm.camera_effects = true
+	gm.reset_game()
+	change_scene_to_file("res://levels/test_arena.tscn")
+	await create_timer(0.5).timeout
+	var player = gm.current_player
+	for b in get_nodes_in_group("enemies"):
+		b.set_physics_process(false)
+		b.global_position = Vector3(0, -50, 0)
+
+	# --- Dodge am Boden: zweimal rechts -> schnell nach rechts (+X) und etwas nach oben ---
+	await place(player, Vector3(-20, 0.1, 30))
+	player.handle_direction_tap("move_right")
+	await create_timer(0.1).timeout
+	player.handle_direction_tap("move_right")
+	check(player.velocity.x > 12.0 and player.velocity.y > 4.0, "Dodge rechts (v = %s)" % player.velocity)
+	await create_timer(0.6).timeout
+	check(player.global_position.x > -15.0, "Dodge bringt ca. 5 m+ (x = %.1f)" % player.global_position.x)
+
+	# Zu langsam getippt -> kein Dodge
+	await place(player, Vector3(-20, 0.1, 30))
+	player.handle_direction_tap("move_left")
+	await create_timer(0.4).timeout
+	player.handle_direction_tap("move_left")
+	check(absf(player.velocity.x) < 1.0, "Langsames Doppeltippen loest keinen Dodge aus")
+
+	# Abklingzeit: direkt nach einem Dodge kein zweiter
+	await place(player, Vector3(-20, 0.1, 30))
+	check(player.try_dodge("move_forward"), "Dodge vorwaerts")
+	check(not player.try_dodge("move_backward"), "Zweiter Dodge sofort danach gesperrt")
+
+	# --- Wall-Dodge: in der Luft mit dem Ruecken zur Nordwand (Innenseite z = -44) ---
+	await place(player, Vector3(0, 3.0, -43.2))
+	player.rotation = Vector3(0, PI, 0)  # Blick nach Sueden, Wand im Ruecken
+	await physics_frame
+	var ok_wall: bool = player.try_dodge("move_forward")
+	check(ok_wall and player.velocity.z > 10.0, "Wall-Dodge von der Wand weg (v = %s)" % player.velocity)
+	player._dodge_cooldown_left = 0.0
+	check(not player.try_dodge("move_forward"), "Nur ein Wall-Dodge pro Sprung")
+
+	# In der Luft ohne Wand -> kein Dodge
+	await place(player, Vector3(0, 6.0, 20))
+	check(not player.try_dodge("move_right"), "Kein Dodge mitten in der Luft ohne Wand")
+
+	# --- Kamera: Landung aus der Hoehe knickt ein ---
+	await place(player, Vector3(-20, 9.0, 30))
+	var min_y := 0.0
+	for i in 150:
+		await physics_frame
+		min_y = minf(min_y, player.camera.position.y)
+	check(min_y < -0.08, "Kamera knickt bei der Landung ein (%.2f m)" % min_y)
+
+	# Tempo-Sichtfeld: schnell in der Luft -> groesseres FOV
+	await place(player, Vector3(-20, 6.0, 30))
+	var base_fov: float = player.camera_feedback.base_fov
+	for i in 30:
+		player.velocity = Vector3(26, 0, 0)
+		await process_frame
+	check(player.camera.fov > base_fov + 4.0, "Sichtfeld waechst mit Tempo (%.1f > %.1f)" % [player.camera.fov, base_fov])
+
+	# Treffer ruckt die Kamera
+	await place(player, Vector3(-20, 0.1, 30))
+	player.take_damage(DamageInfo.create(40.0, null, player.global_position, Vector3.ZERO, "Test"))
+	await process_frame
+	await process_frame
+	check(absf(player.camera.rotation.x) > 0.005, "Treffer ruckt die Kamera (%.3f rad)" % player.camera.rotation.x)
+
+	# Explosion in der Naehe laesst die Kamera wackeln
+	await create_timer(1.0).timeout
+	var explosion: Node3D = load("res://scenes/weapons/explosion.tscn").instantiate()
+	explosion.position = player.global_position + Vector3(6, 0, 0)
+	current_scene.add_child(explosion)
+	await process_frame
+	check(player.camera_feedback._trauma > 0.1, "Explosion in der Naehe: Wackeln (%.2f)" % player.camera_feedback._trauma)
+
+	# Kamera-Effekte aus -> Kamera bleibt ruhig
+	gm.camera_effects = false
+	player.camera_feedback.add_trauma(1.0)
+	await process_frame
+	await process_frame
+	check(player.camera.position == Vector3.ZERO and is_equal_approx(player.camera.fov, base_fov), "Kamera-Effekte abschaltbar")
+
+	gm.bot_count = orig[0]
+	gm.frag_limit = orig[1]
+	gm.time_limit_minutes = orig[2]
+	gm.match_countdown = orig[3]
+	gm.camera_effects = orig[4]
+	print("FEHLER: ", fails)
+	quit(1 if fails > 0 else 0)

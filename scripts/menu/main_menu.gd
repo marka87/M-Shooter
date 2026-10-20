@@ -24,6 +24,7 @@ extends Control
 
 @onready var music_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/MusicContainer/HBox/MusicSlider
 @onready var music_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/MusicContainer/HBox/MusicValueLabel
+@onready var camera_fx_check: CheckButton = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/CameraFxCheck
 @onready var fov_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/FovContainer/HBox/FovSlider
 @onready var fov_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/FovContainer/HBox/FovValueLabel
 
@@ -50,6 +51,8 @@ func _ready() -> void:
 		GameManager.music_volume = v
 		GameManager.apply_music_volume()
 		music_value_label.text = "%d%%" % int(v * 100))
+	camera_fx_check.button_pressed = GameManager.camera_effects
+	camera_fx_check.toggled.connect(func(on: bool): GameManager.camera_effects = on)
 	fov_slider.value = GameManager.fov
 	_update_fov_label(GameManager.fov)
 

@@ -40,6 +40,12 @@ WEAPONS = [
     ('LightningGroundE', 'lightning', 'lightning_gun', 'Lightning Gun', (0.7, 0.9, 1), 28, 0.9, -6),
     ('ShockRingS', 'shock_rifle', 'shock_rifle', 'Shock Rifle', (0.6, 0.35, 1), -4, 4.9, 28.5),
 ]
+# Teleporter: (Name, Position, Ziel, Blickrichtung am Ziel in Grad um die Hochachse)
+# 0 Grad = Blick nach -Z (Norden), 90 = Westen, -90 = Osten, 180 = Sueden
+TELEPORTERS = [
+    ('TeleNW', (-28, 0, -24), (28, 4.05, 8), 90),    # Boden Nordwest -> Ost-Ring, Blick nach Westen
+    ('TeleSE', (28, 0, 24), (-28, 4.05, -8), -90),   # Boden Suedost -> West-Ring, Blick nach Osten
+]
 # Jump-Pads: (Name, Pad-Position, Ziel, Scheitelhoehe)
 PADS = [
     ('PadTowerNE', (22, 0, -12), (25.5, 8.1, -25.5), 3.0),
@@ -66,6 +72,7 @@ head = '''[gd_scene format=3]
 [ext_resource type="PackedScene" path="res://scenes/items/quad_damage_pickup.tscn" id="12_quad"]
 [ext_resource type="PackedScene" path="res://scenes/items/mega_health_pickup.tscn" id="13_mega"]
 [ext_resource type="PackedScene" path="res://scenes/items/weapon_pickup.tscn" id="14_wpick"]
+[ext_resource type="PackedScene" path="res://scenes/items/teleporter.tscn" id="18_tele"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/plasma_gun.tscn" id="15_plasma"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/lightning_gun.tscn" id="16_lightning_gun"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/shock_rifle.tscn" id="17_shock_rifle"]
@@ -163,6 +170,13 @@ for name, pos, target, apex in PADS:
 for name, pos, target, apex in PADS:
     body += (f'[node name="{name}" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("8_pad")]\n'
              f'transform = {tf(*pos)}\ntarget = NodePath("../{name}Target")\napex_height = {apex}\n\n')
+
+body += '[node name="Teleporters" type="Node3D" parent="."]\n\n'
+for name, pos, target, yaw in TELEPORTERS:
+    body += f'[node name="{name}Exit" type="Marker3D" parent="Teleporters"]\ntransform = {tf(*target, yaw)}\n\n'
+for name, pos, target, yaw in TELEPORTERS:
+    body += (f'[node name="{name}" parent="Teleporters" node_paths=PackedStringArray("target") instance=ExtResource("18_tele")]\n'
+             f'transform = {tf(*pos)}\ntarget = NodePath("../{name}Exit")\n\n')
 
 body += '[node name="Lights" type="Node3D" parent="."]\n\n'
 for name, pos, c, energy, rng in LIGHTS:

@@ -1,3 +1,15 @@
+# Änderungen (Runde 16: Movement – Dodge, Teleporter, Kamera)
+
+- **UT-Dodge:** Richtungstaste zweimal innerhalb 0,25 s → Sprung mit 13 m/s in diese Richtung (5 m/s nach oben), danach noch ein Luftsprung möglich (Dodge-Jump). Abklingzeit 0,35 s. Eigener Sound.
+- **Wall-Dodge:** In der Luft von einer Wand direkt hinter einem abstoßen (12 m/s weg, 6,5 m/s hoch), einmal pro Sprung.
+- **Bots dodgen** im Kampf beim Richtungswechsel, je nach Schwierigkeit (Anfänger nie, Gott in 55 % der Fälle).
+- **Teleporter** (`scenes/items/teleporter.tscn`): Ausgang mit fester Blickrichtung und 8 m/s Tempo, Lichtblitz und Sound an beiden Enden, **Telefrag** für jeden, der am Ausgang steht. NavigationLink3D, damit Bots sie als Abkürzung nutzen. In der Neon Foundry: Boden Nordwest → Ost-Ring, Boden Südost → West-Ring.
+- **Kamera-Feedback** (`scripts/components/camera_feedback.gd`): Einknicken beim Landen (stärker bei hohem Fall), Rucken bei Treffern und Rückstoß, Wackeln bei Explosionen in der Nähe (Trauma-System), Neigung beim seitlichen Dodge, bis zu +10° Sichtfeld bei hohem Tempo. Schalter „Kamera-Effekte“ in den Einstellungen (gespeichert).
+- `tools/make_sounds.py --only name1,name2` erzeugt einzelne Effekte, ohne Musik und Ansager neu zu rechnen.
+- **Neuer Test** `tests/movement_test.gd` (13 Prüfungen): Dodge, zu langsames Tippen, Abklingzeit, Wall-Dodge (einmal pro Sprung, nicht ohne Wand), Landung, Tempo-Sichtfeld, Treffer-Ruck, Explosions-Wackeln, Abschalten. Neon-Foundry-Test um Teleporter, Blickrichtung, Telefrag und Bot-Weg über den Teleporter erweitert. Alle vier Tests grün.
+
+---
+
 # Änderungen (Runde 15: Sound)
 
 - **Neuer Sound-Generator** `tools/make_sounds.py` (nur numpy): alle Waffen, Explosion, Combo, Treffer, Pickups, Sprung-Pad, Bot-Treffer/-Tod jetzt als 16-Bit-WAV mit 44,1 kHz in `assets/sounds/`. Geschichtete Synthese: Anschlag, Körper, Rauschen, Verzerrung, Faltungshall. Gleichspannungsanteil wird entfernt.

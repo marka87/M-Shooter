@@ -1,8 +1,8 @@
 extends CharacterBody3D
 class_name Player
 
-## Spieler-Skript mit Quake/UT-artiger Bewegung (Strafe-Jumping, Bunnyhop, Luftkontrolle)
-## Basiert auf CharacterBody3D mit First-Person-Kamera und praeziser Physik.
+## Spieler-Skript mit Quake/UT-artiger Bewegung (Strafe-Jumping, Bunnyhop, Luftkontrolle,
+## Doppelsprung, Dodge und Wall-Dodge). Basiert auf CharacterBody3D mit First-Person-Kamera.
 
 # ==============================================================================
 # EINSTELLBARE VARIABLEN (TUNING)
@@ -48,6 +48,19 @@ class_name Player
 ## Aufwaertsimpuls fuer den Doppelsprung in der Luft (m/s)
 @export var double_jump_velocity: float = 8.0
 
+@export_group("Dodge (Unreal Tournament)")
+## Richtungstaste zweimal innerhalb dieser Zeit = Dodge
+@export var double_tap_time: float = 0.25
+## Tempo des Dodge-Sprungs am Boden (m/s) und Hoehe
+@export var dodge_speed: float = 13.0
+@export var dodge_up: float = 5.0
+## Wall-Dodge: in der Luft von einer Wand abstossen (einmal pro Sprung)
+@export var wall_dodge_speed: float = 12.0
+@export var wall_dodge_up: float = 6.5
+## Wie nah eine Wand hinter dem Spieler sein muss (m)
+@export var wall_dodge_reach: float = 0.7
+@export var dodge_cooldown: float = 0.35
+
 # ==============================================================================
 # INTERNE KNOTENREFERENZEN
 # ==============================================================================
@@ -61,11 +74,14 @@ class_name Player
 @onready var hurt_audio: AudioStreamPlayer = $HurtAudioPlayer
 @onready var hitsound_audio: AudioStreamPlayer = $HitsoundAudioPlayer
 @onready var jump_audio: AudioStreamPlayer = $JumpAudioPlayer
+@onready var camera_feedback: CameraFeedback = $CameraFeedback
 
 ## Eigener Treffer an einem Gegner (fuer Hitmarker im HUD)
 signal enemy_hit()
 ## Item eingesammelt (fuer Ansagen im HUD), Wert aus ItemPickup.PickupType
 signal item_picked(pickup_type: int, item_name: String)
+## Dodge ausgefuehrt (lokale Richtung, z. B. (1, 0, 0) = rechts; wall = Wall-Dodge)
+signal dodged(local_dir: Vector3, wall: bool)
 
 # ==============================================================================
 # STATUS
@@ -104,6 +120,14 @@ var _step_distance: float = 0.0
 var _was_on_floor: bool = true
 var _fall_speed: float = 0.0
 var _step_audio: AudioStreamPlayer = null
+# Dodge: Zeitpunkt des letzten Tastendrucks je Richtung, Abklingzeit, Wall-Dodge schon benutzt?
+const DODGE_DIRECTIONS := {
+	"move_forward": Vector3(0, 0, -1), "move_backward": Vector3(0, 0, 1),
+	"move_left": Vector3(-1, 0, 0), "move_right": Vector3(1, 0, 0),
+}
+var _last_tap: Dictionary = {}
+var _dodge_cooldown_left: float = 0.0
+var _wall_dodge_used: bool = false
 
 
 func _ready() -> void:
@@ -151,6 +175,51 @@ func _unhandled_input(event: InputEvent) -> void:
 		camera_pitch = clamp(camera_pitch, deg_to_rad(min_pitch), deg_to_rad(max_pitch))
 		head.rotation.x = camera_pitch
 
+	# Doppeltipp auf eine Richtungstaste = Dodge
+	for action in DODGE_DIRECTIONS:
+		if event.is_action_pressed(action) and not event.is_echo():
+			handle_direction_tap(action)
+
+
+## Zweiter Tastendruck derselben Richtung kurz nach dem ersten loest den Dodge aus
+func handle_direction_tap(action: String) -> void:
+	var now: float = Time.get_ticks_msec() / 1000.0
+	if now - _last_tap.get(action, -10.0) <= double_tap_time and try_dodge(action):
+		_last_tap[action] = -10.0
+	else:
+		_last_tap[action] = now
+
+
+## Dodge in Richtung der Taste: am Boden ein flacher, schneller Sprung,
+## in der Luft nur als Wall-Dodge (eine Wand muss direkt hinter einem sein). True bei Erfolg.
+func try_dodge(action: String) -> bool:
+	if is_dead or GameManager.is_frozen() or _dodge_cooldown_left > 0.0:
+		return false
+	var local: Vector3 = DODGE_DIRECTIONS[action]
+	var dir: Vector3 = global_transform.basis * local
+	dir.y = 0.0
+	dir = dir.normalized()
+	var wall := false
+	if is_on_floor():
+		velocity.x = dir.x * dodge_speed
+		velocity.z = dir.z * dodge_speed
+		velocity.y = dodge_up
+		# Nach dem Dodge ist noch ein Luftsprung moeglich (Dodge-Jump wie in UT2004)
+		jumps_remaining = max_jumps - 1
+	elif not _wall_dodge_used and test_move(global_transform, -dir * wall_dodge_reach):
+		velocity.x = dir.x * wall_dodge_speed
+		velocity.z = dir.z * wall_dodge_speed
+		velocity.y = maxf(velocity.y, wall_dodge_up)
+		_wall_dodge_used = true
+		wall = true
+	else:
+		return false
+	launch_grace = 0.12
+	_dodge_cooldown_left = dodge_cooldown
+	_play_step(SoundGenerator.create_dodge_sound(), -4.0)
+	dodged.emit(local, wall)
+	return true
+
 
 
 func _physics_process(delta: float) -> void:
@@ -180,9 +249,11 @@ func _physics_process(delta: float) -> void:
 	# Eingaberichtung aus der InputMap lesen (standardmaessig WASD)
 	var wish_dir: Vector3 = get_input_direction()
 
-	# Sprungzaehler auf dem Boden zuruecksetzen
-	if is_on_floor():
+	# Sprungzaehler und Wall-Dodge auf dem Boden zuruecksetzen
+	_dodge_cooldown_left = maxf(_dodge_cooldown_left - delta, 0.0)
+	if is_on_floor() and launch_grace <= 0.0:
 		jumps_remaining = max_jumps
+		_wall_dodge_used = false
 
 	# Sprinten pruefen (Shift-Taste)
 	is_sprinting = is_sprint_pressed()
@@ -209,9 +280,11 @@ func _physics_process(delta: float) -> void:
 ## Schritte beim Laufen (je nach Tempo), Aufprall nach hohem Fall
 func _update_step_sounds(delta: float) -> void:
 	var on_floor := is_on_floor()
-	if on_floor and not _was_on_floor and _fall_speed < -7.0:
-		_play_step(SoundGenerator.create_land_sound(), 0.0)
-		_step_distance = 0.0
+	if on_floor and not _was_on_floor:
+		camera_feedback.land(_fall_speed)
+		if _fall_speed < -7.0:
+			_play_step(SoundGenerator.create_land_sound(), 0.0)
+			_step_distance = 0.0
 	if on_floor:
 		_fall_speed = 0.0
 		var speed := Vector2(velocity.x, velocity.z).length()
@@ -382,6 +455,7 @@ func take_damage(info: DamageInfo) -> void:
 
 	# Physikalischer Impuls auf den Spieler
 	velocity += info.direction * (info.amount * 0.15)
+	camera_feedback.hit(info.amount)
 
 	# Treffer-Sound abspielen (Bildschirmblitz macht das HUD)
 	hurt_audio.pitch_scale = randf_range(0.95, 1.05)
@@ -407,6 +481,14 @@ func _respawn() -> void:
 	head.rotation.x = 0.0
 
 	velocity = Vector3.ZERO
+
+
+## Nach einem Teleporter: geradeaus schauen, kurzes Kamerawackeln
+func on_teleported() -> void:
+	camera_pitch = 0.0
+	head.rotation.x = 0.0
+	launch_grace = 0.1
+	camera_feedback.add_trauma(0.25)
 
 
 ## Wird vom Pickup aufgerufen, das HUD zeigt dann z. B. "QUAD DAMAGE!"

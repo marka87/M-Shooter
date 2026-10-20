@@ -204,6 +204,51 @@ func run() -> void:
 		target_bot._respawn()
 	target_bot.set_physics_process(false)
 
+	# --- Teleporter: Boden Nordwest -> Ost-Ring, Blick und Tempo nach Westen ---
+	var tele_bot = bots[0]
+	if tele_bot.health.is_dead:
+		await create_timer(0.5).timeout
+	tele_bot.set_physics_process(false)
+	tele_bot.global_position = Vector3(0, -50, 0)
+	player.velocity = Vector3.ZERO
+	player.global_position = Vector3(-28, 0.1, -21)
+	player.look_at(Vector3(-28, 0.1, -30), Vector3.UP)
+	Input.action_press("move_forward")
+	await create_timer(0.8).timeout
+	Input.action_release("move_forward")
+	var tp: Vector3 = player.global_position
+	print("Nach Teleporter: ", tp, " v ", player.velocity)
+	check(tp.x > 22.0 and tp.y > 3.8, "Teleporter bringt auf den Ost-Ring")
+	check(-player.global_transform.basis.z.x < -0.9, "Blick nach dem Teleport zeigt nach Westen")
+
+	# Telefrag: Bot steht am Ausgang, Spieler teleportiert -> Bot stirbt
+	var kills: Array = []
+	var on_tele_kill := func(k, v, w): kills.append(w)
+	gm.kill_registered.connect(on_tele_kill)
+	tele_bot.global_position = current_scene.get_node("Teleporters/TeleSEExit").global_position
+	await physics_frame
+	current_scene.get_node("Teleporters/TeleSE").teleport(player)
+	await physics_frame
+	gm.kill_registered.disconnect(on_tele_kill)
+	check("Telefrag" in kills, "Telefrag am Ausgang (%s)" % str(kills))
+	await create_timer(0.5).timeout
+
+	# Bots kennen den Teleporter: Weg vom Nordwest-Eck auf den Ost-Ring ist eine Abkuerzung
+	var map_id: RID = tele_bot.nav_agent.get_navigation_map()
+	var tele_path := NavigationServer3D.map_get_path(map_id, NavigationServer3D.map_get_closest_point(map_id, Vector3(-27, 0, -21)), Vector3(28, 4, 8), true)
+	# Der Weg muss direkt vom Teleporter-Eingang zum Ausgang springen (Navigationslink)
+	var uses_link := false
+	for i in range(1, tele_path.size()):
+		var a3: Vector3 = tele_path[i - 1]
+		var b3: Vector3 = tele_path[i]
+		if Vector2(a3.x + 28, a3.z + 24).length() < 1.5 and Vector2(b3.x - 28, b3.z - 8).length() < 1.5:
+			uses_link = true
+	print("Bot-Weg: ", tele_path.size(), " Punkte")
+	check(uses_link, "Bot-Weg nutzt den Teleporter")
+	if tele_bot.health.is_dead:
+		await create_timer(0.5).timeout
+	tele_bot.set_physics_process(false)
+
 	# Navigationsnetz: Wege vom Boden auf Ring, Mitte und Tuerme
 	var map_rid: RID = bots[0].nav_agent.get_navigation_map()
 	var from := NavigationServer3D.map_get_closest_point(map_rid, Vector3(0, 0, 25))
