@@ -12,6 +12,9 @@ extends Control
 @onready var volume_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/VolumeContainer/HBox/VolumeSlider
 @onready var volume_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/VolumeContainer/HBox/VolumeValueLabel
 
+@onready var fov_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/FovContainer/HBox/FovSlider
+@onready var fov_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/FovContainer/HBox/FovValueLabel
+
 
 func _ready() -> void:
 	# Mauszeiger im Menue sichtbar machen und Spiel entpausieren
@@ -29,7 +32,11 @@ func _ready() -> void:
 		volume_slider.value = GameManager.master_volume
 		_update_volume_label(GameManager.master_volume)
 	
+	fov_slider.value = GameManager.fov
+	_update_fov_label(GameManager.fov)
+
 	# Signale verbinden
+	fov_slider.value_changed.connect(_on_fov_changed)
 	if sens_slider:
 		sens_slider.value_changed.connect(_on_sens_changed)
 	if volume_slider:
@@ -72,6 +79,16 @@ func _on_volume_changed(val: float) -> void:
 	GameManager.apply_master_volume()
 
 	_update_volume_label(val)
+
+
+## Sichtfeld aendern
+func _on_fov_changed(val: float) -> void:
+	GameManager.fov = val
+	_update_fov_label(val)
+
+
+func _update_fov_label(val: float) -> void:
+	fov_value_label.text = "%d°" % int(val)
 
 
 func _update_sens_label(val: float) -> void:

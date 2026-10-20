@@ -154,6 +154,31 @@ custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 text = "100%"
 
+[node name="FovContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/FovContainer"]
+layout_mode = 2
+text = "Sichtfeld (FOV):"
+
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/FovContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="FovSlider" type="HSlider" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/FovContainer/HBox"]
+custom_minimum_size = Vector2(240, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 75.0
+max_value = 120.0
+step = 1.0
+value = 100.0
+
+[node name="FovValueLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/FovContainer/HBox"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "100°"
+
 [node name="Spacer" type="Control" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 8)
 layout_mode = 2

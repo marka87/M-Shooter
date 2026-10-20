@@ -8,7 +8,10 @@ extends Node
 signal score_updated(player_frags: int, player_deaths: int)
 signal game_paused(is_paused: bool)
 signal player_died()
-signal player_respawned(player_node: Node)
+## Fuer den Killfeed: Wer hat wen womit erwischt (killer_name leer = Umgebung)
+signal kill_registered(killer_name: String, victim_name: String, weapon_name: String)
+## Die Punktetabelle hat sich geaendert (fuer das Scoreboard)
+signal scoreboard_changed()
 
 # Spielzustand
 enum GameState { MENU, PLAYING, PAUSED, GAME_OVER }
@@ -18,10 +21,14 @@ var current_state: GameState = GameState.PLAYING
 var player_frags: int = 0
 var player_deaths: int = 0
 var bot_frags: int = 0
+## Punktetabelle: Name -> { "frags": int, "deaths": int, "is_player": bool }
+var scores: Dictionary = {}
 
 # Einstellungen (werden vom Hauptmenue und Spieler genutzt)
 var mouse_sensitivity: float = 0.002
 var master_volume: float = 1.0
+## Horizontales Sichtfeld in Grad (Quake-Spieler nutzen oft 100-110)
+var fov: float = 100.0
 
 # Referenz auf den aktuellen Spieler im Level
 var current_player: CharacterBody3D = null
@@ -58,19 +65,61 @@ func _build_pause_overlay() -> void:
 	add_child(_pause_layer)
 
 
-## Registriert einen Frag (Abschuss) fuer den Spieler
-func add_player_frag() -> void:
-	player_frags += 1
-	score_updated.emit(player_frags, player_deaths)
+## Meldet einen Teilnehmer (Spieler oder Bot) fuer die Punktetabelle an
+func register_participant(display_name: String, is_player: bool = false) -> void:
+	if not scores.has(display_name):
+		scores[display_name] = { "frags": 0, "deaths": 0, "is_player": is_player }
+		scoreboard_changed.emit()
 
 
-## Registriert einen Tod des Spielers (bei Tod durch einen Bot zaehlt ein Bot-Frag)
-func add_player_death(killed_by_bot: bool = false) -> void:
-	player_deaths += 1
-	if killed_by_bot:
+## Wertet einen Abschuss aus. killer == victim oder null = Selbstmord (-1 Frag wie in Quake)
+func register_kill(killer: Node, victim: Node, weapon_name: String) -> void:
+	var victim_name := _name_of(victim)
+	var suicide := killer == null or killer == victim or not is_instance_valid(killer)
+	var killer_name := victim_name if suicide else _name_of(killer)
+
+	_score(victim_name, victim is Player).deaths += 1
+	if suicide:
+		_score(victim_name, victim is Player).frags -= 1
+	else:
+		_score(killer_name, killer is Player).frags += 1
+
+	# Kurzwerte fuer HUD und Tests
+	if victim is Player:
+		player_deaths += 1
+		if suicide:
+			player_frags -= 1
+	if not suicide and killer is Player:
+		player_frags += 1
+	if not suicide and killer is Bot:
 		bot_frags += 1
+
+	kill_registered.emit(killer_name, victim_name, weapon_name)
 	score_updated.emit(player_frags, player_deaths)
-	player_died.emit()
+	scoreboard_changed.emit()
+	if victim is Player:
+		player_died.emit()
+
+
+## Punktetabelle sortiert nach Frags (absteigend), bei Gleichstand weniger Tode zuerst
+func get_scoreboard() -> Array:
+	var rows: Array = []
+	for n in scores:
+		rows.append({ "name": n, "frags": scores[n].frags, "deaths": scores[n].deaths, "is_player": scores[n].is_player })
+	rows.sort_custom(func(a, b):
+		return a.frags > b.frags or (a.frags == b.frags and a.deaths < b.deaths))
+	return rows
+
+
+func _score(display_name: String, is_player: bool) -> Dictionary:
+	register_participant(display_name, is_player)
+	return scores[display_name]
+
+
+func _name_of(node: Node) -> String:
+	if node and node.get("display_name"):
+		return node.display_name
+	return node.name if node else "Welt"
 
 
 ## Setzt alle Spielwerte fuer eine neue Runde zurueck
@@ -78,7 +127,9 @@ func reset_game() -> void:
 	player_frags = 0
 	player_deaths = 0
 	bot_frags = 0
+	scores.clear()
 	score_updated.emit(player_frags, player_deaths)
+	scoreboard_changed.emit()
 	current_state = GameState.PLAYING
 
 
@@ -105,6 +156,7 @@ func load_settings() -> void:
 	if cfg.load(SETTINGS_PATH) == OK:
 		mouse_sensitivity = cfg.get_value("input", "mouse_sensitivity", mouse_sensitivity)
 		master_volume = cfg.get_value("audio", "master_volume", master_volume)
+		fov = cfg.get_value("video", "fov", fov)
 	apply_master_volume()
 
 
@@ -113,6 +165,7 @@ func save_settings() -> void:
 	var cfg := ConfigFile.new()
 	cfg.set_value("input", "mouse_sensitivity", mouse_sensitivity)
 	cfg.set_value("audio", "master_volume", master_volume)
+	cfg.set_value("video", "fov", fov)
 	cfg.save(SETTINGS_PATH)
 
 

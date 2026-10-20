@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://test_arena_001"]
+[gd_scene load_steps=27 format=3 uid="uid://test_arena_001"]
 
 [ext_resource type="Script" path="res://scripts/levels/arena.gd" id="1_arena"]
 [ext_resource type="PackedScene" uid="uid://bplayer_character_001" path="res://scenes/player.tscn" id="2_player"]
@@ -6,10 +6,12 @@
 [ext_resource type="PackedScene" uid="uid://ammo_pickup_001" path="res://scenes/items/ammo_pickup.tscn" id="4_ammo"]
 [ext_resource type="PackedScene" uid="uid://health_pickup_001" path="res://scenes/items/health_pickup.tscn" id="5_health"]
 [ext_resource type="PackedScene" uid="uid://armor_pickup_001" path="res://scenes/items/armor_pickup.tscn" id="6_armor"]
+[ext_resource type="Shader" path="res://assets/shaders/arena_grid.gdshader" id="7_grid"]
+[ext_resource type="PackedScene" path="res://scenes/items/jump_pad.tscn" id="8_pad"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
-sky_top_color = Color(0.18, 0.24, 0.35, 1)
-sky_horizon_color = Color(0.4, 0.45, 0.55, 1)
+sky_top_color = Color(0.04, 0.06, 0.12, 1)
+sky_horizon_color = Color(0.22, 0.18, 0.3, 1)
 ground_bottom_color = Color(0.08, 0.09, 0.12, 1)
 ground_horizon_color = Color(0.2, 0.22, 0.28, 1)
 
@@ -21,10 +23,24 @@ background_mode = 2
 sky = SubResource("Sky_1")
 ambient_light_source = 2
 ambient_light_color = Color(0.25, 0.28, 0.35, 1)
-tonemap_mode = 3
+ambient_light_energy = 0.8
+tonemap_mode = 4
+tonemap_exposure = 1.1
+ssao_enabled = true
+ssao_radius = 1.5
+ssao_intensity = 1.6
 glow_enabled = true
-glow_intensity = 0.3
-glow_bloom = 0.15
+glow_intensity = 0.7
+glow_strength = 1.1
+glow_bloom = 0.05
+glow_hdr_threshold = 0.9
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.012
+volumetric_fog_albedo = Color(0.55, 0.65, 0.85, 1)
+volumetric_fog_anisotropy = 0.4
+adjustment_enabled = true
+adjustment_contrast = 1.08
+adjustment_saturation = 1.12
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_1"]
 geometry_parsed_geometry_type = 1
@@ -33,9 +49,17 @@ agent_radius = 0.5
 agent_max_climb = 0.5
 agent_max_slope = 45.0
 
-[sub_resource type="StandardMaterial3D" id="Mat_Floor"]
-albedo_color = Color(0.15, 0.17, 0.22, 1)
-roughness = 0.85
+[sub_resource type="ShaderMaterial" id="Mat_Floor"]
+render_priority = 0
+shader = ExtResource("7_grid")
+shader_parameter/base_color = Color(0.1, 0.11, 0.15, 1)
+shader_parameter/line_color = Color(0.1, 0.65, 1, 1)
+shader_parameter/cell_size = 2.0
+shader_parameter/line_width = 0.012
+shader_parameter/line_emission = 1.1
+shader_parameter/major_every = 5
+shader_parameter/roughness_value = 0.55
+shader_parameter/metallic_value = 0.3
 
 [sub_resource type="BoxMesh" id="Mesh_Floor"]
 material = SubResource("Mat_Floor")
@@ -44,9 +68,17 @@ size = Vector3(90, 1, 90)
 [sub_resource type="BoxShape3D" id="Shape_Floor"]
 size = Vector3(90, 1, 90)
 
-[sub_resource type="StandardMaterial3D" id="Mat_Wall"]
-albedo_color = Color(0.09, 0.11, 0.14, 1)
-roughness = 0.7
+[sub_resource type="ShaderMaterial" id="Mat_Wall"]
+render_priority = 0
+shader = ExtResource("7_grid")
+shader_parameter/base_color = Color(0.07, 0.08, 0.11, 1)
+shader_parameter/line_color = Color(1, 0.35, 0.1, 1)
+shader_parameter/cell_size = 4.0
+shader_parameter/line_width = 0.012
+shader_parameter/line_emission = 1.2
+shader_parameter/major_every = 4
+shader_parameter/roughness_value = 0.7
+shader_parameter/metallic_value = 0.2
 
 [sub_resource type="BoxMesh" id="Mesh_Wall"]
 material = SubResource("Mat_Wall")
@@ -59,6 +91,9 @@ size = Vector3(90, 8, 2)
 albedo_color = Color(0.9, 0.4, 0.1, 1)
 metallic = 0.3
 roughness = 0.4
+emission_enabled = true
+emission = Color(1, 0.35, 0.05, 1)
+emission_energy_multiplier = 0.25
 
 [sub_resource type="BoxMesh" id="Mesh_Platform"]
 material = SubResource("Mat_Platform")
@@ -88,6 +123,24 @@ size = Vector3(6, 1, 14)
 [sub_resource type="BoxShape3D" id="Shape_Ramp"]
 size = Vector3(6, 1, 14)
 
+[sub_resource type="BoxMesh" id="Mesh_Tower"]
+material = SubResource("Mat_Platform")
+size = Vector3(8, 1, 8)
+
+[sub_resource type="BoxShape3D" id="Shape_Tower"]
+size = Vector3(8, 1, 8)
+
+[sub_resource type="StandardMaterial3D" id="Mat_Neon"]
+shading_mode = 0
+albedo_color = Color(0.2, 0.75, 1, 1)
+emission_enabled = true
+emission = Color(0.2, 0.75, 1, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="BoxMesh" id="Mesh_NeonStrip"]
+material = SubResource("Mat_Neon")
+size = Vector3(88, 0.15, 0.1)
+
 [node name="TestArena" type="Node3D"]
 script = ExtResource("1_arena")
 
@@ -96,9 +149,45 @@ environment = SubResource("Environment_1")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 25, 0)
-light_color = Color(1, 0.96, 0.88, 1)
-light_energy = 1.2
+light_color = Color(0.85, 0.9, 1, 1)
+light_energy = 0.9
 shadow_enabled = true
+
+[node name="Neon" type="Node3D" parent="."]
+
+[node name="StripNorth" type="MeshInstance3D" parent="Neon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -43.9)
+mesh = SubResource("Mesh_NeonStrip")
+cast_shadow = 0
+
+[node name="StripSouth" type="MeshInstance3D" parent="Neon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 43.9)
+mesh = SubResource("Mesh_NeonStrip")
+cast_shadow = 0
+
+[node name="StripEast" type="MeshInstance3D" parent="Neon"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 43.9, 0.4, 0)
+mesh = SubResource("Mesh_NeonStrip")
+cast_shadow = 0
+
+[node name="StripWest" type="MeshInstance3D" parent="Neon"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -43.9, 0.4, 0)
+mesh = SubResource("Mesh_NeonStrip")
+cast_shadow = 0
+
+[node name="AccentHigh" type="OmniLight3D" parent="Neon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 7, -20)
+light_color = Color(1, 0.45, 0.1, 1)
+light_energy = 3.0
+light_volumetric_fog_energy = 2.0
+omni_range = 14.0
+
+[node name="AccentCenter" type="OmniLight3D" parent="Neon"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+light_color = Color(0.2, 0.7, 1, 1)
+light_energy = 2.5
+light_volumetric_fog_energy = 2.0
+omni_range = 16.0
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
 navigation_mesh = SubResource("NavigationMesh_1")
@@ -213,6 +302,33 @@ mesh = SubResource("Mesh_Pillar")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/Pillar3"]
 shape = SubResource("Shape_Pillar")
 
+[node name="TowerPlatform" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 5.5, -2)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/TowerPlatform"]
+mesh = SubResource("Mesh_Tower")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/TowerPlatform"]
+shape = SubResource("Shape_Tower")
+
+[node name="JumpPads" type="Node3D" parent="."]
+
+[node name="TowerTarget" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 6.1, -2)
+
+[node name="HighTarget" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 3.6, -20)
+
+[node name="PadTower" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("8_pad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0, 16)
+target = NodePath("../TowerTarget")
+apex_height = 3.0
+
+[node name="PadHigh" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("8_pad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, -20)
+target = NodePath("../HighTarget")
+apex_height = 3.0
+
 [node name="SpawnPoints" type="Node3D" parent="."]
 
 [node name="SpawnPoint1" type="Marker3D" parent="SpawnPoints"]
@@ -232,9 +348,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 25)
 
 [node name="Bot1" parent="." instance=ExtResource("3_bot")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 1.5, -12)
+display_name = "Vex"
 
 [node name="Bot2" parent="." instance=ExtResource("3_bot")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 1.5, 12)
+display_name = "Kortex"
 
 [node name="Items" type="Node3D" parent="."]
 
@@ -258,3 +376,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 4.0)
 
 [node name="ArmorPillar2" parent="Items" instance=ExtResource("6_armor")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0.8, 16)
+
+[node name="ArmorTower" parent="Items" instance=ExtResource("6_armor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 6.8, -2)

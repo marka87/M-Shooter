@@ -1,3 +1,17 @@
+# Änderungen (Runde 6: Quick Wins)
+
+- **Neuer Look:** AgX-Tonemapping, SSAO, stärkerer Bloom, volumetrischer Nebel, dunklerer Nachthimmel, Schatten. Neuer Shader `assets/shaders/arena_grid.gdshader` legt ein leuchtendes Raster in Weltkoordinaten auf Boden (cyan) und Wände (orange). Dazu Neon-Leisten am Fuß der Wände und farbige Akzentlichter.
+- **Jump-Pads** (`scenes/items/jump_pad.tscn`): Die Startgeschwindigkeit wird aus Ziel, Scheitelhöhe und Schwerkraft berechnet, man landet also immer am Ziel. Ein `NavigationLink3D` lässt Bots das Pad als Weg nutzen. Zwei Pads in der Arena: eins auf einen neuen Turm mit Rüstung, eins auf die hohe Plattform.
+- **Killfeed** oben rechts (eigene Abschüsse grün, eigene Tode rot) und **Scoreboard** auf Tab. `GameManager.register_kill()` führt eine Punktetabelle für alle Teilnehmer; Selbstmord kostet wie in Quake einen Frag. Bots haben Namen (Vex, Kortex).
+- **FOV-Regler** im Einstellungsmenü (75–120°, horizontal, Standard 100°), wird gespeichert.
+- **Shotgun** als neue Waffe 2 (Quake-Reihenfolge: 1 MG, 2 Shotgun, 3 Raketenwerfer, 4 Railgun). 11 Kugeln mit 9 Schaden, gleichmäßige Streuung, Treffer werden pro Ziel zu einer Schadenszahl zusammengefasst. Eigener Sound.
+- Tastenhilfe im HUD kleiner, damit sie die Munitionsanzeige nicht überdeckt.
+- **Rauchtest** auf 35 Prüfungen erweitert (Shotgun, Killfeed, Scoreboard, FOV, Jump-Pad-Landung). Alle bestanden.
+
+Nicht automatisch geprüft: ob Bots die Jump-Pads in der Praxis nutzen, und wie sich alles mit Maus und Tastatur anfühlt.
+
+---
+
 # Änderungen (Runde 5: Roadmap Phase 0, Teil 2)
 
 - **Waffen als Daten (0.6):** Neue Resource `WeaponData` (`scripts/weapons/weapon_data.gd`), Werte in `resources/weapons/*.tres`. `WeaponBase` liest Name, Schaden, Cooldown, Munition und Rückstoß daraus. Eine neue Waffe braucht nur noch eine `.tres` und eine Szene.

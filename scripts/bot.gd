@@ -16,6 +16,8 @@ var current_state: State = State.PATROL
 # ==============================================================================
 
 @export_group("Bot Eigenschaften")
+## Name in Killfeed, Scoreboard und Namensschild (leer = Knotenname)
+@export var display_name: String = ""
 @export var patrol_speed: float = 4.5
 @export var chase_speed: float = 7.5
 @export var combat_speed: float = 3.5
@@ -54,6 +56,8 @@ var strafe_timer: float = 0.0
 var strafe_duration: float = 1.5
 # Laufzeit zum aktuellen Patrouillenziel (gegen Haengenbleiben)
 var patrol_travel_timer: float = 0.0
+# Im Flug nach einem Jump-Pad: keine eigene Steuerung bis zur Landung
+var is_launched: bool = false
 var original_mesh_transform: Transform3D
 var hit_spark_scene: PackedScene = preload("res://scenes/weapons/hit_spark.tscn")
 var floating_number_scene: PackedScene = preload("res://scenes/effects/floating_number.tscn")
@@ -66,6 +70,9 @@ var flash_mat: StandardMaterial3D
 
 
 func _ready() -> void:
+	if display_name.is_empty():
+		display_name = name
+	GameManager.register_participant(display_name, false)
 	original_mesh_transform = body_mesh.transform
 
 	snd_shot = SoundGenerator.create_machinegun_sound()
@@ -98,6 +105,14 @@ func _physics_process(delta: float) -> void:
 		if not is_on_floor():
 			velocity.y -= gravity * delta
 			move_and_slide()
+		return
+
+	# Flug nach Jump-Pad: nur Schwerkraft, bis der Bot wieder steht
+	if is_launched:
+		velocity.y -= gravity * delta
+		move_and_slide()
+		if is_on_floor() and velocity.y <= 0.0:
+			is_launched = false
 		return
 
 	# Schwerkraft anwenden
@@ -315,6 +330,12 @@ func _flash_muzzle() -> void:
 # SCHADEN, TOD & RESPAWN
 # ==============================================================================
 
+## Wird von Jump-Pads aufgerufen
+func launch(launch_velocity: Vector3) -> void:
+	velocity = launch_velocity
+	is_launched = true
+
+
 ## Schadens-Empfang (wird von Maschinengewehr, Railgun und Explosionen aufgerufen)
 func take_damage(info: DamageInfo) -> void:
 	if current_state == State.DEAD:
@@ -369,9 +390,8 @@ func _die(info: DamageInfo) -> void:
 		audio_player.stream = snd_death
 		audio_player.play()
 
-	# Frag fuer den Spieler gutschreiben (nur wenn er den Bot getoetet hat)
-	if info.attacker is Player:
-		GameManager.add_player_frag()
+	# Abschuss melden (Frag fuer den Schuetzen, Killfeed)
+	GameManager.register_kill(info.attacker, self, info.weapon_name)
 
 	# Kollision temporaer deaktivieren
 	if collision_shape:
@@ -461,7 +481,7 @@ func _update_nameplate() -> void:
 		State.ATTACK: state_text = "Angriff"
 		State.DEAD: state_text = "TOT"
 
-	nameplate.text = "BOT [%s] - %d HP" % [state_text, int(health.health)]
+	nameplate.text = "%s [%s] - %d HP" % [display_name, state_text, int(health.health)]
 
 	if health.is_dead:
 		nameplate.modulate = Color(0.5, 0.5, 0.5)

@@ -89,25 +89,36 @@ func run() -> void:
 		b1.health.health = 50.0
 		b1.set_physics_process(false)
 		await physics_frame
-	var frags_before: int = gm.player_frags
-	wm.switch_to_weapon(2)
+	# Shotgun: alle Kugeln auf 5 m in einem einzigen Treffer zusammengefasst
+	b1.health.health = 100.0
+	var dmg_events: Array = []
+	var on_dmg := func(info: DamageInfo, _lost: float): dmg_events.append(info.amount)
+	b1.health.damaged.connect(on_dmg)
+	wm.switch_to_weapon_id(&"shotgun")
 	await wait(0.2)
-	var rg = wm.get_current_weapon()
-	print("Railgun: ", rg.weapon_name, " ammo ", rg.current_ammo, " cd ", rg.cooldown_timer, " sichtbar ", rg.visible, " Bot-Abstand ", player.global_position.distance_to(b1.global_position), " Bot-Zustand ", b1.current_state)
-	var cam: Camera3D = player.camera
-	var q := PhysicsRayQueryParameters3D.create(cam.global_position, cam.global_position - cam.global_transform.basis.z * 300.0, Layers.HITTABLE)
-	q.exclude = [player.get_rid()]
-	var r := cam.get_world_3d().direct_space_state.intersect_ray(q)
-	print("Ray: cam ", cam.global_position, " fwd ", -cam.global_transform.basis.z, " -> ", r.get("collider"), " @ ", r.get("position"), " bot ", b1.global_position, " bot-shape aktiv ", not b1.collision_shape.disabled)
+	check(wm.get_current_weapon().weapon_name == "Shotgun", "Taste 2 = Shotgun")
 	wm.fire_current_weapon()
 	await physics_frame
-	print("nach Schuss: ammo ", rg.current_ammo, " Bot-HP ", b1.health.health)
+	b1.health.damaged.disconnect(on_dmg)
+	print("Shotgun-Treffer: ", dmg_events)
+	check(dmg_events.size() == 1 and dmg_events[0] >= 45.0, "Shotgun: ein Treffer mit >= 45 Schaden")
+
+	b1.health.health = 50.0
+	var frags_before: int = gm.player_frags
+	wm.switch_to_weapon_id(&"railgun")
+	await wait(0.2)
+	wm.fire_current_weapon()
+	await physics_frame
 	check(b1.current_state == b1.State.DEAD, "Railgun toetet Bot")
 	check(gm.player_frags == frags_before + 1, "Frag gezaehlt (%d)" % gm.player_frags)
+	var feed: VBoxContainer = player.hud.kill_feed
+	check(feed.get_child_count() >= 1 and b1.display_name in feed.get_child(feed.get_child_count() - 1).text, "Killfeed zeigt Abschuss")
+	var board: Array = gm.get_scoreboard()
+	check(board.size() == 3 and board[0].name == player.display_name, "Scoreboard: 3 Eintraege, Spieler vorn")
 	b1.set_physics_process(true)
 
 	# Rocket-Jump: nach unten schiessen
-	wm.switch_to_weapon(1)
+	wm.switch_to_weapon_id(&"rocket_launcher")
 	await wait(0.3)
 	player.camera_pitch = deg_to_rad(-89.0)
 	player.head.rotation.x = player.camera_pitch
@@ -122,6 +133,19 @@ func run() -> void:
 	check(player.health.health + player.health.armor < hp_p, "Eigenschaden durch Rakete")
 	player.camera_pitch = 0.0
 	player.head.rotation.x = 0.0
+
+	# FOV aus den Einstellungen
+	check(absf(player.camera.fov - gm.fov) < 0.01, "FOV angewendet (%.0f)" % player.camera.fov)
+
+	# Jump-Pad: Spieler landet auf der Turm-Plattform
+	var pad: Node3D = current_scene.get_node("JumpPads/PadTower")
+	var tower_target: Vector3 = current_scene.get_node("JumpPads/TowerTarget").global_position
+	player.velocity = Vector3.ZERO
+	player.global_position = pad.global_position + Vector3(0, 0.3, 0)
+	await wait(3.0)
+	var flat_dist := Vector2(player.global_position.x - tower_target.x, player.global_position.z - tower_target.z).length()
+	print("Jump-Pad Landung: ", player.global_position, " Abstand zum Ziel ", flat_dist)
+	check(player.global_position.y > 5.5 and flat_dist < 3.0, "Jump-Pad bringt Spieler auf den Turm")
 
 	# Pickup: Health
 	player.health.health = 40.0
@@ -151,7 +175,7 @@ func run() -> void:
 	check(ammo_box.is_active, "Volle Munition: Kiste bleibt liegen")
 	player.global_position = Vector3(0, 30, 0)
 	await wait(0.2)
-	var rail = wm.weapons[2]
+	var rail = wm.get_weapon(&"railgun")
 	rail.current_ammo = 1
 	player.global_position = ammo_box.global_position - Vector3(0, 0.5, 0)
 	await wait(0.5)

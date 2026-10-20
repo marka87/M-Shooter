@@ -19,6 +19,8 @@ static func create_pickup_sound() -> AudioStreamWAV: return _cached("pickup", _b
 static func create_empty_click_sound() -> AudioStreamWAV: return _cached("empty_click", _build_empty_click_sound)
 static func create_hitsound() -> AudioStreamWAV: return _cached("hitsound", _build_hitsound)
 static func create_double_jump_sound() -> AudioStreamWAV: return _cached("double_jump", _build_double_jump_sound)
+static func create_jump_pad_sound() -> AudioStreamWAV: return _cached("jump_pad", _build_jump_pad_sound)
+static func create_shotgun_sound() -> AudioStreamWAV: return _cached("shotgun", _build_shotgun_sound)
 
 
 static func _cached(key: String, builder: Callable) -> AudioStreamWAV:
@@ -295,5 +297,56 @@ static func _build_double_jump_sound() -> AudioStreamWAV:
 		var whoosh: float = (sin(phase) * 0.7 + randf_range(-0.4, 0.4)) * env
 		data[i] = _to_s8(whoosh * 115.0)
 	
+	stream.data = data
+	return stream
+
+
+## Jump-Pad: Kraeftiger, aufsteigender Druckluft-Stoss
+static func _build_jump_pad_sound() -> AudioStreamWAV:
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_8_BITS
+	stream.mix_rate = 22050
+	stream.stereo = false
+
+	var samples := int(stream.mix_rate * 0.35) # 350ms Laenge
+	var data := PackedByteArray()
+	data.resize(samples)
+
+	var phase: float = 0.0
+	for i in range(samples):
+		var t: float = float(i) / float(samples)
+		var env: float = pow(1.0 - t, 1.5) * minf(t * 30.0, 1.0)
+		# Tiefer Puls, der schnell nach oben zieht
+		var freq: float = lerpf(90.0, 420.0, pow(t, 0.6))
+		phase += freq * (TAU / stream.mix_rate)
+		var val: float = (sin(phase) * 0.75 + randf_range(-0.3, 0.3)) * env
+		data[i] = _to_s8(val * 120.0)
+
+	stream.data = data
+	return stream
+
+
+## Shotgun: Lauter Knall mit tiefem Druck und viel Rauschen
+static func _build_shotgun_sound() -> AudioStreamWAV:
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_8_BITS
+	stream.mix_rate = 22050
+	stream.stereo = false
+
+	var samples := int(stream.mix_rate * 0.32) # 320ms Laenge
+	var data := PackedByteArray()
+	data.resize(samples)
+
+	var phase: float = 0.0
+	for i in range(samples):
+		var t: float = float(i) / float(samples)
+		var env: float = pow(1.0 - t, 3.0)
+		var freq: float = lerpf(120.0, 45.0, t)
+		phase += freq * (TAU / stream.mix_rate)
+		var boom: float = sin(phase) * 0.6
+		var blast: float = randf_range(-1.0, 1.0) * (1.0 - t * 0.7)
+		var val: float = (boom + blast * 0.7) * env
+		data[i] = _to_s8(val * 125.0)
+
 	stream.data = data
 	return stream

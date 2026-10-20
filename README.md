@@ -14,7 +14,8 @@ Ein rasanter 3D-Arena-Shooter entwickelt in **Godot 4** mit **GDScript**. Das Sp
 | **Leertaste (in der Luft)** | **Doppelsprung** (Unreal Tournament Style mit Richtungs-Boost!) |
 | **Maus** | Umschauen / Zielen |
 | **Linke Maustaste** | Waffe abfeuern (Halten für Maschinengewehr-Dauerfeuer) |
-| **1, 2, 3** oder **Mausrad** | Waffe wechseln (1: MG, 2: Raketenwerfer, 3: Railgun) |
+| **1, 2, 3, 4** oder **Mausrad** | Waffe wechseln (1: MG, 2: Shotgun, 3: Raketenwerfer, 4: Railgun) |
+| **Tab (halten)** | Scoreboard (Frags und Tode aller Teilnehmer) |
 | **ESC** | Spiel pausieren & Pause-Menü aufrufen |
 
 Alle Tasten laufen über die InputMap (Projekt → Projekteinstellungen → Eingabezuordnung) und sind dort frei belegbar. Die Belegung nutzt physische Tasten, WASD liegt also auch auf AZERTY-Tastaturen an derselben Stelle.
@@ -40,8 +41,9 @@ Alle Tasten laufen über die InputMap (Projekt → Projekteinstellungen → Eing
 | Waffe | Typ | Schaden | Feuerrate | Besonderheit |
 |---|---|---|---|---|
 | **Maschinengewehr** (1) | Hitscan | 12 | 11 Schuss/s | Geringer Rückstoß, leichte Streuung, Mündungsfeuer |
-| **Raketenwerfer** (2) | Projektil | 50 (Direkt) + bis zu 100 (Fläche) | 0.8s Abklingzeit | Sichtbare Rakete, Schockwelle, Flächenschaden & Rocket-Jumping |
-| **Railgun** (3) | Hitscan-Strahl | 100 | 1.25s Abklingzeit | Sofortiger Einschlag über 300m, nachleuchtender Cyan-Energiestrahl |
+| **Shotgun** (2) | Hitscan, 11 Kugeln | 9 pro Kugel (bis 99) | 1.0s Abklingzeit | Stark auf kurze Distanz, Treffer werden pro Ziel zusammengefasst |
+| **Raketenwerfer** (3) | Projektil | 50 (Direkt) + bis zu 100 (Fläche) | 0.8s Abklingzeit | Sichtbare Rakete, Schockwelle, Flächenschaden & Rocket-Jumping |
+| **Railgun** (4) | Hitscan-Strahl | 100 | 1.25s Abklingzeit | Sofortiger Einschlag über 300m, nachleuchtender Cyan-Energiestrahl |
 
 ---
 
@@ -154,5 +156,7 @@ Exit-Code 0 bedeutet: alles bestanden.
 
 1. **Weitere Gegnertypen**: Schnelle Nahkampf-Bots oder schwere Raketen-Bots.
 2. **Audio-Erweiterung**: Hintergrund-Synthesizer-/Industrial-Musik für noch mehr UT-Atmosphäre.
-3. **Erweiterte Arenen**: Teleporter, Sprungpads (Jump Pads wie in Quake 3) und Lava-/Säure-Fallen.
-4. **Mehr Waffen**: Schrotflinte (Shotgun mit Schrot-Streuung) oder Plasmagewehr.
+3. **Erweiterte Arenen**: Teleporter und Lava-/Säure-Fallen.
+4. **Mehr Waffen**: Plasmagewehr, Lightning Gun, Shock Rifle.
+
+Der ausführliche Plan steht in `ROADMAP.md`.

@@ -56,13 +56,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		mouse_input = event.relative
 	
-	# Waffenwechsel per Zahlentasten 1, 2, 3
-	if event.is_action_pressed("weapon_1"):
-		switch_to_weapon(0)
-	elif event.is_action_pressed("weapon_2"):
-		switch_to_weapon(1)
-	elif event.is_action_pressed("weapon_3"):
-		switch_to_weapon(2)
+	# Waffenwechsel per Zahlentasten 1-4 (Reihenfolge wie unter WeaponHolder in player.tscn)
+	for slot in 4:
+		if event.is_action_pressed("weapon_%d" % (slot + 1)):
+			switch_to_weapon(slot)
+			break
 	
 	# Waffenwechsel per Mausrad
 	if event is InputEventMouseButton and event.pressed:
@@ -98,7 +96,7 @@ func fire_current_weapon() -> void:
 		weapon.try_fire(player, camera)
 
 
-## Wechselt zu einem bestimmten Waffen-Index (0 = MG, 1 = Raketenwerfer, 2 = Railgun)
+## Wechselt zu einem Waffen-Index (0 = MG, 1 = Shotgun, 2 = Raketenwerfer, 3 = Railgun)
 func switch_to_weapon(index: int) -> void:
 	if weapons.is_empty() or index < 0 or index >= weapons.size():
 		return
@@ -130,6 +128,22 @@ func cycle_weapon(direction: int) -> void:
 	if new_index < 0:
 		new_index = weapons.size() - 1
 	switch_to_weapon(new_index)
+
+
+## Wechselt zur Waffe mit der angegebenen WeaponData.id
+func switch_to_weapon_id(weapon_id: StringName) -> void:
+	for i in weapons.size():
+		if weapons[i].weapon_id == weapon_id:
+			switch_to_weapon(i)
+			return
+
+
+## Gibt die Waffe mit der angegebenen WeaponData.id zurueck (oder null)
+func get_weapon(weapon_id: StringName) -> WeaponBase:
+	for weapon in weapons:
+		if weapon.weapon_id == weapon_id:
+			return weapon
+	return null
 
 
 ## Gibt die aktuell ausgewaehlte Waffe zurueck

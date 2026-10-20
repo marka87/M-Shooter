@@ -34,7 +34,7 @@ Das Herz eines Arena-Shooters. Hier entscheidet sich, ob es sich „wie Quake“
 |---|---|---|
 | 1.1 | Luftbewegung an Quake 3 / CPMA angleichen (getrennte Werte für Strafe- und Vorwärts-Beschleunigung, Werte im Inspector zum Feintuning) | M |
 | 1.2 | **UT-Dodge**: Doppeltipp auf A/D/W/S für seitlichen Sprung, plus **Wall-Dodge** (Dodge von Wänden ab) | M |
-| 1.3 | **Jump-Pads** und **Teleporter** (Area3D mit Ziel-Marker, Bots brauchen dafür NavigationLink3D) | M |
+| 1.3 | ✅ teilweise: Jump-Pads mit NavigationLink3D für Bots, Teleporter fehlen noch. **Jump-Pads** und **Teleporter** (Area3D mit Ziel-Marker, Bots brauchen dafür NavigationLink3D) | M |
 | 1.4 | Rampen-Sliding und sauberes Treppensteigen (Step-Up), Landung ohne Geschwindigkeitsverlust beim Bunnyhop | M |
 | 1.5 | Kamera-Feedback: Landungs-Dip, View-Punch bei Treffern, leichtes FOV-Weiten bei hoher Geschwindigkeit (abschaltbar) | S |
 | 1.6 | Fallschaden ab großer Höhe, Schrittgeräusche abhängig vom Tempo | S |
@@ -49,7 +49,7 @@ Quake und UT leben davon, dass jede Waffe eine klare Rolle hat. Neun Waffen sind
 | Waffe | Rolle | Vorbild | Alt-Feuer (UT-Stil) |
 |---|---|---|---|
 | Maschinengewehr | Start-Waffe, Dauerfeuer | Q3 MG / UT Enforcer | Höhere Feuerrate, mehr Streuung |
-| **Shotgun** | Nahkampf, Burst | Q3 Shotgun / UT Flak | Granate mit Schrot (Flak-Kugel) |
+| ✅ **Shotgun** | Nahkampf, Burst | Q3 Shotgun / UT Flak | Granate mit Schrot (Flak-Kugel) |
 | **Plasma-Gewehr** | Mittlere Distanz, Spam | Q3 Plasma / UT Link | Kurzer Strahl |
 | Raketenwerfer | Allrounder, Rocket-Jump | Q3/UT | Mehrere Raketen laden |
 | **Lightning Gun** | Strahl auf Mittel-Distanz, Tracking | Q3 LG | – |
@@ -76,7 +76,7 @@ Der aktuelle Stand sind einfache Meshes und prozedurale Effekte. Für einen mode
 | # | Aufgabe | Aufwand |
 |---|---|---|
 | 3.1 | **Maps mit TrenchBroom + [func_godot](https://github.com/func-godot/func_godot_plugin)** bauen. Das ist der klassische Quake-Workflow: Brushes, Rampen, Jump-Pads als Entities, schnelle Iteration | M (Setup) |
-| 3.2 | `WorldEnvironment`: Tonemapping (AgX), Glow/Bloom, SSAO, SSR, leichter Volumetric Fog, eigener Skybox-Shader | S |
+| 3.2 | ✅ teilweise: AgX, Bloom, SSAO, Volumetric Fog, Neon-Raster-Shader; SSR und Skybox-Shader fehlen. `WorldEnvironment`: Tonemapping (AgX), Glow/Bloom, SSAO, SSR, leichter Volumetric Fog, eigener Skybox-Shader | S |
 | 3.3 | Licht: **LightmapGI** backen (beste Qualität bei statischer Arena) oder SDFGI für schnelle Iteration | M |
 | 3.4 | Stilrichtung festlegen. Empfehlung: **Sci-Fi-Industrial mit Neon-Akzenten** (UT99/UT4-Anmutung), das kaschiert einfache Geometrie und ist gut lesbar | – |
 | 3.5 | Modelle: Waffen und Bots aus Blender oder CC0-Paketen (z. B. Kenney, Quaternius), Bots mit Lauf-/Schuss-/Todes-Animation und Ragdoll | L |
@@ -118,7 +118,7 @@ Heute können Bots nur patrouillieren, verfolgen und mit einer Waffe schießen.
 | # | Aufgabe | Aufwand |
 |---|---|---|
 | 6.1 | **Deathmatch** mit Frag-Limit und Zeitlimit, Warmup, Countdown, Endbildschirm mit Statistik | M |
-| 6.2 | **Scoreboard** (Tab), **Killfeed** oben rechts, Multi-Kill-/Spree-System | M |
+| 6.2 | ✅ teilweise: Scoreboard und Killfeed, Multi-Kill/Spree fehlt. **Scoreboard** (Tab), **Killfeed** oben rechts, Multi-Kill-/Spree-System | M |
 | 6.3 | **Power-ups**: Quad Damage / UDamage, Mega Health, Red Armor, Shield Belt, Invisibility. Große Items erzeugen die typische Map-Kontrolle | M |
 | 6.4 | **Instagib** (nur Railgun, ein Treffer tötet), ideal als schneller Zusatzmodus | S |
 | 6.5 | **Team Deathmatch**, danach **Capture the Flag** | L |
@@ -133,7 +133,7 @@ Heute können Bots nur patrouillieren, verfolgen und mit einer Waffe schießen.
 | 7.1 | Modernes HUD: große Zahlen für HP/Rüstung unten links, Munition unten rechts, Waffenleiste, Power-up-Timer | M |
 | 7.2 | **Trefferrichtungs-Anzeige** (rote Markierung, aus welcher Richtung der Schaden kam) | S |
 | 7.3 | Fadenkreuz-Editor (Form, Farbe, Größe), Hitmarker-Optionen | S |
-| 7.4 | Einstellungen: **FOV**, Grafik-Presets, Auflösungsskalierung (FSR), V-Sync/FPS-Limit, **Tastenbelegung**, Gamepad | M |
+| 7.4 | ✅ teilweise: FOV-Regler. Einstellungen: **FOV**, Grafik-Presets, Auflösungsskalierung (FSR), V-Sync/FPS-Limit, **Tastenbelegung**, Gamepad | M |
 | 7.5 | Hauptmenü mit 3D-Hintergrund (Kamerafahrt durch die Arena), Map- und Modusauswahl, Bot-Anzahl und -Stärke | M |
 
 ---

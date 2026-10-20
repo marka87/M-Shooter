@@ -166,13 +166,14 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -480.0
-offset_top = -45.0
-offset_right = 480.0
+offset_left = -420.0
+offset_top = -40.0
+offset_right = 420.0
 offset_bottom = -15.0
 grow_horizontal = 2
 grow_vertical = 0
-text = "[WASD] Bewegen | [Leertaste] Springen & Doppelsprung | [Shift] Sprint | [1, 2, 3 / Mausrad] Waffe | [ESC] Pause"
+theme_override_font_sizes/font_size = 13
+text = "[WASD] Bewegen | [Leertaste] Springen & Doppelsprung | [Shift] Sprint | [1-4 / Mausrad] Waffe | [Tab] Punkte | [ESC] Pause"
 horizontal_alignment = 1
 
 [node name="DeathOverlay" type="Control" parent="."]
@@ -220,3 +221,54 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "Respawn in 3 Sekunden..."
 horizontal_alignment = 1
+
+[node name="KillFeed" type="VBoxContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -420.0
+offset_top = 64.0
+offset_right = -30.0
+offset_bottom = 220.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="Scoreboard" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -180.0
+offset_right = 260.0
+offset_bottom = 180.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Margin" type="MarginContainer" parent="Scoreboard"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 18
+
+[node name="VBox" type="VBoxContainer" parent="Scoreboard/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Scoreboard/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.4, 0.15, 1)
+theme_override_font_sizes/font_size = 28
+text = "DEATHMATCH"
+horizontal_alignment = 1
+
+[node name="Grid" type="GridContainer" parent="Scoreboard/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 32
+theme_override_constants/v_separation = 6
+columns = 3

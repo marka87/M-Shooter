@@ -68,6 +68,9 @@ signal enemy_hit()
 # STATUS
 # ==============================================================================
 
+## Name in Killfeed und Scoreboard
+@export var display_name: String = "Spieler"
+
 @export_group("Respawn")
 ## Sekunden bis zum Respawn nach dem Tod
 @export var respawn_delay: float = 3.0
@@ -90,6 +93,8 @@ var jump_buffer_timer: float = 0.0
 var is_sprinting: bool = false
 # Verbleibende Spruenge (fuer Doppelsprung)
 var jumps_remaining: int = 2
+# Kurz nach einem Jump-Pad-Start keine Bodenbewegung (sonst bremst die Reibung den Start)
+var launch_grace: float = 0.0
 
 
 func _ready() -> void:
@@ -100,8 +105,13 @@ func _ready() -> void:
 	if GameManager.mouse_sensitivity > 0.0:
 		mouse_sensitivity = GameManager.mouse_sensitivity
 
+	# Sichtfeld aus den Einstellungen (horizontal, damit Breitbild nicht "zoomt")
+	camera.keep_aspect = Camera3D.KEEP_WIDTH
+	camera.fov = GameManager.fov
+
 	# Spieler im GameManager registrieren
 	GameManager.current_player = self
+	GameManager.register_participant(display_name, true)
 
 	# Maximale Neigung fuer Boeden (verhindert das Hochklettern steiler Waende)
 	floor_max_angle = deg_to_rad(45.0)
@@ -162,7 +172,8 @@ func _physics_process(delta: float) -> void:
 		jump_buffer_timer = max(jump_buffer_timer - delta, 0.0)
 
 	# Boden- oder Luftbewegung ausfuehren
-	if is_on_floor():
+	launch_grace = maxf(launch_grace - delta, 0.0)
+	if is_on_floor() and launch_grace <= 0.0:
 		_process_ground_movement(wish_dir, delta)
 	else:
 		_process_air_movement(wish_dir, delta)
@@ -306,6 +317,13 @@ func _apply_air_control(wish_dir: Vector3, delta: float) -> void:
 		velocity.z = new_dir.z * speed
 
 
+## Wird von Jump-Pads aufgerufen: Geschwindigkeit komplett ersetzen
+func launch(launch_velocity: Vector3) -> void:
+	velocity = launch_velocity
+	launch_grace = 0.15
+	jumps_remaining = max_jumps - 1
+
+
 ## Schadens-Empfang (von Bots, Raketen-Selbsttreffern und Explosionen)
 func take_damage(info: DamageInfo) -> void:
 	if is_dead:
@@ -323,9 +341,8 @@ func take_damage(info: DamageInfo) -> void:
 ## Spieler stirbt: Tod zaehlen, Respawn laeuft ueber death_timer in _physics_process
 func _on_died(info: DamageInfo) -> void:
 	death_timer = respawn_delay
-	# Selbsttreffer (Rocket-Jump) zaehlt nicht als Bot-Frag
-	var killed_by_bot := is_instance_valid(info.attacker) and info.attacker != self
-	GameManager.add_player_death(killed_by_bot)
+	# Selbsttreffer (Rocket-Jump) zaehlt als Selbstmord
+	GameManager.register_kill(info.attacker, self, info.weapon_name)
 
 
 ## Respawn des Spielers an einem Spawnpunkt
