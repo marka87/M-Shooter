@@ -90,11 +90,11 @@ Der aktuelle Stand sind einfache Meshes und prozedurale Effekte. Für einen mode
 
 | # | Aufgabe | Aufwand |
 |---|---|---|
-| 4.1 | Prozedurale 8-Bit-Sounds durch echte Samples ersetzen (eigene Aufnahmen, sfxr/jsfxr, CC0 von freesound.org). `SoundGenerator` kann als Fallback bleiben | M |
-| 4.2 | **Ansager**: „Double Kill“, „Killing Spree“, „Headshot“, „Flag taken“, Countdown „3, 2, 1, Fight!“ | M |
-| 4.3 | Audio-Busse (SFX, Musik, Ansager, UI) mit eigenem Lautstärke-Regler und Hall in großen Räumen | S |
-| 4.4 | Musik: treibender Industrial/Electro-Track pro Map, Menü-Musik | M |
-| 4.5 | Positionelles Audio verbessern: Schritte von Gegnern hörbar (wichtig für Arena-Taktik) | S |
+| 4.1 | ✅ Hochwertige Sounds per Generator (`tools/make_sounds.py`). Prozedurale 8-Bit-Sounds durch echte Samples ersetzen (eigene Aufnahmen, sfxr/jsfxr, CC0 von freesound.org). `SoundGenerator` kann als Fallback bleiben | M |
+| 4.2 | ✅ **Ansager**: „Double Kill“, „Killing Spree“, „Headshot“, „Flag taken“, Countdown „3, 2, 1, Fight!“ | M |
+| 4.3 | ✅ teilweise: Busse Music und Announcer, Musik-Regler. Audio-Busse (SFX, Musik, Ansager, UI) mit eigenem Lautstärke-Regler und Hall in großen Räumen | S |
+| 4.4 | ✅ teilweise: ein Synthwave-Loop für alles. Musik: treibender Industrial/Electro-Track pro Map, Menü-Musik | M |
+| 4.5 | ✅ Positionelles Audio verbessern: Schritte von Gegnern hörbar (wichtig für Arena-Taktik) | S |
 
 ---
 

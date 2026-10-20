@@ -43,7 +43,15 @@ func _ready() -> void:
 	if not audio_player:
 		audio_player = AudioStreamPlayer3D.new()
 		add_child(audio_player)
-	audio_player.stream = SoundGenerator.create_pickup_sound()
+	match pickup_type:
+		PickupType.WEAPON:
+			audio_player.stream = SoundGenerator.create_weapon_pickup_sound()
+		PickupType.QUAD_DAMAGE:
+			audio_player.stream = SoundGenerator.create_quad_pickup_sound()
+		PickupType.MEGA_HEALTH:
+			audio_player.stream = SoundGenerator.create_mega_pickup_sound()
+		_:
+			audio_player.stream = SoundGenerator.create_pickup_sound()
 	
 	if pickup_type == PickupType.WEAPON and weapon_scene:
 		_build_weapon_visual()

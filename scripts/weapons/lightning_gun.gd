@@ -13,6 +13,7 @@ var _tick: int = 0
 func _ready() -> void:
 	super._ready()
 	audio_player.stream = SoundGenerator.create_lightning_sound()
+	audio_player.volume_db = -9.0
 
 
 func _on_fire(shooter: Node3D, camera: Camera3D) -> void:

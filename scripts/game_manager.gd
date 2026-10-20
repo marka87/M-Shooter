@@ -45,6 +45,17 @@ const MULTI_KILL_WINDOW: float = 3.0
 const MULTI_KILL_TEXT := { 2: "DOUBLE KILL", 3: "MULTI KILL", 4: "MEGA KILL", 5: "MONSTER KILL" }
 const SPREE_TEXT := { 5: "KILLING SPREE", 10: "RAMPAGE", 15: "DOMINATING", 20: "UNSTOPPABLE", 25: "GODLIKE" }
 
+# Musik (laeuft immer, im Menue/Pause/Matchende gedaempft) und Ansager
+var _music: AudioStreamPlayer = null
+var _announcer: AudioStreamPlayer = null
+var _first_blood_done: bool = false
+var _time_warnings_done: Array[int] = []
+const PLAYER_ANNOUNCER := {
+	"DOUBLE KILL": "double_kill", "MULTI KILL": "multi_kill", "MEGA KILL": "mega_kill",
+	"MONSTER KILL": "monster_kill", "KILLING SPREE": "killing_spree", "RAMPAGE": "rampage",
+	"DOMINATING": "dominating", "UNSTOPPABLE": "unstoppable", "GODLIKE": "godlike",
+}
+
 const MATCH_END_SCENE: PackedScene = preload("res://scenes/ui/match_end.tscn")
 var _match_end_layer: CanvasLayer = null
 
@@ -58,6 +69,7 @@ var scores: Dictionary = {}
 # Einstellungen (werden vom Hauptmenue und Spieler genutzt)
 var mouse_sensitivity: float = 0.002
 var master_volume: float = 1.0
+var music_volume: float = 0.7
 ## Horizontales Sichtfeld in Grad (Quake-Spieler nutzen oft 100-110)
 var fov: float = 100.0
 
@@ -95,6 +107,51 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	load_settings()
 	_build_pause_overlay()
+	_setup_audio()
+
+
+## Musik- und Ansager-Spieler anlegen, Musik als Endlosschleife starten
+func _setup_audio() -> void:
+	_announcer = AudioStreamPlayer.new()
+	_announcer.bus = &"Announcer"
+	add_child(_announcer)
+	_music = AudioStreamPlayer.new()
+	_music.bus = &"Music"
+	add_child(_music)
+	var stream := SoundGenerator.load_music("arena_loop")
+	if stream is AudioStreamWAV:
+		stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		stream.loop_begin = 0
+		stream.loop_end = int(stream.get_length() * stream.mix_rate)
+	if stream:
+		_music.stream = stream
+		_music.play()
+	apply_music_volume()
+
+
+func apply_music_volume() -> void:
+	var bus := AudioServer.get_bus_index("Music")
+	if bus < 0:
+		return
+	AudioServer.set_bus_mute(bus, music_volume <= 0.01)
+	if music_volume > 0.01:
+		AudioServer.set_bus_volume_db(bus, linear_to_db(music_volume) - 4.0)
+
+
+## Musik gedaempft (Tiefpass) ausser im laufenden Match
+func _update_music_filter() -> void:
+	var bus := AudioServer.get_bus_index("Music")
+	if bus >= 0:
+		var muffled := current_state != GameState.PLAYING and current_state != GameState.COUNTDOWN
+		AudioServer.set_bus_effect_enabled(bus, 0, muffled)
+
+
+## Ansager-Satz abspielen (z. B. "fight", "double_kill"). Ein neuer Satz unterbricht den alten.
+func play_announcer(key: String) -> void:
+	var stream := SoundGenerator.load_announcer(key)
+	if stream and _announcer:
+		_announcer.stream = stream
+		_announcer.play()
 
 
 ## Spiel sauber beenden: erst die laufende Szene freigeben, dann schliessen.
@@ -102,15 +159,27 @@ func _ready() -> void:
 ## Materialien vor den Objekten freigibt, die sie noch benutzen.
 func quit_game() -> void:
 	get_tree().paused = false
+	# Musik und Ansage anhalten und dem Audio-Thread Zeit geben, die Wiedergabe freizugeben
+	for player in [_music, _announcer]:
+		if player:
+			player.stop()
+			player.stream = null
 	var scene := get_tree().current_scene
 	if scene:
 		scene.queue_free()
-	await get_tree().process_frame
-	await get_tree().process_frame
+	for i in 4:
+		await get_tree().process_frame
+	await get_tree().create_timer(0.1, true, false, true).timeout
+	SoundGenerator.clear_cache()
 	get_tree().quit()
 
 
 func _exit_tree() -> void:
+	# Laufende Musik und Ansage freigeben, sonst meldet Godot beim Beenden Speicherlecks
+	for player in [_music, _announcer]:
+		if player:
+			player.stop()
+			player.stream = null
 	SoundGenerator.clear_cache()
 
 
@@ -129,6 +198,7 @@ func _build_pause_overlay() -> void:
 
 ## Match-Uhr und Countdown (laufen nicht, waehrend das Spiel pausiert ist)
 func _process(delta: float) -> void:
+	_update_music_filter()
 	if get_tree().paused:
 		return
 	match current_state:
@@ -138,13 +208,21 @@ func _process(delta: float) -> void:
 			if n != _last_tick and n > 0:
 				_last_tick = n
 				countdown_tick.emit(n)
+				if n <= 3:
+					play_announcer(["one", "two", "three"][n - 1])
 			if countdown_left <= 0.0:
 				current_state = GameState.PLAYING
 				countdown_tick.emit(0)
+				play_announcer("fight")
 				match_started.emit()
 		GameState.PLAYING:
 			if time_limit_minutes > 0.0 and match_time_left > 0.0:
 				match_time_left -= delta
+				# Zeitansagen bei 5 Minuten und 1 Minute Restzeit
+				for warn in [300, 60]:
+					if match_time_left <= warn and time_limit_minutes * 60.0 > warn + 5 and not warn in _time_warnings_done:
+						_time_warnings_done.append(warn)
+						play_announcer("five_minutes" if warn == 300 else "one_minute")
 				if match_time_left <= 0.0:
 					match_time_left = 0.0
 					end_match("Zeitlimit")
@@ -154,6 +232,10 @@ func _process(delta: float) -> void:
 func start_match() -> void:
 	match_time_left = time_limit_minutes * 60.0
 	_last_tick = -1
+	_first_blood_done = false
+	_time_warnings_done.clear()
+	if match_countdown <= 0.0:
+		play_announcer("fight")
 	if match_countdown > 0.0:
 		current_state = GameState.COUNTDOWN
 		countdown_left = match_countdown
@@ -189,6 +271,7 @@ func end_match(reason: String) -> void:
 	_match_end_layer = MATCH_END_SCENE.instantiate()
 	add_child(_match_end_layer)
 	_match_end_layer.show_results(results)
+	play_announcer("you_win" if results.player_won else "you_lose")
 	match_ended.emit(results)
 
 
@@ -260,6 +343,13 @@ func register_kill(killer: Node, victim: Node, weapon_name: String) -> void:
 		killer_score.spree += 1
 		killer_score.best_spree = maxi(killer_score.best_spree, killer_score.spree)
 		killer_score.weapon_kills[weapon_name] = killer_score.weapon_kills.get(weapon_name, 0) + 1
+		if not _first_blood_done:
+			_first_blood_done = true
+			if killer is Player:
+				player_announcement.emit("FIRST BLOOD", Color(1.0, 0.2, 0.2))
+			play_announcer("first_blood")
+		elif killer is Player and weapon_name == "Shock-Combo":
+			play_announcer("combo")
 		if killer is Player:
 			_announce_player_kill(killer_score.spree)
 
@@ -290,10 +380,17 @@ func _announce_player_kill(spree: int) -> void:
 	var now: float = Time.get_ticks_msec() / 1000.0
 	_player_multi = _player_multi + 1 if now - _player_last_kill <= MULTI_KILL_WINDOW else 1
 	_player_last_kill = now
+	var text := ""
+	var color := Color.WHITE
 	if SPREE_TEXT.has(spree):
-		player_announcement.emit(SPREE_TEXT[spree], Color(1.0, 0.35, 0.2))
+		text = SPREE_TEXT[spree]
+		color = Color(1.0, 0.35, 0.2)
 	elif _player_multi >= 2:
-		player_announcement.emit(MULTI_KILL_TEXT[mini(_player_multi, 5)], Color(1.0, 0.8, 0.2))
+		text = MULTI_KILL_TEXT[mini(_player_multi, 5)]
+		color = Color(1.0, 0.8, 0.2)
+	if text != "":
+		player_announcement.emit(text, color)
+		play_announcer(PLAYER_ANNOUNCER[text])
 
 
 ## Punktetabelle sortiert nach Frags (absteigend), bei Gleichstand weniger Tode zuerst
@@ -357,6 +454,7 @@ func load_settings() -> void:
 	if cfg.load(SETTINGS_PATH) == OK:
 		mouse_sensitivity = cfg.get_value("input", "mouse_sensitivity", mouse_sensitivity)
 		master_volume = cfg.get_value("audio", "master_volume", master_volume)
+		music_volume = cfg.get_value("audio", "music_volume", music_volume)
 		fov = cfg.get_value("video", "fov", fov)
 		bot_count = clampi(cfg.get_value("match", "bot_count", bot_count), 1, MAX_BOTS)
 		bot_skill = clampi(cfg.get_value("match", "bot_skill", bot_skill), 0, 4)
@@ -371,6 +469,7 @@ func save_settings() -> void:
 	var cfg := ConfigFile.new()
 	cfg.set_value("input", "mouse_sensitivity", mouse_sensitivity)
 	cfg.set_value("audio", "master_volume", master_volume)
+	cfg.set_value("audio", "music_volume", music_volume)
 	cfg.set_value("video", "fov", fov)
 	cfg.set_value("match", "bot_count", bot_count)
 	cfg.set_value("match", "bot_skill", bot_skill)

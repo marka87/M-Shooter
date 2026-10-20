@@ -22,6 +22,8 @@ extends Control
 @onready var volume_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/VolumeContainer/HBox/VolumeSlider
 @onready var volume_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/VolumeContainer/HBox/VolumeValueLabel
 
+@onready var music_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/MusicContainer/HBox/MusicSlider
+@onready var music_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/MusicContainer/HBox/MusicValueLabel
 @onready var fov_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/FovContainer/HBox/FovSlider
 @onready var fov_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/FovContainer/HBox/FovValueLabel
 
@@ -42,6 +44,12 @@ func _ready() -> void:
 		volume_slider.value = GameManager.master_volume
 		_update_volume_label(GameManager.master_volume)
 	
+	music_slider.value = GameManager.music_volume
+	music_value_label.text = "%d%%" % int(GameManager.music_volume * 100)
+	music_slider.value_changed.connect(func(v: float):
+		GameManager.music_volume = v
+		GameManager.apply_music_volume()
+		music_value_label.text = "%d%%" % int(v * 100))
 	fov_slider.value = GameManager.fov
 	_update_fov_label(GameManager.fov)
 

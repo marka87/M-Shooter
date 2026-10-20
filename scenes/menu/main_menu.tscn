@@ -154,6 +154,30 @@ custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 text = "100%"
 
+[node name="MusicContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/MusicContainer"]
+layout_mode = 2
+text = "Musik:"
+
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/MusicContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MusicSlider" type="HSlider" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/MusicContainer/HBox"]
+custom_minimum_size = Vector2(240, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.05
+value = 0.7
+
+[node name="MusicValueLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/MusicContainer/HBox"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "70%"
+
 [node name="FovContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 

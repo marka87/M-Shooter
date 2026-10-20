@@ -1,31 +1,55 @@
 extends RefCounted
 class_name SoundGenerator
 
-## Hilfsklasse zur prozeduralen Erzeugung von Retro-Arena-Sounds
-## Erzeugt echte AudioStreamWAV-Ressourcen im RAM ohne externe Sounddateien.
-## Jeder Sound wird nur einmal berechnet und danach aus dem Cache geliefert.
+## Liefert die Sounds des Spiels. Zuerst wird res://assets/sounds/<name>.wav geladen
+## (erzeugt von tools/make_sounds.py); fehlt die Datei, wird der Sound wie frueher prozedural
+## im RAM berechnet. Jeder Sound wird nur einmal geladen bzw. berechnet (Cache).
+
+const SOUND_DIR := "res://assets/sounds/"
 
 static var _cache: Dictionary = {}
 
 
-static func create_machinegun_sound() -> AudioStreamWAV: return _cached("machinegun", _build_machinegun_sound)
-static func create_rocket_fire_sound() -> AudioStreamWAV: return _cached("rocket_fire", _build_rocket_fire_sound)
-static func create_explosion_sound() -> AudioStreamWAV: return _cached("explosion", _build_explosion_sound)
-static func create_railgun_sound() -> AudioStreamWAV: return _cached("railgun", _build_railgun_sound)
-static func create_switch_sound() -> AudioStreamWAV: return _cached("switch", _build_switch_sound)
-static func create_bot_hurt_sound() -> AudioStreamWAV: return _cached("bot_hurt", _build_bot_hurt_sound)
-static func create_bot_death_sound() -> AudioStreamWAV: return _cached("bot_death", _build_bot_death_sound)
-static func create_pickup_sound() -> AudioStreamWAV: return _cached("pickup", _build_pickup_sound)
-static func create_empty_click_sound() -> AudioStreamWAV: return _cached("empty_click", _build_empty_click_sound)
-static func create_hitsound() -> AudioStreamWAV: return _cached("hitsound", _build_hitsound)
-static func create_double_jump_sound() -> AudioStreamWAV: return _cached("double_jump", _build_double_jump_sound)
-static func create_jump_pad_sound() -> AudioStreamWAV: return _cached("jump_pad", _build_jump_pad_sound)
-static func create_shotgun_sound() -> AudioStreamWAV: return _cached("shotgun", _build_shotgun_sound)
-static func create_plasma_sound() -> AudioStreamWAV: return _cached("plasma", _build_plasma_sound)
-static func create_lightning_sound() -> AudioStreamWAV: return _cached("lightning", _build_lightning_sound)
-static func create_shock_beam_sound() -> AudioStreamWAV: return _cached("shock_beam", _build_shock_beam_sound)
-static func create_shock_ball_sound() -> AudioStreamWAV: return _cached("shock_ball", _build_shock_ball_sound)
-static func create_combo_sound() -> AudioStreamWAV: return _cached("combo", _build_combo_sound)
+static func create_machinegun_sound() -> AudioStream: return _cached("machinegun", _build_machinegun_sound)
+static func create_rocket_fire_sound() -> AudioStream: return _cached("rocket_fire", _build_rocket_fire_sound)
+static func create_explosion_sound() -> AudioStream: return _cached("explosion", _build_explosion_sound)
+static func create_railgun_sound() -> AudioStream: return _cached("railgun", _build_railgun_sound)
+static func create_switch_sound() -> AudioStream: return _cached("switch", _build_switch_sound)
+static func create_bot_hurt_sound() -> AudioStream: return _cached("bot_hurt", _build_bot_hurt_sound)
+static func create_bot_death_sound() -> AudioStream: return _cached("bot_death", _build_bot_death_sound)
+static func create_pickup_sound() -> AudioStream: return _cached("pickup", _build_pickup_sound)
+static func create_empty_click_sound() -> AudioStream: return _cached("empty_click", _build_empty_click_sound)
+static func create_hitsound() -> AudioStream: return _cached("hitsound", _build_hitsound)
+static func create_double_jump_sound() -> AudioStream: return _cached("double_jump", _build_double_jump_sound)
+static func create_jump_pad_sound() -> AudioStream: return _cached("jump_pad", _build_jump_pad_sound)
+static func create_shotgun_sound() -> AudioStream: return _cached("shotgun", _build_shotgun_sound)
+static func create_plasma_sound() -> AudioStream: return _cached("plasma", _build_plasma_sound)
+static func create_lightning_sound() -> AudioStream: return _cached("lightning", _build_lightning_sound)
+static func create_shock_beam_sound() -> AudioStream: return _cached("shock_beam", _build_shock_beam_sound)
+static func create_shock_ball_sound() -> AudioStream: return _cached("shock_ball", _build_shock_ball_sound)
+static func create_combo_sound() -> AudioStream: return _cached("combo", _build_combo_sound)
+static func create_weapon_pickup_sound() -> AudioStream: return _cached("weapon_pickup", _build_pickup_sound)
+static func create_quad_pickup_sound() -> AudioStream: return _cached("quad_pickup", _build_pickup_sound)
+static func create_mega_pickup_sound() -> AudioStream: return _cached("mega_pickup", _build_pickup_sound)
+static func create_jump_sound() -> AudioStream: return _cached("jump", _build_double_jump_sound)
+static func create_land_sound() -> AudioStream: return _cached("land", _build_bot_hurt_sound)
+## Vier Varianten (1-4), damit Schritte nicht maschinell gleich klingen
+static func create_footstep_sound(variant: int) -> AudioStream: return _cached("footstep_%d" % variant, _build_switch_sound)
+
+
+## Musik-Loop (ohne prozeduralen Ersatz, fehlt die Datei: null)
+static func load_music(name: String) -> AudioStream:
+	var path := SOUND_DIR + "music/" + name + ".wav"
+	return load(path) if ResourceLoader.exists(path) else null
+
+
+## Ansager-Satz (z. B. "double_kill"), null wenn nicht vorhanden
+static func load_announcer(name: String) -> AudioStream:
+	var key := "announcer/" + name
+	if not _cache.has(key):
+		var path := SOUND_DIR + key + ".wav"
+		_cache[key] = load(path) if ResourceLoader.exists(path) else null
+	return _cache[key]
 
 
 ## Gibt alle zwischengespeicherten Sounds frei (beim Beenden, sonst meldet Godot Speicherlecks)
@@ -33,9 +57,10 @@ static func clear_cache() -> void:
 	_cache.clear()
 
 
-static func _cached(key: String, builder: Callable) -> AudioStreamWAV:
+static func _cached(key: String, builder: Callable) -> AudioStream:
 	if not _cache.has(key):
-		_cache[key] = builder.call()
+		var path := SOUND_DIR + key + ".wav"
+		_cache[key] = load(path) if ResourceLoader.exists(path) else builder.call()
 	return _cache[key]
 
 

@@ -98,6 +98,12 @@ var is_sprinting: bool = false
 var jumps_remaining: int = 2
 # Kurz nach einem Jump-Pad-Start keine Bodenbewegung (sonst bremst die Reibung den Start)
 var launch_grace: float = 0.0
+# Schritte: zurueckgelegte Strecke seit dem letzten Schrittgeraeusch, Landung erkennen
+const STEP_DISTANCE: float = 2.3
+var _step_distance: float = 0.0
+var _was_on_floor: bool = true
+var _fall_speed: float = 0.0
+var _step_audio: AudioStreamPlayer = null
 
 
 func _ready() -> void:
@@ -127,6 +133,10 @@ func _ready() -> void:
 
 	health.died.connect(_on_died)
 	hud.bind(self)
+
+	_step_audio = AudioStreamPlayer.new()
+	_step_audio.volume_db = -9.0
+	add_child(_step_audio)
 
 
 
@@ -191,7 +201,33 @@ func _physics_process(delta: float) -> void:
 		_process_air_movement(wish_dir, delta)
 
 	# Physik-Bewegung ausfuehren (inklusive Wand-Gleitverhalten)
+	_fall_speed = minf(_fall_speed, velocity.y)
 	move_and_slide()
+	_update_step_sounds(delta)
+
+
+## Schritte beim Laufen (je nach Tempo), Aufprall nach hohem Fall
+func _update_step_sounds(delta: float) -> void:
+	var on_floor := is_on_floor()
+	if on_floor and not _was_on_floor and _fall_speed < -7.0:
+		_play_step(SoundGenerator.create_land_sound(), 0.0)
+		_step_distance = 0.0
+	if on_floor:
+		_fall_speed = 0.0
+		var speed := Vector2(velocity.x, velocity.z).length()
+		if speed > 1.5:
+			_step_distance += speed * delta
+			if _step_distance >= STEP_DISTANCE:
+				_step_distance = 0.0
+				_play_step(SoundGenerator.create_footstep_sound(randi_range(1, 4)), -9.0)
+	_was_on_floor = on_floor
+
+
+func _play_step(stream: AudioStream, volume_db: float) -> void:
+	_step_audio.stream = stream
+	_step_audio.volume_db = volume_db
+	_step_audio.pitch_scale = randf_range(0.93, 1.07)
+	_step_audio.play()
 
 
 ## Ermittelt die normalisierte Wunsch-Bewegungsrichtung im Weltkoordinatensystem
@@ -228,6 +264,7 @@ func _process_ground_movement(wish_dir: Vector3, delta: float) -> void:
 	# 1. Bunnyhop: Wenn die Sprungtaste gehalten wird oder im Puffer ist, sofort springen
 	if jump_buffer_timer > 0.0 or is_jump_held():
 		velocity.y = jump_velocity
+		_play_step(SoundGenerator.create_jump_sound(), -12.0)
 		jump_buffer_timer = 0.0
 		jumps_remaining = max_jumps - 1
 		# Wichtig: Vor dem Sprung wird KEINE Bodenreibung angewendet, damit die Geschwindigkeit erhalten bleibt!
@@ -375,6 +412,11 @@ func _respawn() -> void:
 ## Wird vom Pickup aufgerufen, das HUD zeigt dann z. B. "QUAD DAMAGE!"
 func on_item_picked(pickup_type: int, item_name: String = "") -> void:
 	item_picked.emit(pickup_type, item_name)
+	match pickup_type:
+		ItemPickup.PickupType.QUAD_DAMAGE:
+			GameManager.play_announcer("quad_damage")
+		ItemPickup.PickupType.MEGA_HEALTH:
+			GameManager.play_announcer("mega_health")
 
 
 ## Treffer-Feedback: Quake-Trefferton, Hitmarker zeigt das HUD

@@ -159,6 +159,18 @@ Booter/
 
 ---
 
+## 🔊 Sound
+
+Alle Sounds liegen als WAV in `assets/sounds/` und werden von `python tools/make_sounds.py <Ordner mit Ansager-Rohaufnahmen>` erzeugt (nur numpy nötig):
+- **Waffen und Effekte** aus mehreren Schichten (Anschlag, Körper, Rauschen, Verzerrung, Hall), 44,1 kHz / 16 Bit
+- **Musik:** Synthwave-Loop, 120 BPM, 64 s (Intro, Teil A mit Schlagzeug, Break, Teil B mit Lead), läuft im Menü und im Match; im Menü, in der Pause und am Matchende gedämpft
+- **Schritte** (vier Varianten) für Spieler und Bots (Bots als 3D-Sound, damit man sie kommen hört), Sprung und Landung
+- **Ansager:** „3, 2, 1, Fight!“, First Blood, Double/Multi/Mega/Monster Kill, Killing Spree … Godlike, Quad Damage, Mega Health, Combo, Zeitansagen, You have won/lost. Gesprochen von der Windows-Sprachausgabe (Stimme „Zira“), dann tiefer gestimmt, gedoppelt, verzerrt und mit Hall versehen.
+
+Audio-Busse (`default_bus_layout.tres`): Master, Music (eigener Lautstärkeregler in den Einstellungen, Tiefpass für den gedämpften Zustand), Announcer (mit Kompressor). Fehlt eine WAV-Datei, erzeugt `SoundGenerator` wie früher einen prozeduralen Ersatz.
+
+---
+
 ## 🎨 Look: „Neon-Brutalism“
 
 Dunkle Low-Poly-Körper mit leuchtenden Wireframe-Kanten. Der Nachbearbeitungs-Shader `assets/shaders/neon_edges.gdshader` findet Kanten über Tiefen- und Normalensprünge und färbt sie im Farbton der jeweiligen Fläche: orange Plattformen bekommen orange Kanten, Bots die Kanten in ihrer eigenen Farbe. Dazu:

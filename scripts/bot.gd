@@ -87,6 +87,9 @@ var patrol_travel_timer: float = 0.0
 var is_launched: bool = false
 # Item, das gerade angesteuert wird (dann muss der Bot es wirklich beruehren)
 var patrol_item: Node3D = null
+# Schritte als 3D-Sound
+var _step_distance: float = 0.0
+var _step_audio: AudioStreamPlayer3D = null
 var original_mesh_transform: Transform3D
 var hit_spark_scene: PackedScene = preload("res://scenes/weapons/hit_spark.tscn")
 var floating_number_scene: PackedScene = preload("res://scenes/effects/floating_number.tscn")
@@ -118,6 +121,11 @@ func _ready() -> void:
 	if muzzle_flash:
 		muzzle_flash.visible = false
 	_apply_skin_color()
+	_step_audio = AudioStreamPlayer3D.new()
+	_step_audio.unit_size = 4.0
+	_step_audio.max_distance = 35.0
+	_step_audio.volume_db = -4.0
+	add_child(_step_audio)
 
 	nav_agent.target_desired_distance = 1.5
 	nav_agent.path_desired_distance = 1.0
@@ -186,6 +194,15 @@ func _physics_process(delta: float) -> void:
 
 	# Bewegung ausfuehren
 	move_and_slide()
+	if is_on_floor():
+		var speed := Vector2(velocity.x, velocity.z).length()
+		if speed > 1.5:
+			_step_distance += speed * delta
+			if _step_distance >= 2.2:
+				_step_distance = 0.0
+				_step_audio.stream = SoundGenerator.create_footstep_sound(randi_range(1, 4))
+				_step_audio.pitch_scale = randf_range(0.85, 0.95)
+				_step_audio.play()
 
 
 # ==============================================================================
@@ -620,7 +637,7 @@ func _pick_new_patrol_point() -> void:
 
 
 ## Lohnendstes erreichbares Item: Wert geteilt durch Entfernung. Unter einer Schwelle
-## (oder zufaellig in 30 % der Faelle) wird stattdessen normal patrouilliert.
+## (bei mittelwertigen Items zufaellig in 30 % der Faelle) wird stattdessen normal patrouilliert.
 func _best_item() -> Node3D:
 	var best: Node3D = null
 	var best_score: float = 0.0
@@ -632,7 +649,9 @@ func _best_item() -> Node3D:
 		if score > best_score:
 			best_score = score
 			best = item
-	if best_score < 12.0 or randf() < 0.3:
+	# Unwichtiges ignorieren; mittelwertige Items in 30 % der Faelle auslassen (Abwechslung),
+	# hochwertige (Power-ups in der Naehe) immer holen
+	if best_score < 12.0 or (best_score < 40.0 and randf() < 0.3):
 		return null
 	return best
 

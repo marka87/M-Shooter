@@ -260,7 +260,7 @@ func run() -> void:
 	check(FileAccess.file_exists("user://settings.cfg"), "Einstellungen gespeichert")
 
 	# Sound-Daten signed: Stille nahe 0
-	var snd: AudioStreamWAV = SoundGenerator.create_hitsound()
+	var snd: AudioStream = SoundGenerator.create_hitsound()
 	check(snd == SoundGenerator.create_hitsound(), "Sound-Cache liefert dieselbe Instanz")
 
 	print("FEHLER: ", fails)

@@ -17,6 +17,7 @@ func _ready() -> void:
 	# Prozeduralen Schusssound generieren
 	if audio_player:
 		audio_player.stream = SoundGenerator.create_machinegun_sound()
+		audio_player.volume_db = -5.0
 	
 	if muzzle_flash:
 		muzzle_flash.visible = false

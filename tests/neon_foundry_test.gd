@@ -249,7 +249,9 @@ func run() -> void:
 		if bot.powerups.has_quad:
 			got_quad = true
 			break
-	print("Bot nach Quad-Suche: ", bot.global_position)
+	print("Bot nach Quad-Suche: ", bot.global_position, " Zustand ", bot.current_state, " Ziel ", bot.patrol_target,
+		" Item ", bot.patrol_item.name if is_instance_valid(bot.patrol_item) else "-", " Quad aktiv ", quad.is_active,
+		" geflogen ", bot.is_launched, " tot ", bot.health.is_dead)
 	check(got_quad, "Bot holt sich Quad Damage")
 	player.add_to_group("player")
 

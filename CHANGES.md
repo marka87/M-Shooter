@@ -1,3 +1,17 @@
+# Änderungen (Runde 15: Sound)
+
+- **Neuer Sound-Generator** `tools/make_sounds.py` (nur numpy): alle Waffen, Explosion, Combo, Treffer, Pickups, Sprung-Pad, Bot-Treffer/-Tod jetzt als 16-Bit-WAV mit 44,1 kHz in `assets/sounds/`. Geschichtete Synthese: Anschlag, Körper, Rauschen, Verzerrung, Faltungshall. Gleichspannungsanteil wird entfernt.
+- **Musik:** Synthwave-Loop (120 BPM, 64 s, Am–F–C–G) mit Kick, Snare, Hi-Hats, pumpendem Bass (Sidechain), Flächen, Arpeggio mit Echo und Lead-Melodie im zweiten Teil. Läuft dauerhaft; im Menü, in der Pause und am Matchende über einen Tiefpass gedämpft.
+- **Ansager-Stimme:** 21 Sätze, gesprochen von der Windows-Sprachausgabe und bearbeitet (tiefer, gedoppelt, Ringmodulation, Verzerrung, Hall). Ansagen für Countdown, First Blood (neu), Multi-Kills, Serien, Quad Damage, Mega Health, Combo, 5 Minuten / 1 Minute Restzeit, Sieg und Niederlage.
+- **Schritte** für Spieler (je nach Tempo) und Bots (3D-Sound), Sprung- und Landegeräusch, eigene Pickup-Sounds für Waffen, Quad und Mega Health.
+- **Audio-Busse** Music (mit Tiefpass) und Announcer (mit Kompressor); **Musik-Regler** in den Einstellungen (gespeichert).
+- `SoundGenerator` lädt zuerst die WAV-Dateien, fehlende Sounds werden wie bisher prozedural erzeugt.
+- **Fehler behoben:** Bots ließen auch hochwertige Items (Quad) in 30 % der Fälle aus und liefen stattdessen zu Zufallspunkten. Jetzt gilt der Zufall nur noch für mittelwertige Items. Der Quad-Test war deshalb gelegentlich rot.
+- Im Headless-Testmodus meldet Godot beim Beenden eine nicht freigegebene Ansage; das liegt am Dummy-Audio-Treiber. Mit echtem Audio beendet sich das Spiel sauber.
+- Tests: 38 / 31 / 18, alle grün (Neon Foundry fünfmal hintereinander).
+
+---
+
 # Änderungen (Runde 14: Match-Ablauf)
 
 - **Frag- und Zeitlimit** im Match-Fenster (gespeichert). Erreicht jemand das Frag-Limit oder läuft die Uhr ab, endet das Match.
