@@ -4,6 +4,7 @@ extends Control
 ## Ermoeglicht Spielstart (mit Bot-Anzahl und Schwierigkeit), Einstellungen sowie Beenden.
 
 @onready var main_buttons: VBoxContainer = $CenterContainer/MainButtons
+@onready var version_label: Label = $VersionLabel
 @onready var settings_panel: PanelContainer = $CenterContainer/SettingsPanel
 @onready var match_panel: PanelContainer = $CenterContainer/MatchPanel
 
@@ -35,6 +36,11 @@ func _ready() -> void:
 	get_tree().paused = false
 	
 	GameManager.current_state = GameManager.GameState.MENU
+
+	# Versionsnummer aus den Projekteinstellungen (application/config/version) und Engine-Version
+	var engine := Engine.get_version_info()
+	version_label.text = "Version %s  ·  Godot %s.%s.%s" % [
+		ProjectSettings.get_setting("application/config/version", "?"), engine.major, engine.minor, engine.patch]
 	
 	# Schieberegler mit den gespeicherten Einstellungen initialisieren
 	if sens_slider:

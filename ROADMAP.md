@@ -161,7 +161,7 @@ Bei reinem LAN entfallen Lag-Compensation und dedizierter Server.
 | # | Aufgabe | Aufwand |
 |---|---|---|
 | 9.1 | Ziel 144+ FPS: Profiler nutzen, Occlusion Culling, LODs, Schatten sparsam | M |
-| 9.2 | Exporte für Windows/Linux, Versionsnummer im Hauptmenü | S |
+| 9.2 | ✅ teilweise: Windows-Export und Versionsnummer, Linux fehlt. Exporte für Windows/Linux, Versionsnummer im Hauptmenü | S |
 | 9.3 | Automatische Tests für Schadensberechnung und Movement (GUT oder gdUnit4) | M |
 | 9.4 | Itch.io-Seite oder Steam-Playtest | M |
 

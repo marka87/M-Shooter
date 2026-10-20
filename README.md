@@ -215,6 +215,20 @@ Das Addon **func_godot** (Version 2025.12, MIT-Lizenz, `addons/func_godot/`) wan
 
 ---
 
+## 📦 Windows-Build
+
+Die Versionsnummer steht in `project.godot` (`application/config/version`, aktuell 0.9.0) und wird unten rechts im Hauptmenü angezeigt. Das Export-Preset „Windows“ (`export_presets.cfg`) baut eine einzelne `ArenaShooter.exe` mit eingebetteten Spieldaten nach `build/windows/` (nicht im Git). Tests und Werkzeuge werden nicht mitexportiert.
+
+Voraussetzung: Godot-Export-Vorlagen 4.7.2 (Editor → „Export-Vorlagen verwalten“, oder die Windows-Dateien unter `%APPDATA%\Godot\export_templates\4.7.2.stable`). Dann:
+
+```
+Godot_v4.7.2-stable_win64_console.exe --headless --path . --export-release "Windows" build/windows/ArenaShooter.exe
+```
+
+Bei einer neuen Version die Nummer in `project.godot` und `application/file_version` / `product_version` in `export_presets.cfg` anpassen.
+
+---
+
 ## 🧪 Automatischer Test
 
 Ein Rauchtest lädt die Arena und prüft Treffer, Feuerrate, Rocket-Jump, Pickups, Tod, Respawn, Pause und Einstellungen:
