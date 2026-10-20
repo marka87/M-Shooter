@@ -36,6 +36,13 @@ var bot_count: int = 3
 ## Schwierigkeit der Bots (Index in Bot.SKILL_PRESETS, 0 = Anfaenger ... 4 = Gott)
 var bot_skill: int = 2
 const MAX_BOTS: int = 7
+## Spielbare Arenen: Anzeigename und Szene
+const MAPS: Array[Dictionary] = [
+	{ "name": "Neon Foundry", "scene": "res://levels/neon_foundry.tscn" },
+	{ "name": "Testarena", "scene": "res://levels/test_arena.tscn" },
+]
+## Index in MAPS
+var selected_map: int = 0
 
 # Referenz auf den aktuellen Spieler im Level
 var current_player: CharacterBody3D = null
@@ -183,6 +190,7 @@ func load_settings() -> void:
 		fov = cfg.get_value("video", "fov", fov)
 		bot_count = clampi(cfg.get_value("match", "bot_count", bot_count), 1, MAX_BOTS)
 		bot_skill = clampi(cfg.get_value("match", "bot_skill", bot_skill), 0, 4)
+		selected_map = clampi(cfg.get_value("match", "map", selected_map), 0, MAPS.size() - 1)
 	apply_master_volume()
 
 
@@ -194,6 +202,7 @@ func save_settings() -> void:
 	cfg.set_value("video", "fov", fov)
 	cfg.set_value("match", "bot_count", bot_count)
 	cfg.set_value("match", "bot_skill", bot_skill)
+	cfg.set_value("match", "map", selected_map)
 	cfg.save(SETTINGS_PATH)
 
 

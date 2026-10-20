@@ -213,6 +213,17 @@ theme_override_font_sizes/font_size = 30
 text = "DEATHMATCH"
 horizontal_alignment = 1
 
+[node name="MapContainer" type="VBoxContainer" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/MapContainer"]
+layout_mode = 2
+text = "Arena:"
+
+[node name="MapOption" type="OptionButton" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/MapContainer"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+
 [node name="BotsContainer" type="VBoxContainer" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 

@@ -9,6 +9,7 @@ extends Control
 
 @onready var bot_slider: HSlider = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/BotsContainer/HBox/BotSlider
 @onready var bot_value_label: Label = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/BotsContainer/HBox/BotValueLabel
+@onready var map_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/MapContainer/MapOption
 @onready var skill_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/SkillContainer/SkillOption
 @onready var fight_button: Button = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/FightButton
 @onready var match_back_button: Button = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/MatchBackButton
@@ -46,6 +47,10 @@ func _ready() -> void:
 	bot_slider.max_value = GameManager.MAX_BOTS
 	bot_slider.value = GameManager.bot_count
 	bot_value_label.text = str(GameManager.bot_count)
+	for map_info in GameManager.MAPS:
+		map_option.add_item(map_info.name)
+	map_option.selected = GameManager.selected_map
+	map_option.item_selected.connect(func(index: int): GameManager.selected_map = index)
 	for skill_name in Bot.SKILL_NAMES:
 		skill_option.add_item(skill_name)
 	skill_option.selected = GameManager.bot_skill
@@ -69,11 +74,11 @@ func _on_start_button_pressed() -> void:
 	fight_button.grab_focus()
 
 
-## Match mit den gewaehlten Einstellungen in der Test-Arena starten
+## Match mit den gewaehlten Einstellungen in der gewaehlten Arena starten
 func _on_fight_pressed() -> void:
 	GameManager.save_settings()
 	GameManager.reset_game()
-	get_tree().change_scene_to_file("res://levels/test_arena.tscn")
+	get_tree().change_scene_to_file(GameManager.MAPS[GameManager.selected_map].scene)
 
 
 func _on_match_back_pressed() -> void:

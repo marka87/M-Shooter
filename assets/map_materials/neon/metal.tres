@@ -1,0 +1,15 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://assets/shaders/arena_grid.gdshader" id="1_grid"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_grid")
+shader_parameter/base_color = Color(0.05, 0.13, 0.15, 1)
+shader_parameter/line_color = Color(0.2, 0.75, 1.0, 1)
+shader_parameter/cell_size = 1.0
+shader_parameter/line_width = 0.012
+shader_parameter/line_emission = 0.3
+shader_parameter/major_every = 5
+shader_parameter/roughness_value = 0.5
+shader_parameter/metallic_value = 0.3

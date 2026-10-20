@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://dwtvtj6lpco71"
+path="res://.godot/imported/neon_foundry.map-02359844e8e7e5911e73b72597ab2815.tres"
+
+[deps]
+
+source_file="res://maps/neon_foundry.map"
+dest_files=["res://.godot/imported/neon_foundry.map-02359844e8e7e5911e73b72597ab2815.tres"]
+
+[params]
+

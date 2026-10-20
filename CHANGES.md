@@ -1,3 +1,19 @@
+# Änderungen (Runde 11: Arena „Neon Foundry“)
+
+- **Neue Arena „Neon Foundry“** (`levels/neon_foundry.tscn`), 64 × 64 m auf drei Ebenen:
+  - Boden mit vier Deckungsblöcken und zwei Durchgangswänden mit Tür (x = ±18)
+  - Ring-Steg auf 4 m entlang aller Wände mit Geländer und gelben Leuchtstreifen
+  - Mittelplattform auf vier Säulen mit Brücken nach Ost und West
+  - Türme auf 8 m in Nordost und Südwest mit pinken Leuchtkanten
+  - Vier Treppen Boden → Ring, zwei Treppen Ring → Turm
+  - Drei Jump-Pads (zu beiden Türmen und auf die Mittelplattform), 10 Items, 8 Spawnpunkte, Akzentlichter, lila Himmel
+- **Map-Werkzeuge** in `tools/`: Generator für die `.map`-Datei, Generator für die Level-Vorlage, `build_level.gd` zum Einbacken der Geometrie mit func_godot, Generator für Map-Materialien und TrenchBroom-Vorschaubilder.
+- **Treppen:** sichtbare Stufen ohne Kollision plus unsichtbare Rampe (`clip`), dadurch für Spieler und Bots begehbar.
+- **Arena-Auswahl** im Match-Fenster (Neon Foundry als Standard, Testarena), wird gespeichert.
+- **Neuer Test** `tests/neon_foundry_test.gd` (16 Prüfungen): alle Treppen, Brücke, Tür, beide Jump-Pad-Arten, Bot-Wege auf Ring, Mitte und beide Türme, ein Bot läuft tatsächlich auf einen Turm (er nimmt dabei selbst das Jump-Pad). Alle bestanden. Rauchtest weiterhin 38/38.
+
+---
+
 # Änderungen (Runde 10: Look „Neon-Brutalism“)
 
 Mischung aus Low-Poly (Bild 2) und Wireframe (Bild 4): dunkle Körper mit Neonkanten.

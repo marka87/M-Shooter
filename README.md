@@ -154,6 +154,21 @@ Neue Flächen bekommen den Look automatisch: dunkle, leicht farbige Grundfarbe w
 
 ---
 
+## 🗺️ Arenen
+
+Im Match-Fenster wählbar:
+- **Neon Foundry** (Standard): 64 × 64 m, drei Ebenen. Boden mit Deckungsblöcken und zwei Durchgangswänden mit Tür, ein Ring-Steg auf 4 m entlang aller Wände, eine Mittelplattform auf Säulen mit zwei Brücken, zwei Türme auf 8 m (Nordost, Südwest). Sechs Treppen, drei Jump-Pads, 10 Items, 8 Spawnpunkte.
+- **Testarena**: die ursprüngliche flache Arena (für Tests).
+
+**So entsteht die Neon Foundry:**
+1. `python tools/generate_neon_foundry.py` erzeugt `maps/neon_foundry.map` (Quake-Format).
+2. `python tools/make_neon_foundry_scene.py` erzeugt die Vorlage `levels/neon_foundry_template.tscn` (Spawns, Items, Jump-Pads, Licht).
+3. `Godot_v4.7.2-stable_win64_console.exe --headless --path . -s res://tools/build_level.gd -- res://levels/neon_foundry_template.tscn res://levels/neon_foundry.tscn` baut die Geometrie ein.
+
+Die `.map` lässt sich auch in TrenchBroom öffnen und von Hand weiterbauen (Spiel „Generic“, Texturordner `assets/map_textures`). Danach nur Schritt 3 wiederholen. Treppen bestehen aus sichtbaren Stufen ohne Kollision (`func_detail_illusionary`) und einer unsichtbaren Rampe (Textur `clip`), weil Spieler und Bots keine Stufen steigen können.
+
+Map-Texturen: `assets/map_materials/neon/*.tres` (Godot-Materialien) und `assets/map_textures/neon/*.png` (Vorschau für TrenchBroom), erzeugt von `python tools/make_map_materials.py`. Verfügbar: `floor`, `wall`, `walkway`, `metal`, `accent`, `glow_cyan`, `glow_magenta`, `glow_yellow`, `glow_orange`.
+
 ## 🗺️ Maps bauen (func_godot + TrenchBroom)
 
 Das Addon **func_godot** (Version 2025.12, MIT-Lizenz, `addons/func_godot/`) wandelt Quake-`.map`-Dateien in Godot-Geometrie mit Kollision um. Maps baut man im kostenlosen Editor **TrenchBroom** (https://trenchbroom.github.io), den du selbst installierst. In Godot einen `FuncGodotMap`-Knoten anlegen, die `.map`-Datei eintragen und „Build Map“ drücken. 32 Quake-Einheiten entsprechen 1 m.
@@ -169,6 +184,12 @@ Godot_v4.7.2-stable_win64_console.exe --headless --path . -s res://tests/smoke_t
 ```
 
 Exit-Code 0 bedeutet: alles bestanden.
+
+Für die Neon Foundry gibt es einen eigenen Begehbarkeitstest (Treppen, Brücke, Tür, Jump-Pads, Bot-Wege, Bot läuft auf einen Turm):
+
+```
+Godot_v4.7.2-stable_win64_console.exe --headless --path . -s res://tests/neon_foundry_test.gd
+```
 
 ---
 
