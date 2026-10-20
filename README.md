@@ -49,6 +49,8 @@ Alle Tasten laufen über die InputMap (Projekt → Projekteinstellungen → Eing
 
 ## 🤖 Gegner-Bots (KI)
 
+Nach „Spiel starten“ wählst du **Anzahl (1–7)** und **Schwierigkeit** der Bots: Anfänger, Normal, Erfahren, Profi, Gott. Die Stufe bestimmt Treffgenauigkeit, Reaktionszeit, Feuerrate, Ausweichtempo und Sichtweite. Es gilt **jeder gegen jeden**: Bots greifen den nächsten sichtbaren Gegner an, auch andere Bots, und rächen sich an dem, der sie beschießt. Gespawnt wird am Punkt mit dem größten Abstand zu allen anderen.
+
 Die Bots besitzen eine 4-stufige Zustandsmaschine:
 - **PATROL (Patrouille)**: Läuft Arena-Wegpunkte ab und sucht per Raycast nach freier Sichtlinie zum Spieler.
 - **CHASE (Verfolgen)**: Nutzt `NavigationAgent3D` und die dynamisch gebackene `NavigationRegion3D`, um den Spieler anzulaufen.

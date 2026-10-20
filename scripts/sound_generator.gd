@@ -23,6 +23,11 @@ static func create_jump_pad_sound() -> AudioStreamWAV: return _cached("jump_pad"
 static func create_shotgun_sound() -> AudioStreamWAV: return _cached("shotgun", _build_shotgun_sound)
 
 
+## Gibt alle zwischengespeicherten Sounds frei (beim Beenden, sonst meldet Godot Speicherlecks)
+static func clear_cache() -> void:
+	_cache.clear()
+
+
 static func _cached(key: String, builder: Callable) -> AudioStreamWAV:
 	if not _cache.has(key):
 		_cache[key] = builder.call()

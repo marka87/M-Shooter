@@ -189,6 +189,84 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "ZURÜCK"
 
+[node name="MatchPanel" type="PanelContainer" parent="CenterContainer"]
+visible = false
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_Settings")
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/MatchPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/MatchPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="MatchTitle" type="Label" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 30
+text = "DEATHMATCH"
+horizontal_alignment = 1
+
+[node name="BotsContainer" type="VBoxContainer" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/BotsContainer"]
+layout_mode = 2
+text = "Anzahl Bots:"
+
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/BotsContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="BotSlider" type="HSlider" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/BotsContainer/HBox"]
+custom_minimum_size = Vector2(240, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 7.0
+step = 1.0
+value = 3.0
+tick_count = 7
+ticks_on_borders = true
+
+[node name="BotValueLabel" type="Label" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/BotsContainer/HBox"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "3"
+
+[node name="SkillContainer" type="VBoxContainer" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/SkillContainer"]
+layout_mode = 2
+text = "Schwierigkeit:"
+
+[node name="SkillOption" type="OptionButton" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/SkillContainer"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+
+[node name="FightButton" type="Button" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "KÄMPFEN!"
+
+[node name="MatchBackButton" type="Button" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "ZURÜCK"
+
 [connection signal="pressed" from="CenterContainer/MainButtons/StartButton" to="." method="_on_start_button_pressed"]
 [connection signal="pressed" from="CenterContainer/MainButtons/SettingsButton" to="." method="_on_settings_button_pressed"]
 [connection signal="pressed" from="CenterContainer/MainButtons/QuitButton" to="." method="_on_quit_button_pressed"]

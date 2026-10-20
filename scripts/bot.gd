@@ -2,7 +2,8 @@ extends CharacterBody3D
 class_name Bot
 
 ## Gegner-Bot fuer die Arena mit Zustandsmaschine (Patrouille, Verfolgen, Angreifen, Tot).
-## Verwendet NavigationAgent3D fuer die Wegfindung und schiesst mit leichter Ungenauigkeit.
+## Jeder gegen jeden: Ziel ist der naechste sichtbare Gegner (Spieler oder anderer Bot).
+## Verwendet NavigationAgent3D fuer die Wegfindung und schiesst mit Streuung je nach Schwierigkeit.
 
 # ==============================================================================
 # ZUSTAENDE (STATE MACHINE)
@@ -28,6 +29,24 @@ var current_state: State = State.PATROL
 @export var inaccuracy_degrees: float = 4.0 # Ungenauigkeit (Streuung) in Grad
 @export var respawn_delay: float = 4.0 # Zeit in Sekunden bis zum Wiederbeleben
 @export var gravity: float = 22.0
+## Zeit vom Entdecken eines Ziels bis zum ersten Schuss (s)
+@export var reaction_time: float = 0.4
+
+# ==============================================================================
+# SCHWIERIGKEIT
+# ==============================================================================
+
+## Namen der Stufen (Index = GameManager.bot_skill)
+const SKILL_NAMES: Array[String] = ["Anfänger", "Normal", "Erfahren", "Profi", "Gott"]
+## Werte je Stufe: Streuung (Grad), Reaktionszeit (s), Zeit zwischen Schuessen (s),
+## Ausweichtempo im Kampf (m/s), Sichtweite (m)
+const SKILL_PRESETS: Array[Dictionary] = [
+	{ "inaccuracy": 9.0, "reaction": 0.9, "interval": 0.45, "combat_speed": 2.0, "sight": 25.0 },
+	{ "inaccuracy": 6.0, "reaction": 0.6, "interval": 0.35, "combat_speed": 3.0, "sight": 30.0 },
+	{ "inaccuracy": 4.0, "reaction": 0.4, "interval": 0.28, "combat_speed": 3.5, "sight": 35.0 },
+	{ "inaccuracy": 2.5, "reaction": 0.25, "interval": 0.22, "combat_speed": 4.5, "sight": 45.0 },
+	{ "inaccuracy": 1.2, "reaction": 0.12, "interval": 0.18, "combat_speed": 5.5, "sight": 60.0 },
+]
 
 # ==============================================================================
 # KNOTEN-REFERENZEN
@@ -47,6 +66,11 @@ var current_state: State = State.PATROL
 # ==============================================================================
 
 var shoot_timer: float = 0.0
+# Aktuelles Ziel (Spieler oder Bot) und Timer fuer die naechste Zielsuche
+var target: CharacterBody3D = null
+var target_scan_timer: float = 0.0
+# Verbleibende Reaktionszeit bis zum ersten Schuss auf ein neues Ziel
+var reaction_timer: float = 0.0
 var lose_target_timer: float = 0.0
 var patrol_target: Vector3 = Vector3.ZERO
 var patrol_wait_timer: float = 0.0
@@ -123,23 +147,26 @@ func _physics_process(delta: float) -> void:
 	if shoot_timer > 0.0:
 		shoot_timer -= delta
 
-	# Spieler-Referenz holen
-	var player: CharacterBody3D = GameManager.current_player
-	var player_visible: bool = false
-	var distance_to_player: float = 9999.0
+	# Ziel regelmaessig neu waehlen (nicht jeden Frame, das spart Raycasts)
+	target_scan_timer -= delta
+	if target_scan_timer <= 0.0:
+		target_scan_timer = 0.25
+		_update_target()
 
-	if is_instance_valid(player):
-		distance_to_player = global_position.distance_to(player.global_position)
-		player_visible = _check_line_of_sight(player)
+	var target_visible: bool = false
+	var distance_to_target: float = 9999.0
+	if _is_alive(target):
+		distance_to_target = global_position.distance_to(target.global_position)
+		target_visible = _check_line_of_sight(target)
 
 	# Zustandsmaschine abarbeiten
 	match current_state:
 		State.PATROL:
-			_process_patrol(delta, player, player_visible, distance_to_player)
+			_process_patrol(delta, target, target_visible, distance_to_target)
 		State.CHASE:
-			_process_chase(delta, player, player_visible, distance_to_player)
+			_process_chase(delta, target, target_visible, distance_to_target)
 		State.ATTACK:
-			_process_attack(delta, player, player_visible, distance_to_player)
+			_process_attack(delta, target, target_visible, distance_to_target)
 
 	# Bewegung ausfuehren
 	move_and_slide()
@@ -149,10 +176,10 @@ func _physics_process(delta: float) -> void:
 # ZUSTANDS-LOGIK (PATROL, CHASE, ATTACK, DEAD)
 # ==============================================================================
 
-## Patrouille: Zufaellige Wegpunkte ansteuern und nach dem Spieler Ausschau halten
-func _process_patrol(delta: float, _player: CharacterBody3D, player_visible: bool, distance: float) -> void:
-	# Wenn Spieler in Sicht und Reichweite -> Verfolgung aufnehmen
-	if player_visible and distance < sight_range:
+## Patrouille: Zufaellige Wegpunkte ansteuern und nach Gegnern Ausschau halten
+func _process_patrol(delta: float, _target: CharacterBody3D, target_visible: bool, distance: float) -> void:
+	# Wenn ein Gegner in Sicht und Reichweite ist -> Verfolgung aufnehmen
+	if target_visible and distance < sight_range:
 		_switch_state(State.CHASE)
 		return
 
@@ -176,19 +203,20 @@ func _process_patrol(delta: float, _player: CharacterBody3D, player_visible: boo
 	_move_towards(patrol_target, patrol_speed, delta)
 
 
-## Verfolgen: Mit Navigationsagent auf den Spieler zulaufen
-func _process_chase(delta: float, player: CharacterBody3D, player_visible: bool, distance: float) -> void:
-	if not is_instance_valid(player):
+## Verfolgen: Mit Navigationsagent auf das Ziel zulaufen
+func _process_chase(delta: float, chase_target: CharacterBody3D, target_visible: bool, distance: float) -> void:
+	if not _is_alive(chase_target):
 		_switch_state(State.PATROL)
 		return
 
 	# In Angriffsmodus wechseln, wenn nahe genug und freie Schussbahn
-	if player_visible and distance <= attack_range:
+	if target_visible and distance <= attack_range:
 		_switch_state(State.ATTACK)
+		reaction_timer = reaction_time
 		return
 
-	# Wenn Spieler nicht mehr sichtbar, Timer starten
-	if not player_visible:
+	# Wenn das Ziel nicht mehr sichtbar ist, Timer starten
+	if not target_visible:
 		lose_target_timer += delta
 		if lose_target_timer > 5.0:
 			_switch_state(State.PATROL)
@@ -196,18 +224,18 @@ func _process_chase(delta: float, player: CharacterBody3D, player_visible: bool,
 	else:
 		lose_target_timer = 0.0
 
-	# Weg zum Spieler berechnen
-	_move_towards(player.global_position, chase_speed, delta)
+	# Weg zum Ziel berechnen
+	_move_towards(chase_target.global_position, chase_speed, delta)
 
 
-## Angreifen: Spieler fixieren, seitlich strafen und gezielt feuern
-func _process_attack(delta: float, player: CharacterBody3D, player_visible: bool, distance: float) -> void:
-	if not is_instance_valid(player):
+## Angreifen: Ziel fixieren, seitlich strafen und gezielt feuern
+func _process_attack(delta: float, attack_target: CharacterBody3D, target_visible: bool, distance: float) -> void:
+	if not _is_alive(attack_target):
 		_switch_state(State.PATROL)
 		return
 
-	# Wenn Spieler ausser Reichweite oder hinter einer Wand verschwunden
-	if not player_visible or distance > attack_range * 1.35:
+	# Wenn das Ziel ausser Reichweite oder hinter einer Wand verschwunden ist
+	if not target_visible or distance > attack_range * 1.35:
 		lose_target_timer += delta
 		if lose_target_timer > 1.2:
 			_switch_state(State.CHASE)
@@ -215,8 +243,8 @@ func _process_attack(delta: float, player: CharacterBody3D, player_visible: bool
 	else:
 		lose_target_timer = 0.0
 
-	# Den Spieler horizontal ansehen
-	_look_towards(player.global_position)
+	# Das Ziel horizontal ansehen
+	_look_towards(attack_target.global_position)
 
 	# Seitliches Strafe-Ausweichmanoever
 	strafe_timer += delta
@@ -228,16 +256,17 @@ func _process_attack(delta: float, player: CharacterBody3D, player_visible: bool
 	var right_vec := transform.basis.x
 	var combat_velocity := right_vec * (strafe_direction * combat_speed)
 
-	# Zu nah am Spieler? Leicht zurueckweichen
+	# Zu nah am Ziel? Leicht zurueckweichen
 	if distance < 6.0:
 		combat_velocity -= transform.basis.z * (combat_speed * 0.8)
 
 	velocity.x = combat_velocity.x
 	velocity.z = combat_velocity.z
 
-	# Schiessen, wenn Abklingzeit bereit
-	if shoot_timer <= 0.0:
-		_bot_fire(player)
+	# Erst nach der Reaktionszeit schiessen, dann im Takt der Abklingzeit
+	reaction_timer -= delta
+	if reaction_timer <= 0.0 and shoot_timer <= 0.0 and target_visible:
+		_bot_fire(attack_target)
 		shoot_timer = shoot_interval
 
 
@@ -252,26 +281,63 @@ func _switch_state(new_state: State) -> void:
 # SCHIESSEN & SICHTLINIE
 # ==============================================================================
 
-## Prueft, ob freie Sichtlinie (Line of Sight) zum Spieler besteht
-func _check_line_of_sight(target: Node3D) -> bool:
+## Prueft, ob freie Sichtlinie (Line of Sight) zu einem Ziel besteht
+func _check_line_of_sight(los_target: Node3D) -> bool:
 	var space_state := get_world_3d().direct_space_state
 	var from: Vector3 = global_position + Vector3(0.0, 1.4, 0.0)
-	var to: Vector3 = target.global_position + Vector3(0.0, 1.0, 0.0)
+	var to: Vector3 = los_target.global_position + Vector3(0.0, 1.0, 0.0)
 
-	# Nur Welt und Spieler: andere Bots verdecken die Sicht nicht
-	var query := PhysicsRayQueryParameters3D.create(from, to, Layers.WORLD | Layers.PLAYER)
+	var query := PhysicsRayQueryParameters3D.create(from, to, Layers.HITTABLE)
 	query.exclude = [get_rid()]
 	query.collide_with_bodies = true
 	query.collide_with_areas = false
 
 	var hit := space_state.intersect_ray(query)
 	if hit:
-		return hit.collider == target
+		return hit.collider == los_target
 	return false
 
 
-## Bot schiesst mit leichter Ungenauigkeit (Streuung) auf den Spieler
-func _bot_fire(player: CharacterBody3D) -> void:
+## Lebender Kaempfer (Spieler oder Bot)?
+func _is_alive(node: Node) -> bool:
+	return is_instance_valid(node) and node.get("health") != null and not node.health.is_dead
+
+
+## Naechsten sichtbaren Gegner in Sichtweite waehlen. Ein sichtbares Ziel wird behalten,
+## ein verdecktes ebenfalls (zum Verfolgen), bis ein anderer Gegner sichtbar wird.
+func _update_target() -> void:
+	if _is_alive(target) and _check_line_of_sight(target):
+		return
+	var best: CharacterBody3D = null
+	var best_dist: float = sight_range
+	for group in ["player", "enemies"]:
+		for node in get_tree().get_nodes_in_group(group):
+			if node == self or not _is_alive(node):
+				continue
+			var dist: float = global_position.distance_to(node.global_position)
+			if dist < best_dist and _check_line_of_sight(node):
+				best = node
+				best_dist = dist
+	if best:
+		if best != target:
+			reaction_timer = reaction_time
+		target = best
+	elif not _is_alive(target):
+		target = null
+
+
+## Werte einer Schwierigkeitsstufe uebernehmen (0 = Anfaenger ... 4 = Gott)
+func apply_skill(level: int) -> void:
+	var preset: Dictionary = SKILL_PRESETS[clampi(level, 0, SKILL_PRESETS.size() - 1)]
+	inaccuracy_degrees = preset.inaccuracy
+	reaction_time = preset.reaction
+	shoot_interval = preset.interval
+	combat_speed = preset.combat_speed
+	sight_range = preset.sight
+
+
+## Bot schiesst mit Streuung auf sein Ziel (trifft auch, wer im Weg steht)
+func _bot_fire(fire_target: CharacterBody3D) -> void:
 	# Schuss-Sound
 	if audio_player:
 		audio_player.stream = snd_shot
@@ -282,7 +348,7 @@ func _bot_fire(player: CharacterBody3D) -> void:
 	_flash_muzzle()
 
 	var from: Vector3 = muzzle.global_position if muzzle else global_position + Vector3(0.0, 1.2, 0.0)
-	var target_chest: Vector3 = player.global_position + Vector3(0.0, 1.0, 0.0)
+	var target_chest: Vector3 = fire_target.global_position + Vector3(0.0, 1.0, 0.0)
 	var base_dir: Vector3 = (target_chest - from).normalized()
 
 	# Leichte Ungenauigkeit hinzufuegen (faire Bot-Praezision)
@@ -312,9 +378,9 @@ func _bot_fire(player: CharacterBody3D) -> void:
 			get_parent().add_child(spark)
 			spark.global_position = hit_pos + hit_normal * 0.05
 
-		# Schaden am Spieler anrichten
-		if hit_collider == player and player.has_method("take_damage"):
-			player.take_damage(DamageInfo.create(damage_per_shot, self, hit_pos, shoot_dir, "Maschinengewehr"))
+		# Schaden am Getroffenen anrichten
+		if hit_collider and hit_collider.has_method("take_damage"):
+			hit_collider.take_damage(DamageInfo.create(damage_per_shot, self, hit_pos, shoot_dir, "Maschinengewehr"))
 
 
 func _flash_muzzle() -> void:
@@ -362,9 +428,13 @@ func take_damage(info: DamageInfo) -> void:
 	# Optischer Trefferblitz (Mesh kurz weiss aufleuchten lassen)
 	_flash_hit()
 
-	# Bei Angriff sofort auf den Spieler aufmerksam werden
-	if current_state == State.PATROL:
-		_switch_state(State.CHASE)
+	# Rache: Wer schiesst, wird zum Ziel (ausser bei Selbsttreffern)
+	if info.attacker != self and _is_alive(info.attacker) and info.attacker is CharacterBody3D:
+		if info.attacker != target:
+			target = info.attacker
+			reaction_timer = reaction_time
+		if current_state == State.PATROL:
+			_switch_state(State.CHASE)
 
 	# Schaden zuletzt anwenden: Bei Tod startet health.died -> _die() mit Todes-Sound,
 	# der sonst vom Treffer-Sound oben ueberschrieben wuerde
@@ -409,8 +479,9 @@ func _die(info: DamageInfo) -> void:
 func _respawn() -> void:
 	health.reset()
 
-	# An einem zufaelligen Spawnpunkt platzieren
-	global_transform = GameManager.get_random_spawn_transform()
+	# Am Spawnpunkt mit dem groessten Abstand zu anderen Kaempfern
+	global_transform = GameManager.get_spawn_transform(self)
+	target = null
 
 	# Mesh-Drehung und Kollision zuruecksetzen
 	body_mesh.transform = original_mesh_transform

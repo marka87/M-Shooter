@@ -4,6 +4,8 @@ extends SceneTree
 # Start (aus dem Projektordner):
 #   Godot_v4.7.2-stable_win64_console.exe --headless --path . -s res://tests/smoke_test.gd
 # Exit-Code 0 = alles bestanden.
+# Hinweis: Klassen wie Bot oder Player hier nicht direkt nennen. Sonst werden ihre Skripte
+# kompiliert, bevor der Autoload GameManager existiert, und der Test bricht ab.
 
 var fails := 0
 
@@ -32,11 +34,18 @@ func fire_for(wm, sec: float) -> void:
 		t += 1.0 / 120.0
 
 func run() -> void:
+	# Einen Frame warten: Erst dann hat der GameManager die gespeicherten Einstellungen geladen
+	await process_frame
 	var gm = root.get_node_or_null("GameManager")
 	check(gm != null, "GameManager-Autoload vorhanden")
 	if gm == null:
 		quit(1)
 		return
+	# Testwerte setzen, die echten Einstellungen am Ende wiederherstellen
+	var orig_bot_count: int = gm.bot_count
+	var orig_bot_skill: int = gm.bot_skill
+	gm.bot_count = 2
+	gm.bot_skill = 4
 	gm.reset_game()
 	change_scene_to_file("res://levels/test_arena.tscn")
 	await wait(1.5)
@@ -44,7 +53,9 @@ func run() -> void:
 	var player = gm.current_player
 	check(is_instance_valid(player), "Spieler registriert")
 	var bots := get_nodes_in_group("enemies")
-	check(bots.size() == 2, "2 Bots in der Arena (%d)" % bots.size())
+	check(bots.size() == gm.bot_count, "Bot-Anzahl aus Einstellungen (%d)" % bots.size())
+	check(bots[0].inaccuracy_degrees == bots[0].SKILL_PRESETS[4].inaccuracy and bots[0].reaction_time == bots[0].SKILL_PRESETS[4].reaction, "Schwierigkeit 'Gott' uebernommen")
+	check(bots[0].display_name == "Vex" and bots[1].display_name == "Kortex", "Bot-Namen vergeben")
 	print("Ticks/s: ", Engine.physics_ticks_per_second, "  Physik: ", ProjectSettings.get_setting("physics/3d/physics_engine"))
 
 	# Bots patrouillieren?
@@ -55,7 +66,8 @@ func run() -> void:
 
 	# MG auf Bot
 	var wm = player.weapon_manager
-	b1.set_physics_process(false)
+	for b in bots:
+		b.set_physics_process(false)
 	b1.velocity = Vector3.ZERO
 	var clear := false
 	for ang in [0.0, 90.0, 180.0, 270.0, 45.0, 135.0, 225.0, 315.0]:
@@ -115,7 +127,8 @@ func run() -> void:
 	check(feed.get_child_count() >= 1 and b1.display_name in feed.get_child(feed.get_child_count() - 1).text, "Killfeed zeigt Abschuss")
 	var board: Array = gm.get_scoreboard()
 	check(board.size() == 3 and board[0].name == player.display_name, "Scoreboard: 3 Eintraege, Spieler vorn")
-	b1.set_physics_process(true)
+	for b in bots:
+		b.set_physics_process(true)
 
 	# Rocket-Jump: nach unten schiessen
 	wm.switch_to_weapon_id(&"rocket_launcher")
@@ -185,9 +198,10 @@ func run() -> void:
 
 	# Tod durch Bot und Respawn
 	var b2 = bots[1]
+	var bot_frags_before: int = gm.bot_frags
 	player.take_damage(DamageInfo.create(1000.0, b2, player.global_position, Vector3.ZERO, "Test"))
 	check(player.is_dead, "Spieler stirbt")
-	check(gm.bot_frags == 1, "Bot-Frag gezaehlt (%d)" % gm.bot_frags)
+	check(gm.bot_frags == bot_frags_before + 1, "Bot-Frag gezaehlt (%d)" % gm.bot_frags)
 
 	# Pause waehrend des Todes: Respawn darf nicht weiterlaufen
 	gm.current_state = gm.GameState.PLAYING
@@ -204,7 +218,37 @@ func run() -> void:
 	check(not player.is_dead, "Respawn nach Pause")
 	check(player.health.armor == player.health.start_armor, "Start-Ruestung nach Respawn")
 
-	# Einstellungen
+	# Spawn: Der gewaehlte Punkt liegt weit weg von allen anderen Kaempfern
+	var spawn_pos: Vector3 = gm.get_spawn_transform(player).origin
+	var nearest := INF
+	for b in bots:
+		if not b.health.is_dead:
+			nearest = minf(nearest, spawn_pos.distance_to(b.global_position))
+	check(nearest > 15.0, "Spawn weit weg von Bots (%.0f m)" % nearest)
+
+	# Jeder gegen jeden: Bots greifen sich gegenseitig an, wenn der Spieler nicht zu sehen ist
+	player.remove_from_group("player")
+	var bot_hits: Array = []
+	var on_bot_hit := func(info: DamageInfo, _lost: float):
+		if is_instance_valid(info.attacker) and info.attacker.is_in_group("enemies"):
+			bot_hits.append(info.attacker.display_name)
+	for b in bots:
+		if b.health.is_dead:
+			b._respawn()
+		b.health.damaged.connect(on_bot_hit)
+		b.set_physics_process(true)
+	bots[0].global_position = Vector3(-35, 1.0, 30)
+	bots[1].global_position = Vector3(-35, 1.0, 12)
+	await wait(5.0)
+	for b in bots:
+		b.health.damaged.disconnect(on_bot_hit)
+	player.add_to_group("player")
+	print("Bot-gegen-Bot-Treffer: ", bot_hits.size())
+	check(bot_hits.size() > 0, "Bots kaempfen gegeneinander (%d Treffer)" % bot_hits.size())
+
+	# Einstellungen (echte Werte wiederherstellen, damit der Test sie nicht ueberschreibt)
+	gm.bot_count = orig_bot_count
+	gm.bot_skill = orig_bot_skill
 	gm.save_settings()
 	check(FileAccess.file_exists("user://settings.cfg"), "Einstellungen gespeichert")
 

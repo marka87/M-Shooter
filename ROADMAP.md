@@ -104,7 +104,7 @@ Heute können Bots nur patrouillieren, verfolgen und mit einer Waffe schießen.
 
 | # | Aufgabe | Aufwand |
 |---|---|---|
-| 5.1 | Skill-Stufen (Zielgenauigkeit, Reaktionszeit, Bewegung) wie „Novice … Godlike“ | S |
+| 5.1 | ✅ Skill-Stufen (Zielgenauigkeit, Reaktionszeit, Bewegung) wie „Novice … Godlike“ | S |
 | 5.2 | Bots nutzen alle Waffen, wählen die passende nach Distanz und **zielen bei Projektilen vor** (Vorhalt) | M |
 | 5.3 | **Item-Bewusstsein**: Bots holen Health/Armor bei wenig Leben und kennen die Respawn-Zeiten großer Items | M |
 | 5.4 | Ausweichen: Dodge, Strafe-Jumping, Rocket-Jump auf hohe Plattformen | L |

@@ -348,7 +348,7 @@ func _on_died(info: DamageInfo) -> void:
 ## Respawn des Spielers an einem Spawnpunkt
 func _respawn() -> void:
 	health.reset()
-	global_transform = GameManager.get_random_spawn_transform()
+	global_transform = GameManager.get_spawn_transform(self)
 
 	# Blick wieder geradeaus richten
 	camera_pitch = 0.0

@@ -1,3 +1,16 @@
+# Änderungen (Runde 7: Bot-Anzahl und Schwierigkeit)
+
+- **Match-Fenster** nach „Spiel starten“: Anzahl Bots (1–7) und Schwierigkeit (Anfänger, Normal, Erfahren, Profi, Gott). Wird gespeichert.
+- **Schwierigkeitsstufen** (`Bot.SKILL_PRESETS`): Streuung, Reaktionszeit, Feuerrate, Ausweichtempo, Sichtweite. Neu ist die **Reaktionszeit**: Bots schießen erst eine Weile, nachdem sie ein neues Ziel entdeckt haben.
+- **Jeder gegen jeden:** Bots suchen sich den nächsten sichtbaren Gegner (Spieler oder Bot), behalten ein Ziel und rächen sich am Angreifer. Bot-Schüsse treffen jeden, der im Weg steht.
+- **Arena erzeugt die Bots** selbst (`arena.gd`) mit Namen (Vex, Kortex, Rhea, Nyx, Talon, Orbit, Grimm). Vier zusätzliche Spawnpunkte (jetzt 8).
+- **Bessere Spawns:** `GameManager.get_spawn_transform()` wählt einen der zwei Spawnpunkte, die am weitesten von allen lebenden Gegnern entfernt sind.
+- **Speicherleck beim Beenden behoben:** Der Sound-Cache wird beim Beenden geleert.
+- **Rauchtest** auf 38 Prüfungen erweitert (Bot-Anzahl, Schwierigkeit, Namen, Spawn-Abstand, Bots kämpfen gegeneinander). Der Test stellt die echten Einstellungen am Ende wieder her. Alle bestanden.
+- Dauerlauf mit 7 Bots über 60 s: Anfänger ca. 4 Abschüsse, Gott ca. 32 Abschüsse. Keine Fehler.
+
+---
+
 # Änderungen (Runde 6: Quick Wins)
 
 - **Neuer Look:** AgX-Tonemapping, SSAO, stärkerer Bloom, volumetrischer Nebel, dunklerer Nachthimmel, Schatten. Neuer Shader `assets/shaders/arena_grid.gdshader` legt ein leuchtendes Raster in Weltkoordinaten auf Boden (cyan) und Wände (orange). Dazu Neon-Leisten am Fuß der Wände und farbige Akzentlichter.

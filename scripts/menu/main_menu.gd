@@ -1,10 +1,17 @@
 extends Control
 
 ## Hauptmenue-Steuerung fuer den Arena-Shooter
-## Ermoeglicht Spielstart, Anpassen von Mausempfindlichkeit & Lautstaerke sowie Beenden.
+## Ermoeglicht Spielstart (mit Bot-Anzahl und Schwierigkeit), Einstellungen sowie Beenden.
 
 @onready var main_buttons: VBoxContainer = $CenterContainer/MainButtons
 @onready var settings_panel: PanelContainer = $CenterContainer/SettingsPanel
+@onready var match_panel: PanelContainer = $CenterContainer/MatchPanel
+
+@onready var bot_slider: HSlider = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/BotsContainer/HBox/BotSlider
+@onready var bot_value_label: Label = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/BotsContainer/HBox/BotValueLabel
+@onready var skill_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/SkillContainer/SkillOption
+@onready var fight_button: Button = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/FightButton
+@onready var match_back_button: Button = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/MatchBackButton
 
 @onready var sens_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/SensContainer/HBox/SensSlider
 @onready var sens_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/SensContainer/HBox/SensValueLabel
@@ -35,7 +42,19 @@ func _ready() -> void:
 	fov_slider.value = GameManager.fov
 	_update_fov_label(GameManager.fov)
 
+	# Match-Einstellungen
+	bot_slider.max_value = GameManager.MAX_BOTS
+	bot_slider.value = GameManager.bot_count
+	bot_value_label.text = str(GameManager.bot_count)
+	for skill_name in Bot.SKILL_NAMES:
+		skill_option.add_item(skill_name)
+	skill_option.selected = GameManager.bot_skill
+
 	# Signale verbinden
+	bot_slider.value_changed.connect(_on_bot_count_changed)
+	skill_option.item_selected.connect(_on_skill_selected)
+	fight_button.pressed.connect(_on_fight_pressed)
+	match_back_button.pressed.connect(_on_match_back_pressed)
 	fov_slider.value_changed.connect(_on_fov_changed)
 	if sens_slider:
 		sens_slider.value_changed.connect(_on_sens_changed)
@@ -43,10 +62,33 @@ func _ready() -> void:
 		volume_slider.value_changed.connect(_on_volume_changed)
 
 
-## Spiel in der Test-Arena starten
+## Match-Fenster (Bots, Schwierigkeit) anzeigen
 func _on_start_button_pressed() -> void:
+	main_buttons.visible = false
+	match_panel.visible = true
+	fight_button.grab_focus()
+
+
+## Match mit den gewaehlten Einstellungen in der Test-Arena starten
+func _on_fight_pressed() -> void:
+	GameManager.save_settings()
 	GameManager.reset_game()
 	get_tree().change_scene_to_file("res://levels/test_arena.tscn")
+
+
+func _on_match_back_pressed() -> void:
+	GameManager.save_settings()
+	match_panel.visible = false
+	main_buttons.visible = true
+
+
+func _on_bot_count_changed(val: float) -> void:
+	GameManager.bot_count = int(val)
+	bot_value_label.text = str(int(val))
+
+
+func _on_skill_selected(index: int) -> void:
+	GameManager.bot_skill = index
 
 
 ## Einstellungs-Menue anzeigen

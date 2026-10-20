@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" path="res://scripts/levels/arena.gd" id="1_arena"]
 [ext_resource type="PackedScene" uid="uid://bplayer_character_001" path="res://scenes/player.tscn" id="2_player"]
-[ext_resource type="PackedScene" uid="uid://bot_enemy_001" path="res://scenes/bot.tscn" id="3_bot"]
 [ext_resource type="PackedScene" uid="uid://ammo_pickup_001" path="res://scenes/items/ammo_pickup.tscn" id="4_ammo"]
 [ext_resource type="PackedScene" uid="uid://health_pickup_001" path="res://scenes/items/health_pickup.tscn" id="5_health"]
 [ext_resource type="PackedScene" uid="uid://armor_pickup_001" path="res://scenes/items/armor_pickup.tscn" id="6_armor"]
@@ -343,16 +342,20 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 4.5, -20)
 [node name="SpawnPoint4" type="Marker3D" parent="SpawnPoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 1.5, 20)
 
+[node name="SpawnPoint5" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1, 0, -1.000000, 0, 0.000000, -35, 1.5, 0)
+
+[node name="SpawnPoint6" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 35, 1.5, -30)
+
+[node name="SpawnPoint7" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(-0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, -0.707107, -35, 1.5, 35)
+
+[node name="SpawnPoint8" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(-0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, -0.707107, 35, 1.5, 35)
+
 [node name="Player" parent="." instance=ExtResource("2_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 25)
-
-[node name="Bot1" parent="." instance=ExtResource("3_bot")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 1.5, -12)
-display_name = "Vex"
-
-[node name="Bot2" parent="." instance=ExtResource("3_bot")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 1.5, 12)
-display_name = "Kortex"
 
 [node name="Items" type="Node3D" parent="."]
 

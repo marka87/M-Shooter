@@ -30,6 +30,13 @@ var master_volume: float = 1.0
 ## Horizontales Sichtfeld in Grad (Quake-Spieler nutzen oft 100-110)
 var fov: float = 100.0
 
+# Match-Einstellungen
+## Anzahl Bots in der Arena (1-7)
+var bot_count: int = 3
+## Schwierigkeit der Bots (Index in Bot.SKILL_PRESETS, 0 = Anfaenger ... 4 = Gott)
+var bot_skill: int = 2
+const MAX_BOTS: int = 7
+
 # Referenz auf den aktuellen Spieler im Level
 var current_player: CharacterBody3D = null
 
@@ -50,6 +57,10 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	load_settings()
 	_build_pause_overlay()
+
+
+func _exit_tree() -> void:
+	SoundGenerator.clear_cache()
 
 
 ## ESC (Aktion "pause") schaltet die Pause um
@@ -157,6 +168,8 @@ func load_settings() -> void:
 		mouse_sensitivity = cfg.get_value("input", "mouse_sensitivity", mouse_sensitivity)
 		master_volume = cfg.get_value("audio", "master_volume", master_volume)
 		fov = cfg.get_value("video", "fov", fov)
+		bot_count = clampi(cfg.get_value("match", "bot_count", bot_count), 1, MAX_BOTS)
+		bot_skill = clampi(cfg.get_value("match", "bot_skill", bot_skill), 0, 4)
 	apply_master_volume()
 
 
@@ -166,6 +179,8 @@ func save_settings() -> void:
 	cfg.set_value("input", "mouse_sensitivity", mouse_sensitivity)
 	cfg.set_value("audio", "master_volume", master_volume)
 	cfg.set_value("video", "fov", fov)
+	cfg.set_value("match", "bot_count", bot_count)
+	cfg.set_value("match", "bot_skill", bot_skill)
 	cfg.save(SETTINGS_PATH)
 
 
@@ -181,6 +196,27 @@ func apply_master_volume() -> void:
 func register_spawn_point(point: Node3D) -> void:
 	if not spawn_points.has(point):
 		spawn_points.append(point)
+
+
+## Spawnpunkt mit moeglichst grossem Abstand zu allen anderen lebenden Kaempfern.
+## Unter den zwei besten wird zufaellig gewaehlt, damit der Spawn nicht vorhersagbar ist.
+func get_spawn_transform(for_node: Node3D) -> Transform3D:
+	if spawn_points.is_empty():
+		return Transform3D(Basis(), Vector3(0.0, 1.5, 0.0))
+	var others: Array[Node3D] = []
+	for group in ["player", "enemies"]:
+		for node in get_tree().get_nodes_in_group(group):
+			if node != for_node and node.get("health") != null and not node.health.is_dead:
+				others.append(node)
+	var rated: Array = []
+	for point in spawn_points:
+		var nearest: float = INF
+		for other in others:
+			nearest = minf(nearest, point.global_position.distance_to(other.global_position))
+		rated.append({ "point": point, "dist": nearest })
+	rated.sort_custom(func(a, b): return a.dist > b.dist)
+	var pick: int = randi() % mini(2, rated.size())
+	return rated[pick].point.global_transform
 
 
 ## Gibt einen zufaelligen Spawnpunkt zurueck
