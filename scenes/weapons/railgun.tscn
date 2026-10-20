@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://railgun_weapon_001"]
+[gd_scene load_steps=9 format=3 uid="uid://railgun_weapon_001"]
 
 [ext_resource type="Script" path="res://scripts/weapons/railgun.gd" id="1_rail"]
+[ext_resource type="Resource" path="res://resources/weapons/railgun.tres" id="9_data"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Graphite"]
 albedo_color = Color(0.12, 0.14, 0.18, 1)
@@ -31,12 +32,7 @@ size = Vector3(0.07, 0.15, 0.07)
 
 [node name="Railgun" type="Node3D"]
 script = ExtResource("1_rail")
-weapon_name = "Railgun"
-damage = 100.0
-cooldown = 1.25
-max_ammo = 25
-current_ammo = 12
-recoil_distance = 0.14
+data = ExtResource("9_data")
 
 [node name="Receiver" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.1)

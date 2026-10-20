@@ -16,7 +16,6 @@ var current_state: State = State.PATROL
 # ==============================================================================
 
 @export_group("Bot Eigenschaften")
-@export var max_health: float = 100.0
 @export var patrol_speed: float = 4.5
 @export var chase_speed: float = 7.5
 @export var combat_speed: float = 3.5
@@ -39,12 +38,12 @@ var current_state: State = State.PATROL
 @onready var muzzle_flash: OmniLight3D = $Muzzle/MuzzleFlash
 @onready var audio_player: AudioStreamPlayer3D = $AudioStreamPlayer3D
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
+@onready var health: HealthComponent = $Health
 
 # ==============================================================================
 # INTERNE VARIABLEN
 # ==============================================================================
 
-var current_health: float = 100.0
 var shoot_timer: float = 0.0
 var lose_target_timer: float = 0.0
 var patrol_target: Vector3 = Vector3.ZERO
@@ -67,7 +66,6 @@ var flash_mat: StandardMaterial3D
 
 
 func _ready() -> void:
-	current_health = max_health
 	original_mesh_transform = body_mesh.transform
 
 	snd_shot = SoundGenerator.create_machinegun_sound()
@@ -85,6 +83,8 @@ func _ready() -> void:
 
 	nav_agent.target_desired_distance = 1.5
 	nav_agent.path_desired_distance = 1.0
+	health.changed.connect(func(_h: float, _a: float): _update_nameplate())
+	health.died.connect(_die)
 	_update_nameplate()
 
 	# Kurze Pause bis der Navigationsserver synchronisiert ist, erst dann gibt es Zufallspunkte
@@ -99,24 +99,24 @@ func _physics_process(delta: float) -> void:
 			velocity.y -= gravity * delta
 			move_and_slide()
 		return
-	
+
 	# Schwerkraft anwenden
 	if not is_on_floor():
 		velocity.y -= gravity * delta
-	
+
 	# Timer aktualisieren
 	if shoot_timer > 0.0:
 		shoot_timer -= delta
-	
+
 	# Spieler-Referenz holen
 	var player: CharacterBody3D = GameManager.current_player
 	var player_visible: bool = false
 	var distance_to_player: float = 9999.0
-	
+
 	if is_instance_valid(player):
 		distance_to_player = global_position.distance_to(player.global_position)
 		player_visible = _check_line_of_sight(player)
-	
+
 	# Zustandsmaschine abarbeiten
 	match current_state:
 		State.PATROL:
@@ -125,7 +125,7 @@ func _physics_process(delta: float) -> void:
 			_process_chase(delta, player, player_visible, distance_to_player)
 		State.ATTACK:
 			_process_attack(delta, player, player_visible, distance_to_player)
-	
+
 	# Bewegung ausfuehren
 	move_and_slide()
 
@@ -140,14 +140,14 @@ func _process_patrol(delta: float, _player: CharacterBody3D, player_visible: boo
 	if player_visible and distance < sight_range:
 		_switch_state(State.CHASE)
 		return
-	
+
 	# Wartezeit am Wegpunkt
 	if patrol_wait_timer > 0.0:
 		patrol_wait_timer -= delta
 		velocity.x = move_toward(velocity.x, 0.0, 10.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, 10.0 * delta)
 		return
-	
+
 	# Zum Patrouillen-Zielpunkt laufen (nur horizontal messen, sonst wird ein Ziel auf
 	# anderer Hoehe nie "erreicht"). Nach 12 Sekunden ohne Ankunft neues Ziel waehlen.
 	patrol_travel_timer += delta
@@ -157,7 +157,7 @@ func _process_patrol(delta: float, _player: CharacterBody3D, player_visible: boo
 		patrol_wait_timer = randf_range(1.5, 3.5)
 		_pick_new_patrol_point()
 		return
-	
+
 	_move_towards(patrol_target, patrol_speed, delta)
 
 
@@ -166,12 +166,12 @@ func _process_chase(delta: float, player: CharacterBody3D, player_visible: bool,
 	if not is_instance_valid(player):
 		_switch_state(State.PATROL)
 		return
-	
+
 	# In Angriffsmodus wechseln, wenn nahe genug und freie Schussbahn
 	if player_visible and distance <= attack_range:
 		_switch_state(State.ATTACK)
 		return
-	
+
 	# Wenn Spieler nicht mehr sichtbar, Timer starten
 	if not player_visible:
 		lose_target_timer += delta
@@ -180,7 +180,7 @@ func _process_chase(delta: float, player: CharacterBody3D, player_visible: bool,
 			return
 	else:
 		lose_target_timer = 0.0
-	
+
 	# Weg zum Spieler berechnen
 	_move_towards(player.global_position, chase_speed, delta)
 
@@ -190,7 +190,7 @@ func _process_attack(delta: float, player: CharacterBody3D, player_visible: bool
 	if not is_instance_valid(player):
 		_switch_state(State.PATROL)
 		return
-	
+
 	# Wenn Spieler ausser Reichweite oder hinter einer Wand verschwunden
 	if not player_visible or distance > attack_range * 1.35:
 		lose_target_timer += delta
@@ -199,27 +199,27 @@ func _process_attack(delta: float, player: CharacterBody3D, player_visible: bool
 			return
 	else:
 		lose_target_timer = 0.0
-	
+
 	# Den Spieler horizontal ansehen
 	_look_towards(player.global_position)
-	
+
 	# Seitliches Strafe-Ausweichmanoever
 	strafe_timer += delta
 	if strafe_timer > strafe_duration:
 		strafe_timer = 0.0
 		strafe_duration = randf_range(1.2, 2.0)
 		strafe_direction = -strafe_direction if randf() > 0.3 else strafe_direction
-	
+
 	var right_vec := transform.basis.x
 	var combat_velocity := right_vec * (strafe_direction * combat_speed)
-	
+
 	# Zu nah am Spieler? Leicht zurueckweichen
 	if distance < 6.0:
 		combat_velocity -= transform.basis.z * (combat_speed * 0.8)
-	
+
 	velocity.x = combat_velocity.x
 	velocity.z = combat_velocity.z
-	
+
 	# Schiessen, wenn Abklingzeit bereit
 	if shoot_timer <= 0.0:
 		_bot_fire(player)
@@ -242,13 +242,13 @@ func _check_line_of_sight(target: Node3D) -> bool:
 	var space_state := get_world_3d().direct_space_state
 	var from: Vector3 = global_position + Vector3(0.0, 1.4, 0.0)
 	var to: Vector3 = target.global_position + Vector3(0.0, 1.0, 0.0)
-	
+
 	# Nur Welt und Spieler: andere Bots verdecken die Sicht nicht
 	var query := PhysicsRayQueryParameters3D.create(from, to, Layers.WORLD | Layers.PLAYER)
 	query.exclude = [get_rid()]
 	query.collide_with_bodies = true
 	query.collide_with_areas = false
-	
+
 	var hit := space_state.intersect_ray(query)
 	if hit:
 		return hit.collider == target
@@ -262,14 +262,14 @@ func _bot_fire(player: CharacterBody3D) -> void:
 		audio_player.stream = snd_shot
 		audio_player.pitch_scale = randf_range(0.85, 0.95)
 		audio_player.play()
-	
+
 	# Muendungsfeuer aufblitzen lassen
 	_flash_muzzle()
-	
+
 	var from: Vector3 = muzzle.global_position if muzzle else global_position + Vector3(0.0, 1.2, 0.0)
 	var target_chest: Vector3 = player.global_position + Vector3(0.0, 1.0, 0.0)
 	var base_dir: Vector3 = (target_chest - from).normalized()
-	
+
 	# Leichte Ungenauigkeit hinzufuegen (faire Bot-Praezision)
 	var spread_rad: float = deg_to_rad(inaccuracy_degrees)
 	var random_offset := Vector3(
@@ -279,24 +279,24 @@ func _bot_fire(player: CharacterBody3D) -> void:
 	)
 	var shoot_dir: Vector3 = (base_dir + random_offset).normalized()
 	var to: Vector3 = from + shoot_dir * 100.0
-	
+
 	# Raycast fuer Schuss
 	var space_state := get_world_3d().direct_space_state
 	var query := PhysicsRayQueryParameters3D.create(from, to, Layers.HITTABLE)
 	query.exclude = [get_rid()]
-	
+
 	var hit := space_state.intersect_ray(query)
 	if hit:
 		var hit_collider: Object = hit.collider
 		var hit_pos: Vector3 = hit.position
 		var hit_normal: Vector3 = hit.normal
-		
+
 		# Funken am Treffpunkt
 		if hit_spark_scene:
 			var spark := hit_spark_scene.instantiate() as Node3D
 			get_parent().add_child(spark)
 			spark.global_position = hit_pos + hit_normal * 0.05
-		
+
 		# Schaden am Spieler anrichten
 		if hit_collider == player and player.has_method("take_damage"):
 			player.take_damage(DamageInfo.create(damage_per_shot, self, hit_pos, shoot_dir, "Maschinengewehr"))
@@ -320,10 +320,7 @@ func take_damage(info: DamageInfo) -> void:
 	if current_state == State.DEAD:
 		return
 	var amount: float = info.amount
-	
-	current_health -= amount
-	_update_nameplate()
-	
+
 	# Schwebende 3D-Schadenszahl erzeugen
 	if floating_number_scene:
 		var fn := floating_number_scene.instantiate() as FloatingNumber
@@ -331,26 +328,26 @@ func take_damage(info: DamageInfo) -> void:
 		# Bei Flaechenschaden liegt der Trefferpunkt in der Explosion, deshalb ueber dem Kopf anzeigen
 		var spawn_pos: Vector3 = global_position + Vector3(0.0, 1.4, 0.0) if info.is_splash else info.position
 		fn.setup(amount, spawn_pos)
-	
+
 	# Treffer-Sound abspielen
 	if audio_player:
 		audio_player.stream = snd_hurt
 		audio_player.pitch_scale = randf_range(0.9, 1.1)
 		audio_player.play()
-	
+
 	# Treffer-Impuls (z.B. durch Raketen-Explosion)
 	velocity += info.direction * (amount * 0.12)
-	
+
 	# Optischer Trefferblitz (Mesh kurz weiss aufleuchten lassen)
 	_flash_hit()
-	
+
 	# Bei Angriff sofort auf den Spieler aufmerksam werden
 	if current_state == State.PATROL:
 		_switch_state(State.CHASE)
-	
-	# Tod pruefen
-	if current_health <= 0.0:
-		_die()
+
+	# Schaden zuletzt anwenden: Bei Tod startet health.died -> _die() mit Todes-Sound,
+	# der sonst vom Treffer-Sound oben ueberschrieben wuerde
+	health.apply_damage(info)
 
 
 ## Kurzes optisches Aufblitzen bei Treffern
@@ -364,43 +361,42 @@ func _flash_hit() -> void:
 
 
 ## Tod des Bots: Kollision abschalten, Sound, Frag fuer Spieler und Respawn-Timer
-func _die() -> void:
+func _die(info: DamageInfo) -> void:
 	_switch_state(State.DEAD)
-	current_health = 0.0
-	_update_nameplate()
-	
+
 	# Todes-Sound
 	if audio_player:
 		audio_player.stream = snd_death
 		audio_player.play()
-	
-	# Frag fuer den Spieler gutschreiben
-	GameManager.add_player_frag()
-	
+
+	# Frag fuer den Spieler gutschreiben (nur wenn er den Bot getoetet hat)
+	if info.attacker is Player:
+		GameManager.add_player_frag()
+
 	# Kollision temporaer deaktivieren
 	if collision_shape:
 		collision_shape.disabled = true
-	
+
 	# Umfall-Animation per Tween
 	var tween := create_tween()
 	tween.tween_property(body_mesh, "rotation_degrees:x", 85.0, 0.3)
-	
+
 	# Respawn nach Verzoegerung
 	get_tree().create_timer(respawn_delay, false).timeout.connect(_respawn)
 
 
 ## Respawn: Reaktiviert den Bot an einem Spawnpunkt
 func _respawn() -> void:
-	current_health = max_health
-	
+	health.reset()
+
 	# An einem zufaelligen Spawnpunkt platzieren
 	global_transform = GameManager.get_random_spawn_transform()
-	
+
 	# Mesh-Drehung und Kollision zuruecksetzen
 	body_mesh.transform = original_mesh_transform
 	if collision_shape:
 		collision_shape.disabled = false
-	
+
 	velocity = Vector3.ZERO
 	_switch_state(State.PATROL)
 	_pick_new_patrol_point()
@@ -413,16 +409,16 @@ func _respawn() -> void:
 ## Bewegt den Bot zu einer Zielposition (ueber NavAgent oder direkte Lenkung)
 func _move_towards(target_pos: Vector3, speed: float, _delta: float) -> void:
 	nav_agent.target_position = target_pos
-	
+
 	var next_path_pos: Vector3 = nav_agent.get_next_path_position()
 	var dir: Vector3 = (next_path_pos - global_position)
 	dir.y = 0.0
-	
+
 	# Falls Navigationsnetz nicht bereit oder Ziel direkt erreichbar
 	if dir.length_squared() < 0.01:
 		dir = (target_pos - global_position)
 		dir.y = 0.0
-	
+
 	if dir.length_squared() > 0.01:
 		dir = dir.normalized()
 		velocity.x = dir.x * speed
@@ -457,17 +453,17 @@ func _pick_new_patrol_point() -> void:
 func _update_nameplate() -> void:
 	if not nameplate:
 		return
-	
+
 	var state_text: String = ""
 	match current_state:
 		State.PATROL: state_text = "Patrouille"
 		State.CHASE: state_text = "Verfolgen"
 		State.ATTACK: state_text = "Angriff"
 		State.DEAD: state_text = "TOT"
-	
-	nameplate.text = "BOT [%s] - %d HP" % [state_text, int(current_health)]
-	
-	if current_health <= 0:
+
+	nameplate.text = "BOT [%s] - %d HP" % [state_text, int(health.health)]
+
+	if health.is_dead:
 		nameplate.modulate = Color(0.5, 0.5, 0.5)
 	elif current_state == State.ATTACK:
 		nameplate.modulate = Color(1.0, 0.25, 0.2)

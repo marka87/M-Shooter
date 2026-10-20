@@ -1,6 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://rocket_launcher_001"]
+[gd_scene load_steps=8 format=3 uid="uid://rocket_launcher_001"]
 
 [ext_resource type="Script" path="res://scripts/weapons/rocket_launcher.gd" id="1_rpg"]
+[ext_resource type="Resource" path="res://resources/weapons/rocket_launcher.tres" id="9_data"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_LauncherDark"]
 albedo_color = Color(0.2, 0.22, 0.26, 1)
@@ -27,12 +28,7 @@ size = Vector3(0.08, 0.18, 0.08)
 
 [node name="RocketLauncher" type="Node3D"]
 script = ExtResource("1_rpg")
-weapon_name = "Raketenwerfer"
-damage = 100.0
-cooldown = 0.8
-max_ammo = 35
-current_ammo = 18
-recoil_distance = 0.12
+data = ExtResource("9_data")
 
 [node name="MainTube" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.2)

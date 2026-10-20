@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/weapon_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = &"rocket_launcher"
+weapon_name = "Raketenwerfer"
+damage = 100.0
+cooldown = 0.8
+max_ammo = 35
+start_ammo = 18
+ammo_box_amount = 6
+recoil_distance = 0.12

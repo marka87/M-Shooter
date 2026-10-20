@@ -73,20 +73,20 @@ func run() -> void:
 			break
 	check(clear, "Freie Schussbahn zum Bot gefunden")
 	wm.switch_to_weapon(0)
-	var hp_before: float = b1.current_health
+	var hp_before: float = b1.health.health
 	var ammo_before: int = wm.get_current_weapon().current_ammo
 	await fire_for(wm, 1.0)
 	var shots: int = ammo_before - wm.get_current_weapon().current_ammo
 	print("MG-Schuesse in 1 s: ", shots)
 	check(shots >= 10 and shots <= 12, "MG-Feuerrate ~11/s (%d)" % shots)
-	check(b1.current_health < hp_before, "MG trifft Bot (%.0f -> %.0f)" % [hp_before, b1.current_health])
+	check(b1.health.health < hp_before, "MG trifft Bot (%.0f -> %.0f)" % [hp_before, b1.health.health])
 
 	# Railgun toetet Bot
-	b1.current_health = 50.0
+	b1.health.health = 50.0
 	if b1.current_state == b1.State.DEAD:
 		b1._respawn()
 		b1.global_position = player.global_position - player.global_transform.basis.z * 5.0
-		b1.current_health = 50.0
+		b1.health.health = 50.0
 		b1.set_physics_process(false)
 		await physics_frame
 	var frags_before: int = gm.player_frags
@@ -101,7 +101,7 @@ func run() -> void:
 	print("Ray: cam ", cam.global_position, " fwd ", -cam.global_transform.basis.z, " -> ", r.get("collider"), " @ ", r.get("position"), " bot ", b1.global_position, " bot-shape aktiv ", not b1.collision_shape.disabled)
 	wm.fire_current_weapon()
 	await physics_frame
-	print("nach Schuss: ammo ", rg.current_ammo, " Bot-HP ", b1.current_health)
+	print("nach Schuss: ammo ", rg.current_ammo, " Bot-HP ", b1.health.health)
 	check(b1.current_state == b1.State.DEAD, "Railgun toetet Bot")
 	check(gm.player_frags == frags_before + 1, "Frag gezaehlt (%d)" % gm.player_frags)
 	b1.set_physics_process(true)
@@ -111,20 +111,20 @@ func run() -> void:
 	await wait(0.3)
 	player.camera_pitch = deg_to_rad(-89.0)
 	player.head.rotation.x = player.camera_pitch
-	var hp_p: float = player.current_health + player.current_armor
+	var hp_p: float = player.health.health + player.health.armor
 	wm.fire_current_weapon()
 	var max_vy := 0.0
 	for i in 60:
 		await physics_frame
 		max_vy = max(max_vy, player.velocity.y)
-	print("Rocket-Jump max. vy: ", max_vy, "  HP+Armor: ", hp_p, " -> ", player.current_health + player.current_armor)
+	print("Rocket-Jump max. vy: ", max_vy, "  HP+Armor: ", hp_p, " -> ", player.health.health + player.health.armor)
 	check(max_vy > 5.0, "Rocket-Jump hebt Spieler an")
-	check(player.current_health + player.current_armor < hp_p, "Eigenschaden durch Rakete")
+	check(player.health.health + player.health.armor < hp_p, "Eigenschaden durch Rakete")
 	player.camera_pitch = 0.0
 	player.head.rotation.x = 0.0
 
 	# Pickup: Health
-	player.current_health = 40.0
+	player.health.health = 40.0
 	var health_pickup: Node3D = null
 	for item in current_scene.get_node("Items").get_children():
 		if item.pickup_type == item.PickupType.HEALTH:
@@ -132,8 +132,32 @@ func run() -> void:
 			break
 	player.global_position = health_pickup.global_position - Vector3(0, 0.5, 0)
 	await wait(0.5)
-	check(player.current_health > 40.0, "Health-Pickup wirkt (%.0f)" % player.current_health)
+	check(player.health.health > 40.0, "Health-Pickup wirkt (%.0f)" % player.health.health)
 	check(not health_pickup.is_active, "Pickup danach inaktiv")
+
+	# HUD zeigt die Lebenspunkte
+	check(player.hud.health_label.text == "HP: %d" % int(player.health.health), "HUD zeigt HP (%s)" % player.hud.health_label.text)
+
+	# Munitionskiste: nur einsammeln, wenn etwas fehlt
+	var ammo_box: Node3D = null
+	for item in current_scene.get_node("Items").get_children():
+		if item.pickup_type == item.PickupType.AMMO_BOX:
+			ammo_box = item
+			break
+	for w in wm.weapons:
+		w.current_ammo = w.max_ammo
+	player.global_position = ammo_box.global_position - Vector3(0, 0.5, 0)
+	await wait(0.5)
+	check(ammo_box.is_active, "Volle Munition: Kiste bleibt liegen")
+	player.global_position = Vector3(0, 30, 0)
+	await wait(0.2)
+	var rail = wm.weapons[2]
+	rail.current_ammo = 1
+	player.global_position = ammo_box.global_position - Vector3(0, 0.5, 0)
+	await wait(0.5)
+	check(not ammo_box.is_active, "Munitionskiste eingesammelt")
+	check(rail.current_ammo == 1 + rail.data.ammo_box_amount, "Railgun +%d Munition (%d)" % [rail.data.ammo_box_amount, rail.current_ammo])
+	check(wm.get_current_weapon().weapon_name == player.hud.weapon_name_label.text, "HUD zeigt aktive Waffe")
 
 	# Tod durch Bot und Respawn
 	var b2 = bots[1]
@@ -145,6 +169,8 @@ func run() -> void:
 	gm.current_state = gm.GameState.PLAYING
 	gm.toggle_pause()
 	check(paused, "Pause aktiv")
+	check(gm._pause_layer.visible, "Pause-Menue sichtbar")
+	check(player.hud.death_overlay.visible, "Todes-Overlay sichtbar")
 	await wait(4.0)
 	check(player.is_dead, "Respawn wartet waehrend Pause")
 	gm.toggle_pause()
@@ -152,7 +178,7 @@ func run() -> void:
 		b.set_physics_process(false)
 	await wait(3.5)
 	check(not player.is_dead, "Respawn nach Pause")
-	check(player.current_armor == player.start_armor, "Start-Ruestung nach Respawn")
+	check(player.health.armor == player.health.start_armor, "Start-Ruestung nach Respawn")
 
 	# Einstellungen
 	gm.save_settings()

@@ -14,15 +14,15 @@ Ohne diese Schritte wird jede spätere Phase teurer.
 
 | # | Aufgabe | Warum | Aufwand |
 |---|---|---|---|
-| 0.1 | `git init`, erster Commit, danach kleine Commits pro Feature | Jede Änderung lässt sich zurückdrehen | S |
-| 0.2 | Projekt einmal in Godot starten und Fehler aus Runde 1 und 2 beseitigen | Bisher ist nichts in der Engine getestet | S |
+| 0.1 | ✅ `git init`, erster Commit, danach kleine Commits pro Feature | Jede Änderung lässt sich zurückdrehen | S |
+| 0.2 | ✅ Projekt einmal in Godot starten und Fehler aus Runde 1 und 2 beseitigen | Bisher ist nichts in der Engine getestet | S |
 | 0.3 | ✅ teilweise: 120 Hz gesetzt, Interpolation folgt nach Test in der Engine. **Physik-Takt auf 120 Hz** (`physics/common/physics_ticks_per_second`) plus **Physik-Interpolation** einschalten | Quake-Bewegung fühlt sich erst bei hohem Takt präzise an. Strafe-Jumping hängt direkt davon ab | S |
 | 0.4 | ✅ **Jolt Physics** als 3D-Physik-Engine wählen | Stabiler und schneller als GodotPhysics, vor allem bei CharacterBody3D an Kanten und Rampen | S |
 | 0.5 | ✅ Kollisions-Layer in den Projekteinstellungen benennen (World, Player, Bot, Pickup, Projectile) und überall statt `0xFFFFFFFF` nutzen | Heute stehen Zahlen wie `collision_mask = 5` im Code, das ist schwer zu lesen | S |
-| 0.6 | **Waffen als Daten:** `WeaponData`-Resource (`.tres`) mit Schaden, Feuerrate, Munition, Sounds, Modell | `add_all_ammo(mg, rkt, rail)` und Index 0/1/2 in Pickups brechen bei jeder neuen Waffe | M |
-| 0.7 | **`player.gd` aufteilen** (500 Zeilen): `MovementController`, `HealthComponent` (auch für Bots), HUD als eigene Szene mit eigenem Skript | Bewegung, Schaden und HUD hängen heute in einer Datei | M |
+| 0.6 | ✅ **Waffen als Daten:** `WeaponData`-Resource (`.tres`) mit Schaden, Feuerrate, Munition, Sounds, Modell | `add_all_ammo(mg, rkt, rail)` und Index 0/1/2 in Pickups brechen bei jeder neuen Waffe | M |
+| 0.7 | ✅ teilweise: HealthComponent und HUD-Szene; Bewegung bleibt in `player.gd`. **`player.gd` aufteilen** (500 Zeilen): `MovementController`, `HealthComponent` (auch für Bots), HUD als eigene Szene mit eigenem Skript | Bewegung, Schaden und HUD hängen heute in einer Datei | M |
 | 0.8 | ✅ `DamageInfo`-Klasse (Menge, Angreifer, Waffe, Position, Richtung, Headshot) statt vier loser Parameter | Killfeed, Ansager, Statistiken und Multiplayer brauchen das alle | S |
-| 0.9 | Pause-Menü aus `game_manager.gd` in eine eigene `.tscn` verschieben | UI im Editor gestalten statt per Code | S |
+| 0.9 | ✅ Pause-Menü aus `game_manager.gd` in eine eigene `.tscn` verschieben | UI im Editor gestalten statt per Code | S |
 
 ---
 

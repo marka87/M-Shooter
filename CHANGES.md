@@ -1,3 +1,15 @@
+# Änderungen (Runde 5: Roadmap Phase 0, Teil 2)
+
+- **Waffen als Daten (0.6):** Neue Resource `WeaponData` (`scripts/weapons/weapon_data.gd`), Werte in `resources/weapons/*.tres`. `WeaponBase` liest Name, Schaden, Cooldown, Munition und Rückstoß daraus. Eine neue Waffe braucht nur noch eine `.tres` und eine Szene.
+- **Pickups ohne feste Indizes:** Typen sind jetzt `AMMO_BOX`, `WEAPON_AMMO` (mit `weapon_id`), `HEALTH`, `ARMOR`. Die Munitionskiste gibt jeder Waffe ihre `ammo_box_amount` und bleibt liegen, wenn alles voll ist.
+- **HealthComponent (0.7):** Leben, Rüstung, Rüstungsabzug und Tod für Spieler und Bots in einer gemeinsamen Komponente (`scripts/components/health_component.gd`) mit den Signalen `changed`, `damaged`, `died`. Bots geben nur noch einen Frag, wenn der Spieler sie getötet hat.
+- **HUD als eigene Szene (0.7):** `scenes/ui/hud.tscn` mit `scripts/ui/hud.gd`. Das HUD hängt sich an die Signale des Spielers. `player.gd` schrumpft von 527 auf ca. 350 Zeilen und enthält nur noch Bewegung, Schaden, Tod und Respawn.
+- **Pause-Menü als Szene (0.9):** `scenes/ui/pause_menu.tscn` statt per Code gebaut, mit Tastaturfokus auf „Weiterspielen“.
+- **Fehler behoben:** Wenn ein Treffer den Bot tötete, überschrieb der Treffer-Sound den Todes-Sound. Das Todes-Overlay erscheint jetzt sofort, auch wenn im selben Frame pausiert wird.
+- **Rauchtest erweitert** auf 27 Prüfungen (Munitionskiste, HUD-Anzeige, Pause-Menü, Todes-Overlay). Alle bestanden.
+
+---
+
 # Änderungen (Runde 4: erster Test in Godot 4.7.2)
 
 Erstmals mit echter Engine geprüft (headless, Godot 4.7.2).

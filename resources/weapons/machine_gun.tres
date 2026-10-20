@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/weapon_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = &"machine_gun"
+weapon_name = "Maschinengewehr"
+damage = 12.0
+cooldown = 0.09
+max_ammo = 200
+start_ammo = 120
+ammo_box_amount = 60
+recoil_distance = 0.04

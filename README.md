@@ -91,6 +91,9 @@ Booter/
 │   │   └── armor_pickup.tscn    # Rüstungs-Schild
 │   ├── menu/
 │   │   └── main_menu.tscn       # Hauptmenü mit Einstellungen & Start
+│   ├── ui/
+│   │   ├── hud.tscn             # Spieler-HUD
+│   │   └── pause_menu.tscn      # Pause-Menü
 │   └── weapons/
 │       ├── machine_gun.tscn     # Maschinengewehr 3D-Szene
 │       ├── rocket_launcher.tscn # Raketenwerfer 3D-Szene
@@ -99,7 +102,16 @@ Booter/
 │       ├── railgun.tscn         # Railgun 3D-Szene
 │       ├── beam.tscn            # Leuchtender Railgun-Lichtstrahl
 │       └── hit_spark.tscn       # Funken-Einschlagseffekt
+├── resources/
+│   └── weapons/            # WeaponData (.tres) je Waffe: Schaden, Feuerrate, Munition
 ├── scripts/
+│   ├── components/
+│   │   └── health_component.gd # Leben & Rüstung für Spieler und Bots
+│   ├── ui/
+│   │   ├── hud.gd
+│   │   └── pause_menu.gd
+│   ├── damage_info.gd      # Daten eines Treffers
+│   ├── layers.gd           # Kollisions-Layer als Konstanten
 │   ├── game_manager.gd     # Autoload-Singleton (Punkte, Respawns, Pause-Menü)
 │   ├── player.gd           # Quake-Bewegung, Doppelsprung, HUD, Schaden
 │   ├── bot.gd              # Bot-Zustandsmaschine & KI

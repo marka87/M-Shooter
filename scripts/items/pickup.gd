@@ -4,15 +4,16 @@ class_name ItemPickup
 ## Drehbares, schwebendes Item-Pickup fuer Munition, Leben oder Ruestung
 ## Wird beim Beruehren aufgesammelt und respawnt automatisch nach einigen Sekunden.
 
-enum PickupType { ALL_AMMO, MG_AMMO, ROCKET_AMMO, RAIL_AMMO, HEALTH, ARMOR }
+enum PickupType { AMMO_BOX, WEAPON_AMMO, HEALTH, ARMOR }
 
-@export var pickup_type: PickupType = PickupType.ALL_AMMO
+@export var pickup_type: PickupType = PickupType.AMMO_BOX
 @export var respawn_time: float = 8.0
 
-# Mengen
-@export var mg_ammo_amount: int = 60
-@export var rocket_ammo_amount: int = 6
-@export var rail_ammo_amount: int = 5
+@export_group("Mengen")
+## Munitionskiste: Mengen stehen in der WeaponData jeder Waffe (ammo_box_amount)
+## Nur fuer WEAPON_AMMO: Waffe (WeaponData.id) und Menge
+@export var weapon_id: StringName = &""
+@export var weapon_ammo_amount: int = 10
 @export var health_amount: float = 35.0
 @export var armor_amount: float = 50.0
 
@@ -57,32 +58,17 @@ func _on_body_entered(body: Node3D) -> void:
 	if not body.is_in_group("player"):
 		return
 	
+	# Nur einsammeln, wenn es dem Spieler etwas bringt (volle Werte lassen das Item liegen)
 	var picked_up: bool = false
-	
-	# Munition oder Leben auf den Spieler anwenden
 	match pickup_type:
-		PickupType.ALL_AMMO:
-			if body.has_method("add_all_ammo"):
-				body.add_all_ammo(mg_ammo_amount, rocket_ammo_amount, rail_ammo_amount)
-				picked_up = true
-		PickupType.MG_AMMO:
-			if body.has_method("add_ammo_by_index"):
-				body.add_ammo_by_index(0, mg_ammo_amount)
-				picked_up = true
-		PickupType.ROCKET_AMMO:
-			if body.has_method("add_ammo_by_index"):
-				body.add_ammo_by_index(1, rocket_ammo_amount)
-				picked_up = true
-		PickupType.RAIL_AMMO:
-			if body.has_method("add_ammo_by_index"):
-				body.add_ammo_by_index(2, rail_ammo_amount)
-				picked_up = true
+		PickupType.AMMO_BOX:
+			picked_up = body.weapon_manager.add_ammo_box()
+		PickupType.WEAPON_AMMO:
+			picked_up = body.weapon_manager.add_ammo(weapon_id, weapon_ammo_amount)
 		PickupType.HEALTH:
-			if body.has_method("add_health"):
-				picked_up = body.add_health(health_amount)
+			picked_up = body.health.heal(health_amount)
 		PickupType.ARMOR:
-			if body.has_method("add_armor"):
-				picked_up = body.add_armor(armor_amount)
+			picked_up = body.health.add_armor(armor_amount)
 	
 	if picked_up:
 		_collect()

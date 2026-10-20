@@ -42,7 +42,7 @@ func _ready() -> void:
 		if child is WeaponBase:
 			weapons.append(child)
 			child.unequip()
-			child.ammo_changed.connect(_on_weapon_ammo_changed)
+			child.ammo_changed.connect(_on_weapon_ammo_changed.bind(child))
 	
 	# Erste Waffe (Maschinengewehr) ausruesten
 	if not weapons.is_empty():
@@ -139,13 +139,32 @@ func get_current_weapon() -> WeaponBase:
 	return weapons[current_weapon_index]
 
 
+## Munitionskiste: jede Waffe bekommt ihre ammo_box_amount. True, wenn irgendetwas aufgefuellt wurde.
+func add_ammo_box() -> bool:
+	var any := false
+	for weapon in weapons:
+		if weapon.add_ammo(weapon.data.ammo_box_amount):
+			any = true
+	return any
+
+
+## Munition fuer eine bestimmte Waffe (per WeaponData.id). True, wenn aufgefuellt wurde.
+func add_ammo(weapon_id: StringName, amount: int) -> bool:
+	for weapon in weapons:
+		if weapon.weapon_id == weapon_id:
+			return weapon.add_ammo(amount)
+	return false
+
+
 func _on_game_paused(is_paused: bool) -> void:
 	if not is_paused:
 		_wait_for_shoot_release = true
 
 
-func _on_weapon_ammo_changed(current: int, max_val: int) -> void:
-	ammo_updated.emit(current, max_val)
+## Nur die Munition der aktiven Waffe ans HUD melden
+func _on_weapon_ammo_changed(current: int, max_val: int, weapon: WeaponBase) -> void:
+	if weapon == get_current_weapon():
+		ammo_updated.emit(current, max_val)
 
 
 ## Berechnet die geschmeidige Waffen-Traegheit beim Drehen des Blickwinkels

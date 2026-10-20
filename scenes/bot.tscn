@@ -1,6 +1,7 @@
-[gd_scene load_steps=10 format=3 uid="uid://bot_enemy_001"]
+[gd_scene load_steps=11 format=3 uid="uid://bot_enemy_001"]
 
 [ext_resource type="Script" path="res://scripts/bot.gd" id="1_bot"]
+[ext_resource type="Script" path="res://scripts/components/health_component.gd" id="9_health"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.45
@@ -78,3 +79,7 @@ outline_size = 8
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
 unit_size = 7.0
 max_distance = 60.0
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("9_health")
+armor_absorption = 0.0

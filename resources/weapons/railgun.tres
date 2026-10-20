@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/weapons/weapon_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = &"railgun"
+weapon_name = "Railgun"
+damage = 100.0
+cooldown = 1.25
+max_ammo = 25
+start_ammo = 12
+ammo_box_amount = 5
+recoil_distance = 0.14

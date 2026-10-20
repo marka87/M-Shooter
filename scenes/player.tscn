@@ -1,10 +1,12 @@
-[gd_scene load_steps=9 format=3 uid="uid://bplayer_character_001"]
+[gd_scene load_steps=11 format=3 uid="uid://bplayer_character_001"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/weapon_manager.gd" id="2_wmgr"]
 [ext_resource type="PackedScene" uid="uid://machine_gun_001" path="res://scenes/weapons/machine_gun.tscn" id="3_mg"]
 [ext_resource type="PackedScene" uid="uid://rocket_launcher_001" path="res://scenes/weapons/rocket_launcher.tscn" id="4_rpg"]
 [ext_resource type="PackedScene" uid="uid://railgun_weapon_001" path="res://scenes/weapons/railgun.tscn" id="5_rail"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="6_hud"]
+[ext_resource type="Script" path="res://scripts/components/health_component.gd" id="7_health"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -50,223 +52,11 @@ script = ExtResource("2_wmgr")
 
 [node name="SwitchAudioPlayer" type="AudioStreamPlayer" parent="Head/Camera3D/WeaponHolder"]
 
-[node name="HUD" type="CanvasLayer" parent="."]
+[node name="HUD" parent="." instance=ExtResource("6_hud")]
 
-[node name="CrosshairContainer" type="CenterContainer" parent="HUD"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="CrosshairDot" type="ColorRect" parent="HUD/CrosshairContainer"]
-custom_minimum_size = Vector2(4, 4)
-layout_mode = 2
-mouse_filter = 2
-color = Color(1, 1, 1, 0.85)
-
-[node name="Hitmarker" type="Control" parent="HUD/CrosshairContainer"]
-visible = false
-custom_minimum_size = Vector2(24, 24)
-layout_mode = 2
-mouse_filter = 2
-
-[node name="TopLeft" type="ColorRect" parent="HUD/CrosshairContainer/Hitmarker"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -10.0
-offset_top = -10.0
-offset_right = -4.0
-offset_bottom = -8.0
-rotation = 0.785398
-color = Color(1, 0.2, 0.2, 1)
-
-[node name="TopRight" type="ColorRect" parent="HUD/CrosshairContainer/Hitmarker"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = 4.0
-offset_top = -10.0
-offset_right = 10.0
-offset_bottom = -8.0
-rotation = -0.785398
-color = Color(1, 0.2, 0.2, 1)
-
-[node name="BottomLeft" type="ColorRect" parent="HUD/CrosshairContainer/Hitmarker"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -10.0
-offset_top = 8.0
-offset_right = -4.0
-offset_bottom = 10.0
-rotation = -0.785398
-color = Color(1, 0.2, 0.2, 1)
-
-[node name="BottomRight" type="ColorRect" parent="HUD/CrosshairContainer/Hitmarker"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = 4.0
-offset_top = 8.0
-offset_right = 10.0
-offset_bottom = 10.0
-rotation = 0.785398
-color = Color(1, 0.2, 0.2, 1)
-
-[node name="SpeedLabel" type="Label" parent="HUD"]
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -250.0
-offset_top = 20.0
-offset_right = 250.0
-offset_bottom = 50.0
-grow_horizontal = 2
-text = "Geschwindigkeit: 0.0 m/s"
-horizontal_alignment = 1
-
-[node name="FragsLabel" type="Label" parent="HUD"]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -200.0
-offset_top = 20.0
-offset_right = -30.0
-offset_bottom = 55.0
-grow_horizontal = 0
-theme_override_font_sizes/font_size = 22
-text = "Frags: 0"
-horizontal_alignment = 2
-
-[node name="DamageFlash" type="ColorRect" parent="HUD"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(1, 0, 0, 0)
-
-[node name="StatsContainer" type="VBoxContainer" parent="HUD"]
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 30.0
-offset_top = -85.0
-offset_right = 220.0
-offset_bottom = -25.0
-grow_vertical = 0
-
-[node name="HealthLabel" type="Label" parent="HUD/StatsContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "HP: 100"
-
-[node name="ArmorLabel" type="Label" parent="HUD/StatsContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "RÜSTUNG: 50"
-
-[node name="WeaponInfo" type="VBoxContainer" parent="HUD"]
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -280.0
-offset_top = -85.0
-offset_right = -30.0
-offset_bottom = -25.0
-grow_horizontal = 0
-grow_vertical = 0
-
-[node name="WeaponNameLabel" type="Label" parent="HUD/WeaponInfo"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Maschinengewehr"
-horizontal_alignment = 2
-
-[node name="AmmoLabel" type="Label" parent="HUD/WeaponInfo"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Munition: 120 / 200"
-horizontal_alignment = 2
-
-[node name="ControlHints" type="Label" parent="HUD"]
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -480.0
-offset_top = -45.0
-offset_right = 480.0
-offset_bottom = -15.0
-grow_horizontal = 2
-grow_vertical = 0
-text = "[WASD] Bewegen | [Leertaste] Springen & Doppelsprung | [Shift] Sprint | [1, 2, 3 / Mausrad] Waffe | [ESC] Pause"
-horizontal_alignment = 1
-
-[node name="DeathOverlay" type="Control" parent="HUD"]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="Dim" type="ColorRect" parent="HUD/DeathOverlay"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.2, 0.02, 0.02, 0.75)
-
-[node name="VBox" type="VBoxContainer" parent="HUD/DeathOverlay"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = -60.0
-offset_right = 300.0
-offset_bottom = 60.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="DeathTitle" type="Label" parent="HUD/DeathOverlay/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.25, 0.2, 1)
-theme_override_font_sizes/font_size = 38
-text = "DU WURDEST ELIMINIERT"
-horizontal_alignment = 1
-
-[node name="RespawnCountdownLabel" type="Label" parent="HUD/DeathOverlay/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Respawn in 3 Sekunden..."
-horizontal_alignment = 1
+[node name="Health" type="Node" parent="."]
+script = ExtResource("7_health")
+start_armor = 50.0
 
 [node name="HurtAudioPlayer" type="AudioStreamPlayer" parent="."]
 

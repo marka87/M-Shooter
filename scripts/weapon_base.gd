@@ -3,19 +3,32 @@ class_name WeaponBase
 
 ## Basisklasse fuer alle Waffen im Spiel
 ## Regelt Munition, Abklingzeit, Schuss-Verhalten, Rueckstoss und Audio.
-## Die Werte der einzelnen Waffen stehen in deren .tscn und sind im Inspector einstellbar.
+## Die Werte (Schaden, Feuerrate, Munition) kommen aus einer WeaponData-Resource.
 
 signal fired()
 signal ammo_changed(current: int, max_val: int)
 
 @export_group("Waffen-Eigenschaften")
-@export var weapon_name: String = "Waffe"
-@export var damage: float = 25.0
-@export var cooldown: float = 0.2 # Zeit in Sekunden zwischen zwei Schuesssen
-@export var max_ammo: int = 100
-@export var current_ammo: int = 50
-@export var recoil_distance: float = 0.08 # Optischer Rueckstoss des Waffenmodells (m)
-@export var recoil_recovery_speed: float = 12.0 # Wie schnell die Waffe nach dem Rueckstoss zurueckkehrt
+## Werte der Waffe (res://resources/weapons/*.tres)
+@export var data: WeaponData
+## Wie schnell die Waffe nach dem Rueckstoss zurueckkehrt
+@export var recoil_recovery_speed: float = 12.0
+
+# Bequemer Zugriff auf die Resource-Werte
+var weapon_id: StringName:
+	get: return data.id
+var weapon_name: String:
+	get: return data.weapon_name
+var damage: float:
+	get: return data.damage
+var cooldown: float:
+	get: return data.cooldown
+var max_ammo: int:
+	get: return data.max_ammo
+var recoil_distance: float:
+	get: return data.recoil_distance
+
+var current_ammo: int = 0
 
 # Knoten-Referenzen
 @onready var muzzle: Node3D = $Muzzle
@@ -28,7 +41,9 @@ var current_recoil: float = 0.0
 
 
 func _ready() -> void:
+	assert(data != null, "%s: WeaponData fehlt" % name)
 	initial_position = position
+	current_ammo = data.start_ammo
 
 
 func _process(delta: float) -> void:
@@ -94,7 +109,10 @@ func unequip() -> void:
 	hide()
 
 
-## Munition auffuellen
-func add_ammo(amount: int) -> void:
+## Munition auffuellen. Gibt false zurueck, wenn die Waffe schon voll war.
+func add_ammo(amount: int) -> bool:
+	if current_ammo >= max_ammo:
+		return false
 	current_ammo = clampi(current_ammo + amount, 0, max_ammo)
 	ammo_changed.emit(current_ammo, max_ammo)
+	return true

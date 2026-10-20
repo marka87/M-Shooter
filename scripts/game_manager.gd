@@ -26,8 +26,9 @@ var master_volume: float = 1.0
 # Referenz auf den aktuellen Spieler im Level
 var current_player: CharacterBody3D = null
 
-# Einblendung fuer die Pause
-var _pause_layer: CanvasLayer = null
+# Einblendung fuer die Pause (scenes/ui/pause_menu.tscn)
+const PAUSE_MENU_SCENE: PackedScene = preload("res://scenes/ui/pause_menu.tscn")
+var _pause_layer: PauseMenu = null
 
 # Speicherort der Benutzereinstellungen
 const SETTINGS_PATH := "user://settings.cfg"
@@ -51,65 +52,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-## Einblendung fuer die Pause mit interaktiven Menue-Optionen
+## Pause-Menue aus der eigenen Szene erzeugen (anfangs ausgeblendet)
 func _build_pause_overlay() -> void:
-	_pause_layer = CanvasLayer.new()
-	_pause_layer.layer = 100
-	_pause_layer.visible = false
+	_pause_layer = PAUSE_MENU_SCENE.instantiate()
 	add_child(_pause_layer)
-
-	var shade := ColorRect.new()
-	shade.color = Color(0.04, 0.05, 0.08, 0.75)
-	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	shade.mouse_filter = Control.MOUSE_FILTER_STOP
-	_pause_layer.add_child(shade)
-
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_pause_layer.add_child(center)
-
-	var vbox := VBoxContainer.new()
-	vbox.custom_minimum_size = Vector2(280, 0)
-	vbox.add_theme_constant_override("separation", 14)
-	center.add_child(vbox)
-
-	var title := Label.new()
-	title.text = "PAUSE"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 42)
-	title.add_theme_color_override("font_color", Color(0.95, 0.4, 0.15))
-	vbox.add_child(title)
-
-	var spacer := Control.new()
-	spacer.custom_minimum_size = Vector2(0, 10)
-	vbox.add_child(spacer)
-
-	var resume_btn := Button.new()
-	resume_btn.text = "WEITERSPIELEN (ESC)"
-	resume_btn.custom_minimum_size = Vector2(0, 48)
-	resume_btn.add_theme_font_size_override("font_size", 18)
-	resume_btn.pressed.connect(toggle_pause)
-	vbox.add_child(resume_btn)
-
-	var menu_btn := Button.new()
-	menu_btn.text = "ZUM HAUPTMENÜ"
-	menu_btn.custom_minimum_size = Vector2(0, 48)
-	menu_btn.add_theme_font_size_override("font_size", 18)
-	menu_btn.pressed.connect(func():
-		toggle_pause()
-		get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
-	)
-	vbox.add_child(menu_btn)
-
-	var quit_btn := Button.new()
-	quit_btn.text = "BEENDEN"
-	quit_btn.custom_minimum_size = Vector2(0, 48)
-	quit_btn.add_theme_font_size_override("font_size", 18)
-	quit_btn.pressed.connect(func():
-		get_tree().quit()
-	)
-	vbox.add_child(quit_btn)
 
 
 ## Registriert einen Frag (Abschuss) fuer den Spieler

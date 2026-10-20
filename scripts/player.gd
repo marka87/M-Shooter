@@ -1,4 +1,5 @@
 extends CharacterBody3D
+class_name Player
 
 ## Spieler-Skript mit Quake/UT-artiger Bewegung (Strafe-Jumping, Bunnyhop, Luftkontrolle)
 ## Basiert auf CharacterBody3D mit First-Person-Kamera und praeziser Physik.
@@ -53,37 +54,29 @@ extends CharacterBody3D
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
-@onready var speed_label: Label = $HUD/SpeedLabel
 @onready var weapon_manager: WeaponManager = $Head/Camera3D/WeaponHolder
-@onready var weapon_name_label: Label = $HUD/WeaponInfo/WeaponNameLabel
-@onready var ammo_label: Label = $HUD/WeaponInfo/AmmoLabel
-@onready var frags_label: Label = $HUD/FragsLabel
-@onready var health_label: Label = $HUD/StatsContainer/HealthLabel
-@onready var armor_label: Label = $HUD/StatsContainer/ArmorLabel
-@onready var damage_flash: ColorRect = $HUD/DamageFlash
+@onready var health: HealthComponent = $Health
+@onready var hud: HUD = $HUD
 @onready var hurt_audio: AudioStreamPlayer = $HurtAudioPlayer
-@onready var hitmarker: Control = $HUD/CrosshairContainer/Hitmarker
 @onready var hitsound_audio: AudioStreamPlayer = $HitsoundAudioPlayer
 @onready var jump_audio: AudioStreamPlayer = $JumpAudioPlayer
-@onready var death_overlay: Control = $HUD/DeathOverlay
-@onready var respawn_countdown_label: Label = $HUD/DeathOverlay/VBox/RespawnCountdownLabel
+
+## Eigener Treffer an einem Gegner (fuer Hitmarker im HUD)
+signal enemy_hit()
 
 # ==============================================================================
-# LEBEN, RUESTUNG & STATUS
+# STATUS
 # ==============================================================================
 
-@export_group("Leben und Ruestung")
-@export var max_health: float = 100.0
-@export var max_armor: float = 100.0
-## Ruestung beim Start und nach jedem Respawn
-@export var start_armor: float = 50.0
+@export_group("Respawn")
+## Sekunden bis zum Respawn nach dem Tod
+@export var respawn_delay: float = 3.0
 
-var current_health: float = 100.0
-var current_armor: float = 0.0
-var is_dead: bool = false
+## Verbleibende Zeit bis zum Respawn (wird vom HUD angezeigt)
 var death_timer: float = 0.0
-# Wer zuletzt Schaden verursacht hat (fuer die Frag-Zaehlung der Bots)
-var last_attacker: Node = null
+## Kurzform fuer health.is_dead (z. B. fuer den WeaponManager)
+var is_dead: bool:
+	get: return health.is_dead
 
 # ==============================================================================
 # INTERNE PHYSIK-VARIABLEN
@@ -100,40 +93,27 @@ var jumps_remaining: int = 2
 
 
 func _ready() -> void:
-	current_health = max_health
-	current_armor = start_armor
-
 	# Mauszeiger fangen fuer First-Person-Steuerung
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	
+
 	# Empfindlichkeit aus den gespeicherten Einstellungen uebernehmen
 	if GameManager.mouse_sensitivity > 0.0:
 		mouse_sensitivity = GameManager.mouse_sensitivity
 
-	# Spieler im GameManager registrieren und Punkte-Signal verbinden
+	# Spieler im GameManager registrieren
 	GameManager.current_player = self
-	GameManager.score_updated.connect(_on_score_updated)
-	_on_score_updated(GameManager.player_frags, GameManager.player_deaths)
-	
+
 	# Maximale Neigung fuer Boeden (verhindert das Hochklettern steiler Waende)
 	floor_max_angle = deg_to_rad(45.0)
 	floor_snap_length = 0.2
-	
-	# Waffen-Signale mit HUD verbinden
-	if weapon_manager:
-		weapon_manager.weapon_switched.connect(_on_weapon_switched)
-		weapon_manager.ammo_updated.connect(_on_ammo_updated)
-		var current_w := weapon_manager.get_current_weapon()
-		if current_w:
-			_on_weapon_switched(current_w.weapon_name, current_w.current_ammo, current_w.max_ammo)
-	
+
 	# Sounds zuweisen (Treffer am Spieler, Quake-Trefferton, Doppelsprung)
 	hurt_audio.stream = SoundGenerator.create_bot_hurt_sound()
 	hitsound_audio.stream = SoundGenerator.create_hitsound()
 	jump_audio.stream = SoundGenerator.create_double_jump_sound()
-	
-	# HUD initialisieren
-	_update_hud_stats()
+
+	health.died.connect(_on_died)
+	hud.bind(self)
 
 
 
@@ -154,9 +134,7 @@ func _physics_process(delta: float) -> void:
 	# Tot: keine Eingabe, nur noch Schwerkraft und Respawn-Countdown aktualisieren
 	if is_dead:
 		death_timer -= delta
-		if respawn_countdown_label:
-			respawn_countdown_label.text = "Respawn in %.1f Sekunden..." % max(death_timer, 0.0)
-		# Respawn ueber denselben Countdown wie die Anzeige (pausiert automatisch mit dem Spiel)
+		# Respawn ueber denselben Countdown wie die HUD-Anzeige (pausiert automatisch mit dem Spiel)
 		if death_timer <= 0.0:
 			_respawn()
 			return
@@ -191,9 +169,6 @@ func _physics_process(delta: float) -> void:
 
 	# Physik-Bewegung ausfuehren (inklusive Wand-Gleitverhalten)
 	move_and_slide()
-
-	# Tacho-Anzeige im HUD aktualisieren
-	_update_speed_display()
 
 
 ## Ermittelt die normalisierte Wunsch-Bewegungsrichtung im Weltkoordinatensystem
@@ -331,103 +306,31 @@ func _apply_air_control(wish_dir: Vector3, delta: float) -> void:
 		velocity.z = new_dir.z * speed
 
 
-## Aktualisiert die Geschwindigkeitsanzeige im Bildschirm
-func _update_speed_display() -> void:
-	if speed_label:
-		var horizontal_speed: float = Vector2(velocity.x, velocity.z).length()
-		var ground_state: String = "BODEN" if is_on_floor() else "LUFT"
-		speed_label.text = "Geschwindigkeit: %4.1f m/s [%s]" % [horizontal_speed, ground_state]
-		if horizontal_speed > sprint_speed + 1.0:
-			# Gruene Hervorhebung bei erfolgreichem Strafe-Jump
-			speed_label.modulate = Color(0.2, 1.0, 0.4)
-		elif is_sprinting:
-			speed_label.modulate = Color(1.0, 0.8, 0.2)
-		else:
-			speed_label.modulate = Color(1.0, 1.0, 1.0)
-
-
-## Wird aufgerufen, wenn die Waffe gewechselt wird
-func _on_weapon_switched(w_name: String, current_ammo: int, max_ammo: int) -> void:
-	if weapon_name_label:
-		weapon_name_label.text = w_name
-	if ammo_label:
-		ammo_label.text = "Munition: %d / %d" % [current_ammo, max_ammo]
-
-
-## Wird aufgerufen, wenn Munition verbraucht oder aufgesammelt wird
-func _on_ammo_updated(current_ammo: int, max_ammo: int) -> void:
-	if ammo_label:
-		ammo_label.text = "Munition: %d / %d" % [current_ammo, max_ammo]
-
-
 ## Schadens-Empfang (von Bots, Raketen-Selbsttreffern und Explosionen)
 func take_damage(info: DamageInfo) -> void:
 	if is_dead:
 		return
-	last_attacker = info.attacker
-	var amount: float = info.amount
-	
-	# Quake-Ruestungs-Absorption: Ruestung schuetzt zu 66%, 34% gehen direkt auf Leben
-	var absorbed: float = min(current_armor, amount * 0.66)
-	var health_dmg: float = amount - absorbed
-	current_armor -= absorbed
-	current_health -= health_dmg
-	
+	health.apply_damage(info)
+
 	# Physikalischer Impuls auf den Spieler
-	velocity += info.direction * (amount * 0.15)
-	
-	# Roter Bildschirmblitz als Treffer-Feedback
-	_flash_screen()
-	
-	# Treffer-Sound abspielen
-	if hurt_audio:
-		hurt_audio.pitch_scale = randf_range(0.95, 1.05)
-		hurt_audio.play()
-	
-	_update_hud_stats()
-	
-	# Tod des Spielers pruefen
-	if current_health <= 0.0:
-		_die()
+	velocity += info.direction * (info.amount * 0.15)
+
+	# Treffer-Sound abspielen (Bildschirmblitz macht das HUD)
+	hurt_audio.pitch_scale = randf_range(0.95, 1.05)
+	hurt_audio.play()
 
 
-## Roter Bildschirmblitz bei Treffern
-func _flash_screen() -> void:
-	if damage_flash:
-		damage_flash.color = Color(0.9, 0.1, 0.1, 0.35)
-		var tween := create_tween()
-		tween.tween_property(damage_flash, "color:a", 0.0, 0.25)
-
-
-## Spieler stirbt: Tod zaehlen und nach kurzer Zeit respawnen
-func _die() -> void:
-	is_dead = true
-	current_health = 0.0
-	death_timer = 3.0
-	_update_hud_stats()
-	
-	if death_overlay:
-		death_overlay.visible = true
-	if respawn_countdown_label:
-		respawn_countdown_label.text = "Respawn in 3.0 Sekunden..."
-	
+## Spieler stirbt: Tod zaehlen, Respawn laeuft ueber death_timer in _physics_process
+func _on_died(info: DamageInfo) -> void:
+	death_timer = respawn_delay
 	# Selbsttreffer (Rocket-Jump) zaehlt nicht als Bot-Frag
-	var killed_by_bot := is_instance_valid(last_attacker) and last_attacker != self
+	var killed_by_bot := is_instance_valid(info.attacker) and info.attacker != self
 	GameManager.add_player_death(killed_by_bot)
-	# Respawn erfolgt in _physics_process, sobald death_timer abgelaufen ist
 
 
 ## Respawn des Spielers an einem Spawnpunkt
 func _respawn() -> void:
-	is_dead = false
-	current_health = max_health
-	current_armor = start_armor
-	last_attacker = null
-	_update_hud_stats()
-	
-	if death_overlay:
-		death_overlay.visible = false
-	
+	health.reset()
 	global_transform = GameManager.get_random_spawn_transform()
 
 	# Blick wieder geradeaus richten
@@ -437,80 +340,8 @@ func _respawn() -> void:
 	velocity = Vector3.ZERO
 
 
-## Treffer-Feedback (Quake-Trefferton & Hitmarker am Fadenkreuz)
+## Treffer-Feedback: Quake-Trefferton, Hitmarker zeigt das HUD
 func on_enemy_hit() -> void:
-	if hitsound_audio:
-		hitsound_audio.pitch_scale = randf_range(0.98, 1.05)
-		hitsound_audio.play()
-	
-	if hitmarker:
-		hitmarker.visible = true
-		hitmarker.modulate = Color(1.0, 0.25, 0.25, 1.0)
-		var tween := create_tween()
-		tween.tween_property(hitmarker, "modulate:a", 0.0, 0.12)
-		tween.tween_callback(func():
-			if is_instance_valid(hitmarker):
-				hitmarker.visible = false
-		)
-
-
-## Aktualisiert die Lebens- und Ruestungsanzeige im HUD
-func _update_hud_stats() -> void:
-	if health_label:
-		health_label.text = "HP: %d" % int(max(current_health, 0.0))
-		if current_health <= 25.0:
-			health_label.modulate = Color(1.0, 0.2, 0.2)
-		else:
-			health_label.modulate = Color(0.2, 1.0, 0.5)
-	
-	if armor_label:
-		armor_label.text = "RÜSTUNG: %d" % int(max(current_armor, 0.0))
-		armor_label.modulate = Color(0.2, 0.8, 1.0)
-
-
-# ==============================================================================
-# ITEM-PICKUP UNTERSTUETZUNG (MUNITION, LEBEN, RUESTUNG)
-# ==============================================================================
-
-## Munition fuer alle Waffen auffuellen
-func add_all_ammo(mg: int, rkt: int, rail: int) -> void:
-	if weapon_manager and not weapon_manager.weapons.is_empty():
-		if weapon_manager.weapons.size() > 0: weapon_manager.weapons[0].add_ammo(mg)
-		if weapon_manager.weapons.size() > 1: weapon_manager.weapons[1].add_ammo(rkt)
-		if weapon_manager.weapons.size() > 2: weapon_manager.weapons[2].add_ammo(rail)
-		var cur := weapon_manager.get_current_weapon()
-		if cur:
-			_on_ammo_updated(cur.current_ammo, cur.max_ammo)
-
-
-## Munition fuer eine bestimmte Waffe auffuellen
-func add_ammo_by_index(idx: int, amount: int) -> void:
-	if weapon_manager and idx >= 0 and idx < weapon_manager.weapons.size():
-		weapon_manager.weapons[idx].add_ammo(amount)
-		var cur := weapon_manager.get_current_weapon()
-		if cur:
-			_on_ammo_updated(cur.current_ammo, cur.max_ammo)
-
-
-## Leben auffuellen
-func add_health(amount: float) -> bool:
-	if current_health >= max_health:
-		return false
-	current_health = min(current_health + amount, max_health)
-	_update_hud_stats()
-	return true
-
-
-## Ruestung auffuellen
-func add_armor(amount: float) -> bool:
-	if current_armor >= max_armor:
-		return false
-	current_armor = min(current_armor + amount, max_armor)
-	_update_hud_stats()
-	return true
-
-
-## Punktestand-Aktualisierung (Frags & Tode)
-func _on_score_updated(frags: int, _deaths: int) -> void:
-	if frags_label:
-		frags_label.text = "Frags: %d" % frags
+	hitsound_audio.pitch_scale = randf_range(0.98, 1.05)
+	hitsound_audio.play()
+	enemy_hit.emit()
