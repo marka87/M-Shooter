@@ -86,7 +86,7 @@ Bots benutzen **dieselben Waffen wie der Spieler** (sichtbar in der Hand, mit Mu
 
 ## 🛡️ Schadens- & Pickup-System
 
-- **Einstellungen**: Mausempfindlichkeit, Lautstärke, Sichtfeld, Kamera-Effekte, **Grafik-Stufe** (Niedrig/Mittel mit FSR-Hochskalierung und ohne SSAO/Nebel, Ultra mit 4x MSAA), **V-Sync** und **Tastenbelegung** (Taste anklicken, neue Taste oder Maustaste drücken) werden in `user://settings.cfg` gespeichert. Dazu Effekt-Lautstärke, Fadenkreuz (Form, Farbe, Größe) und Hitmarker an/aus.
+- **Einstellungen**: Mausempfindlichkeit, Lautstärke, Sichtfeld, Kamera-Effekte, **Grafik-Stufe** (Niedrig/Mittel mit FSR-Hochskalierung und ohne SSAO/Nebel, Ultra mit 4x MSAA), **V-Sync**, **Fenstermodus** (Fenster, randloses oder exklusives Vollbild), **Auflösung** (im Fenster) und **Tastenbelegung** (Taste anklicken, neue Taste oder Maustaste drücken) werden in `user://settings.cfg` gespeichert. Dazu Effekt-Lautstärke, Fadenkreuz (Form, Farbe, Größe) und Hitmarker an/aus.
 - **Lebenspunkte (HP)**: 100 Basis-HP. Sinkt HP auf 0, erscheint das Todes-Overlay mit 3-Sekunden-Respawn-Countdown.
 - **Rüstung**: Startet bei 50 (bis max. 100). Fängt **66 %** allen Schadens ab, während nur 34 % die Lebenspunkte schwächen.
 - **Treffer-Feedback**: 

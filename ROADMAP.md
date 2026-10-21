@@ -139,7 +139,7 @@ Heute können Bots nur patrouillieren, verfolgen und mit einer Waffe schießen.
 | 7.1 | ✅ Modernes HUD: große Zahlen für HP/Rüstung unten links, Munition unten rechts, Waffenleiste, Power-up-Timer | M |
 | 7.2 | ✅ **Trefferrichtungs-Anzeige** (rote Markierung, aus welcher Richtung der Schaden kam) | S |
 | 7.3 | ✅ Fadenkreuz-Editor (Form, Farbe, Größe), Hitmarker-Optionen | S |
-| 7.4 | ✅ teilweise: FOV, Grafik-Presets (FSR, SSAO, Nebel, Schatten, MSAA), V-Sync, Tastenbelegung; Gamepad und FPS-Limit fehlen. Einstellungen: **FOV**, Grafik-Presets, Auflösungsskalierung (FSR), V-Sync/FPS-Limit, **Tastenbelegung**, Gamepad | M |
+| 7.4 | ✅ teilweise: FOV, Grafik-Presets (FSR, SSAO, Nebel, Schatten, MSAA, SDFGI), V-Sync, Fenstermodus, Auflösung, Tastenbelegung; Gamepad und FPS-Limit fehlen. Einstellungen: **FOV**, Grafik-Presets, Auflösungsskalierung (FSR), V-Sync/FPS-Limit, **Tastenbelegung**, Gamepad | M |
 | 7.5 | ✅ teilweise: Map-, Bot- und Regelauswahl, 3D-Hintergrund fehlt. Hauptmenü mit 3D-Hintergrund (Kamerafahrt durch die Arena), Map- und Modusauswahl, Bot-Anzahl und -Stärke | M |
 
 ---

@@ -93,6 +93,12 @@ var camera_effects: bool = true
 const GRAPHICS_PRESETS: Array[String] = ["Niedrig", "Mittel", "Hoch", "Ultra"]
 var graphics_preset: int = 2
 var vsync: bool = true
+## Fenstermodus (Index in WINDOW_MODES) und Fenstergroesse im Fenstermodus
+const WINDOW_MODES: Array[String] = ["Fenster", "Vollbild (randlos)", "Vollbild (exklusiv)"]
+const RESOLUTIONS: Array[Vector2i] = [Vector2i(1280, 720), Vector2i(1366, 768), Vector2i(1600, 900), Vector2i(1920, 1080),
+	Vector2i(2560, 1080), Vector2i(2560, 1440), Vector2i(3440, 1440), Vector2i(3840, 2160)]
+var window_mode: int = 0
+var resolution: Vector2i = Vector2i(1280, 720)
 
 ## Belegbare Aktionen (InputMap) mit Anzeigenamen fuer die Einstellungen
 const BINDABLE_ACTIONS := {
@@ -516,6 +522,8 @@ func load_settings() -> void:
 		duel = cfg.get_value("match", "duel", duel)
 		graphics_preset = clampi(cfg.get_value("video", "graphics_preset", graphics_preset), 0, GRAPHICS_PRESETS.size() - 1)
 		vsync = cfg.get_value("video", "vsync", vsync)
+		window_mode = clampi(cfg.get_value("video", "window_mode", window_mode), 0, WINDOW_MODES.size() - 1)
+		resolution = cfg.get_value("video", "resolution", resolution)
 		for action in BINDABLE_ACTIONS:
 			var events = cfg.get_value("keys", action) if cfg.has_section_key("keys", action) else []
 			if events is Array and not events.is_empty():
@@ -524,6 +532,7 @@ func load_settings() -> void:
 					if ev is InputEvent:
 						InputMap.action_add_event(action, ev)
 	apply_graphics()
+	apply_display()
 	apply_master_volume()
 	apply_sfx_volume()
 
@@ -550,6 +559,8 @@ func save_settings() -> void:
 	cfg.set_value("match", "duel", duel)
 	cfg.set_value("video", "graphics_preset", graphics_preset)
 	cfg.set_value("video", "vsync", vsync)
+	cfg.set_value("video", "window_mode", window_mode)
+	cfg.set_value("video", "resolution", resolution)
 	for action in BINDABLE_ACTIONS:
 		cfg.set_value("keys", action, InputMap.action_get_events(action))
 	cfg.save(SETTINGS_PATH)
@@ -593,6 +604,34 @@ func apply_graphics(level: Node = null) -> void:
 	if p < 1:
 		for light in level.find_children("*", "Light3D", true, false):
 			light.shadow_enabled = false
+
+
+## Fenstermodus und Aufloesung anwenden. Im Fenster: gewaehlte Groesse (hoechstens Bildschirmgroesse),
+## mittig. Vollbild nutzt die Bildschirmaufloesung; die Grafik-Stufe regelt dort die Renderaufloesung.
+func apply_display() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	match window_mode:
+		0:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+			var screen := DisplayServer.window_get_current_screen()
+			var screen_size := DisplayServer.screen_get_usable_rect(screen).size
+			var size := Vector2i(mini(resolution.x, screen_size.x), mini(resolution.y, screen_size.y))
+			DisplayServer.window_set_size(size)
+			DisplayServer.window_set_position(DisplayServer.screen_get_usable_rect(screen).position + (screen_size - size) / 2)
+		1:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+		2:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+
+
+## Aufloesungen, die auf den aktuellen Bildschirm passen (ohne Bildschirm: alle)
+func available_resolutions() -> Array[Vector2i]:
+	if DisplayServer.get_name() == "headless":
+		return RESOLUTIONS
+	var screen_size := DisplayServer.screen_get_size(DisplayServer.window_get_current_screen())
+	var fitting: Array[Vector2i] = RESOLUTIONS.filter(func(r: Vector2i): return r.x <= screen_size.x and r.y <= screen_size.y)
+	return fitting if not fitting.is_empty() else [RESOLUTIONS[0]]
 
 
 ## Neue Taste fuer eine Aktion (ersetzt die bisherige Belegung)

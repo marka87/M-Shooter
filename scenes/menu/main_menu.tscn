@@ -254,11 +254,25 @@ theme_override_constants/separation = 8
 
 [node name="GraphicsLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn"]
 layout_mode = 2
-text = "Grafik:"
+text = "Grafik und Anzeige:"
 
 [node name="GraphicsOption" type="OptionButton" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+
+[node name="DisplayRow" type="HBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ModeOption" type="OptionButton" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/DisplayRow"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ResolutionOption" type="OptionButton" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/DisplayRow"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="VsyncCheck" type="CheckButton" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn"]
 layout_mode = 2
@@ -452,4 +466,4 @@ horizontal_alignment = 2
 [connection signal="pressed" from="CenterContainer/MainButtons/StartButton" to="." method="_on_start_button_pressed"]
 [connection signal="pressed" from="CenterContainer/MainButtons/SettingsButton" to="." method="_on_settings_button_pressed"]
 [connection signal="pressed" from="CenterContainer/MainButtons/QuitButton" to="." method="_on_quit_button_pressed"]
-[connection signal="pressed" from="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/BackButton" to="." method="_on_back_button_pressed"]
+[connection signal="pressed" from="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/BackButton" to="." method="_on_back_button_pressed"]

@@ -376,13 +376,15 @@ func run() -> void:
 	# HUD-Layout: Hauptelemente ueberlappen sich nicht und liegen im Bild (1280x720 und 1152x648)
 	hud.quad_label.visible = true
 	var hud_ok := true
-	for screen in [Vector2i(1280, 720), Vector2i(1152, 648)]:
+	# 16:9, 4:3 und 21:9 (die Oberflaeche skaliert mit, breitere/hoehere Formate bekommen mehr Platz)
+	for screen in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(1024, 768), Vector2i(2560, 1080)]:
 		root.size = screen
 		await process_frame
 		await process_frame
+		var visible_rect: Rect2 = hud.get_viewport().get_visible_rect()
 		var parts: Array = ["Vitals", "AmmoBox", "QuadLabel", "ControlHints", "KillFeed", "TimerLabel", "FragsLabel"].map(func(n): return hud.get_node(n).get_global_rect())
 		for i in parts.size():
-			hud_ok = hud_ok and Rect2(Vector2.ZERO, Vector2(screen)).encloses(parts[i])
+			hud_ok = hud_ok and visible_rect.encloses(parts[i])
 			for j in range(i + 1, parts.size()):
 				hud_ok = hud_ok and not parts[i].intersects(parts[j])
 	check(hud_ok, "HUD-Elemente ueberlappen nicht")

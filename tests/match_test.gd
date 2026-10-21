@@ -164,6 +164,13 @@ func run() -> void:
 	await process_frame
 	check(current_scene.name == "MainMenu" and not paused, "Zurueck im Hauptmenue, nicht pausiert")
 
+	# Einstellungen oeffnen und mit "Zurueck" (echtes Button-Signal aus der Szene) schliessen
+	var menu = current_scene
+	menu._on_settings_button_pressed()
+	menu.get_node("CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/BackButton").pressed.emit()
+	check(not menu.settings_panel.visible and menu.main_buttons.visible, "Einstellungen: Zurueck funktioniert")
+	check(menu.resolution_option.item_count == gm.RESOLUTIONS.size() and menu.mode_option.item_count == 3, "Einstellungen: Aufloesung und Fenstermodus waehlbar")
+
 	gm.countdown_tick.disconnect(on_tick)
 	gm.player_announcement.disconnect(on_announce)
 	gm.bot_count = orig[0]

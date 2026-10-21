@@ -1,3 +1,12 @@
+# Änderungen (Runde 26: Zurück-Button, Auflösung)
+
+- **Fehler behoben:** „Zurück“ in den Einstellungen tat nichts. Beim Umbau auf zwei Spalten war der Button umgezogen, die Signal-Verbindung in `main_menu.tscn` zeigte noch auf den alten Pfad. Ein Test drückt den Button jetzt über das echte Signal.
+- **Fenstermodus und Auflösung** in den Einstellungen: Fenster, Vollbild (randlos) oder Vollbild (exklusiv); im Fenster Auflösungen von 1280×720 bis 3840×2160 (nur solche, die auf den Bildschirm passen), Fenster wird mittig gesetzt. Gespeichert in `settings.cfg`.
+- **Oberfläche skaliert mit** (`canvas_items`, `expand`): Menü und HUD bleiben bei 1440p und 4K gleich groß statt winzig; breitere oder höhere Formate bekommen mehr Platz. Der HUD-Test prüft 16:9, 4:3 und 21:9.
+- Alle vier Tests grün.
+
+---
+
 # Änderungen (Runde 25: player.gd aufgeteilt, indirektes Licht)
 
 - **MovementController** (`scripts/components/movement_controller.gd`, Knoten „Movement“ unter dem Spieler): die komplette Bewegungsphysik (Boden mit Reibung, Bunnyhop, Strafe-Jumping, CPM-Luftkontrolle, Doppelsprung, Dodge, Wall-Dodge, Jump-Pad-Start, Fallhöhe) mit allen Tuning-Werten im Inspector. Er arbeitet nur mit übergebenen Eingabewerten (Richtung, Sprung gedrückt/gehalten, Sprint) und meldet Sprung, Doppelsprung, Dodge und Landung per Signal. Das bereitet LAN (8.1) und Bot-Bewegung (5.4) vor. `player.gd` schrumpft von 538 auf 279 Zeilen (Mausblick, Eingaben, Schaden, Tod, Respawn, Schritte, Pickups). Verhalten unverändert.

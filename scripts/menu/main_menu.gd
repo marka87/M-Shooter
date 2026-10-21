@@ -32,6 +32,8 @@ extends Control
 @onready var fov_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/FovContainer/HBox/FovValueLabel
 @onready var graphics_option: OptionButton = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/GraphicsOption
 @onready var vsync_check: CheckButton = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/VsyncCheck
+@onready var mode_option: OptionButton = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/DisplayRow/ModeOption
+@onready var resolution_option: OptionButton = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/DisplayRow/ResolutionOption
 @onready var keys_grid: GridContainer = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/KeysGrid
 @onready var sfx_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/SfxContainer/HBox/SfxSlider
 @onready var sfx_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/SfxContainer/HBox/SfxValueLabel
@@ -82,6 +84,22 @@ func _ready() -> void:
 	graphics_option.item_selected.connect(func(i: int):
 		GameManager.graphics_preset = i
 		GameManager.apply_graphics())
+	for mode_name in GameManager.WINDOW_MODES:
+		mode_option.add_item(mode_name)
+	mode_option.selected = GameManager.window_mode
+	var resolutions := GameManager.available_resolutions()
+	for res in resolutions:
+		resolution_option.add_item("%d × %d" % [res.x, res.y])
+	resolution_option.selected = maxi(resolutions.find(GameManager.resolution), 0)
+	# Aufloesung gilt nur im Fenster; im Vollbild gibt der Bildschirm sie vor
+	resolution_option.disabled = GameManager.window_mode != 0
+	mode_option.item_selected.connect(func(i: int):
+		GameManager.window_mode = i
+		resolution_option.disabled = i != 0
+		GameManager.apply_display())
+	resolution_option.item_selected.connect(func(i: int):
+		GameManager.resolution = resolutions[i]
+		GameManager.apply_display())
 	vsync_check.button_pressed = GameManager.vsync
 	vsync_check.toggled.connect(func(on: bool):
 		GameManager.vsync = on
