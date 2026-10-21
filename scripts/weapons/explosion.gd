@@ -16,6 +16,8 @@ var weapon_name: String = "Raketenwerfer"
 ## Optionale Einfaerbung (z. B. violett fuer die Shock-Combo). Alpha 0 = Originalfarben.
 var tint: Color = Color(0, 0, 0, 0)
 
+var scorch_scene: PackedScene = preload("res://scenes/effects/scorch_decal.tscn")
+
 
 func _ready() -> void:
 	# Explosionssound abspielen
@@ -31,6 +33,9 @@ func _ready() -> void:
 	if particles:
 		particles.emitting = true
 	
+	# Brandfleck an der Wand oder am Boden erzeugen
+	_spawn_scorch_decal()
+
 	# Flaechenschaden und Explosionswucht auf alle getroffenen Einheiten anwenden
 	_apply_blast_damage_and_impulse()
 	_shake_player_camera()
@@ -54,6 +59,25 @@ func _shake_player_camera() -> void:
 	var dist: float = player.global_position.distance_to(global_position)
 	if dist < reach:
 		player.camera_feedback.add_trauma(0.7 * (1.0 - dist / reach) * clampf(max_damage / 100.0, 0.6, 1.5))
+
+
+## Sucht die naechste Wand/Bodenflaeche und platziert dort einen Brandkrater
+func _spawn_scorch_decal() -> void:
+	if not scorch_scene or not get_parent():
+		return
+	var space_state := get_world_3d().direct_space_state
+	var ray_targets := [Vector3.DOWN * 2.5, Vector3.UP * 1.5, Vector3.FORWARD * 1.5, Vector3.BACK * 1.5, Vector3.LEFT * 1.5, Vector3.RIGHT * 1.5]
+	for dir in ray_targets:
+		var query := PhysicsRayQueryParameters3D.create(global_position, global_position + dir, Layers.WORLD)
+		query.collide_with_areas = false
+		var hit := space_state.intersect_ray(query)
+		if hit:
+			var scorch := scorch_scene.instantiate() as ScorchDecal
+			get_parent().add_child(scorch)
+			scorch.global_position = hit.position + hit.normal * 0.02
+			var tint_col: Color = tint if tint.a > 0.0 else Color(1.0, 0.45, 0.1)
+			scorch.setup_scorch(hit.normal, clampf(blast_radius * 0.5, 2.0, 4.5), tint_col)
+			break
 
 
 ## Kugel, Licht und Truemmer in der Tint-Farbe einfaerben (eigene Material-Kopien)
@@ -80,8 +104,8 @@ func _apply_blast_damage_and_impulse() -> void:
 	var shape_query := PhysicsShapeQueryParameters3D.new()
 	shape_query.shape = sphere_shape
 	shape_query.transform = Transform3D(Basis(), explosion_pos)
-	# Nur Spieler und Bots bekommen Schaden und Rueckstoss
-	shape_query.collision_mask = Layers.CHARACTERS
+	# Spieler, Bots und Physik-Props bekommen Schaden und Rueckstoss
+	shape_query.collision_mask = Layers.BLASTABLE
 	shape_query.collide_with_bodies = true
 	shape_query.collide_with_areas = false
 	
@@ -111,21 +135,23 @@ func _apply_blast_damage_and_impulse() -> void:
 		var factor: float = clampf(1.0 - (distance / blast_radius), 0.0, 1.0)
 		var dir: Vector3 = diff.normalized() if distance > 0.01 else Vector3.UP
 		
-		# 1. Impuls fuer Rocket-Jumping anwenden (Quake-Physik)
+		# 1. Impuls fuer Rocket-Jumping / Physik-Objekte anwenden (Quake/Jolt-Physik)
 		if body is CharacterBody3D:
 			var impulse: Vector3 = dir * (blast_force * factor)
 			if impulse.y < 5.0 and factor > 0.25:
 				impulse.y = 8.5 * factor
 			(body as CharacterBody3D).velocity += impulse
+		elif body is RigidBody3D:
+			var phys_impulse: Vector3 = dir * (blast_force * factor * 1.5) + Vector3.UP * (blast_force * factor * 0.6)
+			(body as RigidBody3D).apply_impulse(phys_impulse)
 		
-		# 2. Schaden anrichten (fuer Spieler und Bots)
+		# 2. Schaden anrichten (fuer Spieler, Bots und zerstoerbare Props)
 		var actual_damage: float = max_damage * factor
 		if body.has_method("take_damage"):
 			# Bei Selbsttreffer (Rocket-Jump) 40% Eigenschaden
 			if body == shooter_node:
 				actual_damage *= 0.4
-			# Impuls wurde oben schon angewendet, deshalb hier keine Richtung uebergeben
-			body.take_damage(DamageInfo.create(actual_damage, shooter_node, explosion_pos, Vector3.ZERO, weapon_name, true))
+			body.take_damage(DamageInfo.create(actual_damage, shooter_node, explosion_pos, dir, weapon_name, true))
 			if shooter_node and shooter_node != body and shooter_node.has_method("on_enemy_hit"):
 				shooter_node.on_enemy_hit()
 

@@ -206,6 +206,7 @@ Neue Flächen bekommen den Look automatisch: dunkle, leicht farbige Grundfarbe w
 
 Im Match-Fenster wählbar:
 - **Neon Foundry** (Standard): 64 × 64 m, drei Ebenen. Boden mit Deckungsblöcken und zwei Durchgangswänden mit Tür, ein Ring-Steg auf 4 m entlang aller Wände, eine Mittelplattform auf Säulen mit zwei Brücken, zwei Türme auf 8 m (Nordost, Südwest). Sechs Treppen, drei Jump-Pads, 10 Items, 8 Spawnpunkte.
+- **Orbital Void**: Schwebende Weltraum-Plattformen über dem endlosen Abgrund. Mit Jump-Pads zu hohen Spires, dynamischen Physik-Fässern und Kisten, Void-Kill-Zone und tödlichen Kicks ins All.
 - **Testarena**: die ursprüngliche flache Arena (für Tests).
 
 **So entsteht die Neon Foundry:**
@@ -255,6 +256,12 @@ Für die Neon Foundry gibt es einen eigenen Begehbarkeitstest (Treppen, Brücke,
 
 ```
 Godot_v4.7.2-stable_win64_console.exe --headless --path . -s res://tests/neon_foundry_test.gd
+```
+
+Für Orbital Void (Jump-Pads, Spire, Void-Kill-Zone, Begehbarkeit):
+
+```
+Godot_v4.7.2-stable_win64_console.exe --headless --path . -s res://tests/orbital_void_test.gd
 ```
 
 ---

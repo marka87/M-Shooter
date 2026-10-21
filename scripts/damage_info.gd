@@ -10,6 +10,12 @@ var amount: float = 0.0
 var attacker: Node = null
 ## Trefferpunkt in Weltkoordinaten (z. B. fuer Schadenszahlen)
 var position: Vector3 = Vector3.ZERO
+## Alias fuer position (verhindert Skript-Abbrueche bei Verwechslung)
+var hit_position: Vector3:
+	get:
+		return position
+	set(v):
+		position = v
 ## Richtung fuer den Rueckstoss. Vector3.ZERO = kein zusaetzlicher Rueckstoss
 var direction: Vector3 = Vector3.ZERO
 ## Name der Waffe (fuer Killfeed und Statistik)

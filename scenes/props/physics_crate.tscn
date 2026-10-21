@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3 uid="uid://physics_crate_001"]
+
+[ext_resource type="Script" path="res://scripts/props/physics_crate.gd" id="1_crate"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_Crate"]
+albedo_color = Color(0.2, 0.45, 0.55, 1)
+metallic = 0.7
+roughness = 0.3
+emission_enabled = true
+emission = Color(0.1, 0.35, 0.5, 1)
+emission_energy_multiplier = 0.3
+
+[sub_resource type="BoxMesh" id="Mesh_Crate"]
+material = SubResource("Mat_Crate")
+size = Vector3(1.0, 1.0, 1.0)
+
+[sub_resource type="BoxShape3D" id="Shape_Crate"]
+size = Vector3(1.0, 1.0, 1.0)
+
+[node name="PhysicsCrate" type="RigidBody3D"]
+collision_layer = 16
+collision_mask = 23
+mass = 35.0
+continuous_cd = true
+script = ExtResource("1_crate")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_Crate")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("Shape_Crate")

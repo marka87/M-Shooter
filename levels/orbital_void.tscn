@@ -1,0 +1,675 @@
+[gd_scene load_steps=38 format=3 uid="uid://orbital_void_001"]
+
+[ext_resource type="Script" path="res://scripts/levels/arena.gd" id="1_arena"]
+[ext_resource type="PackedScene" uid="uid://bplayer_character_001" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://ammo_pickup_001" path="res://scenes/items/ammo_pickup.tscn" id="4_ammo"]
+[ext_resource type="PackedScene" uid="uid://health_pickup_001" path="res://scenes/items/health_pickup.tscn" id="5_health"]
+[ext_resource type="PackedScene" uid="uid://armor_pickup_001" path="res://scenes/items/armor_pickup.tscn" id="6_armor"]
+[ext_resource type="Shader" path="res://assets/shaders/arena_grid.gdshader" id="7_grid"]
+[ext_resource type="PackedScene" path="res://scenes/items/jump_pad.tscn" id="8_pad"]
+[ext_resource type="Shader" path="res://assets/shaders/space_sky.gdshader" id="9_sky"]
+[ext_resource type="PackedScene" path="res://scenes/items/quad_damage_pickup.tscn" id="10_quad"]
+[ext_resource type="PackedScene" path="res://scenes/items/mega_health_pickup.tscn" id="11_mega"]
+[ext_resource type="PackedScene" path="res://scenes/items/weapon_pickup.tscn" id="12_wpick"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/railgun.tscn" id="13_rail"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/rocket_launcher.tscn" id="14_rpg"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/plasma_gun.tscn" id="15_plasma"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/shotgun.tscn" id="16_sg"]
+[ext_resource type="Script" path="res://scripts/levels/void_kill_zone.gd" id="17_void"]
+[ext_resource type="PackedScene" uid="uid://physics_barrel_001" path="res://scenes/props/physics_barrel.tscn" id="18_barrel"]
+[ext_resource type="PackedScene" uid="uid://physics_crate_001" path="res://scenes/props/physics_crate.tscn" id="19_crate"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_Sky"]
+shader = ExtResource("9_sky")
+shader_parameter/zenith_color = Color(0.01, 0.012, 0.035, 1)
+shader_parameter/horizon_color = Color(0.12, 0.05, 0.22, 1)
+shader_parameter/horizon_glow = Color(0.85, 0.2, 1, 1)
+shader_parameter/nebula_color = Color(0.25, 0.65, 1, 1)
+shader_parameter/star_density = 0.65
+shader_parameter/star_brightness = 7.0
+shader_parameter/nebula_strength = 0.55
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("ShaderMaterial_Sky")
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+ambient_light_source = 2
+ambient_light_color = Color(0.25, 0.26, 0.38, 1)
+ambient_light_energy = 0.9
+tonemap_mode = 4
+tonemap_exposure = 1.15
+ssao_enabled = true
+ssao_radius = 1.8
+ssao_intensity = 1.5
+glow_enabled = true
+glow_intensity = 0.8
+glow_strength = 1.1
+glow_bloom = 0.08
+glow_hdr_threshold = 0.85
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.008
+volumetric_fog_albedo = Color(0.4, 0.3, 0.7, 1)
+adjustment_enabled = true
+adjustment_contrast = 1.1
+adjustment_saturation = 1.15
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_1"]
+geometry_parsed_geometry_type = 1
+agent_height = 1.75
+agent_radius = 0.5
+agent_max_climb = 0.5
+agent_max_slope = 45.0
+
+[sub_resource type="ShaderMaterial" id="Mat_MainBase"]
+render_priority = 0
+shader = ExtResource("7_grid")
+shader_parameter/base_color = Color(0.04, 0.06, 0.1, 1)
+shader_parameter/line_color = Color(0.15, 0.75, 1, 1)
+shader_parameter/cell_size = 3.0
+shader_parameter/line_width = 0.015
+shader_parameter/line_emission = 0.5
+shader_parameter/major_every = 4
+shader_parameter/roughness_value = 0.5
+shader_parameter/metallic_value = 0.35
+
+[sub_resource type="ShaderMaterial" id="Mat_MainUpper"]
+render_priority = 0
+shader = ExtResource("7_grid")
+shader_parameter/base_color = Color(0.08, 0.05, 0.12, 1)
+shader_parameter/line_color = Color(0.95, 0.35, 0.9, 1)
+shader_parameter/cell_size = 2.5
+shader_parameter/line_width = 0.015
+shader_parameter/line_emission = 0.5
+shader_parameter/major_every = 4
+shader_parameter/roughness_value = 0.45
+shader_parameter/metallic_value = 0.4
+
+[sub_resource type="ShaderMaterial" id="Mat_Spire"]
+render_priority = 0
+shader = ExtResource("7_grid")
+shader_parameter/base_color = Color(0.12, 0.04, 0.06, 1)
+shader_parameter/line_color = Color(1, 0.35, 0.2, 1)
+shader_parameter/cell_size = 2.0
+shader_parameter/line_width = 0.02
+shader_parameter/line_emission = 0.65
+shader_parameter/major_every = 4
+shader_parameter/roughness_value = 0.4
+shader_parameter/metallic_value = 0.5
+
+[sub_resource type="ShaderMaterial" id="Mat_Flank"]
+render_priority = 0
+shader = ExtResource("7_grid")
+shader_parameter/base_color = Color(0.05, 0.08, 0.07, 1)
+shader_parameter/line_color = Color(0.2, 1, 0.6, 1)
+shader_parameter/cell_size = 2.5
+shader_parameter/line_width = 0.015
+shader_parameter/line_emission = 0.5
+shader_parameter/major_every = 4
+shader_parameter/roughness_value = 0.5
+shader_parameter/metallic_value = 0.35
+
+[sub_resource type="ShaderMaterial" id="Mat_Pillar"]
+render_priority = 0
+shader = ExtResource("7_grid")
+shader_parameter/base_color = Color(0.03, 0.07, 0.1, 1)
+shader_parameter/line_color = Color(0.1, 0.85, 0.8, 1)
+shader_parameter/cell_size = 1.0
+shader_parameter/line_width = 0.015
+shader_parameter/line_emission = 0.35
+shader_parameter/major_every = 6
+shader_parameter/roughness_value = 0.5
+shader_parameter/metallic_value = 0.4
+
+[sub_resource type="StandardMaterial3D" id="Mat_SupportCone"]
+albedo_color = Color(0.05, 0.06, 0.08, 1)
+metallic = 0.7
+roughness = 0.4
+
+[sub_resource type="StandardMaterial3D" id="Mat_NeonCyan"]
+shading_mode = 0
+albedo_color = Color(0.15, 0.75, 1, 1)
+emission_enabled = true
+emission = Color(0.15, 0.75, 1, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="BoxMesh" id="Mesh_MainBase"]
+material = SubResource("Mat_MainBase")
+size = Vector3(26, 1, 26)
+
+[sub_resource type="BoxShape3D" id="Shape_MainBase"]
+size = Vector3(26, 1, 26)
+
+[sub_resource type="BoxMesh" id="Mesh_MainUpper"]
+material = SubResource("Mat_MainUpper")
+size = Vector3(14, 1.6, 14)
+
+[sub_resource type="BoxShape3D" id="Shape_MainUpper"]
+size = Vector3(14, 1.6, 14)
+
+[sub_resource type="BoxMesh" id="Mesh_RampFB"]
+material = SubResource("Mat_MainUpper")
+size = Vector3(4, 0.25, 4.8)
+
+[sub_resource type="BoxShape3D" id="Shape_RampFB"]
+size = Vector3(4, 0.25, 4.8)
+
+[sub_resource type="BoxMesh" id="Mesh_RampLR"]
+material = SubResource("Mat_MainUpper")
+size = Vector3(4.8, 0.25, 4)
+
+[sub_resource type="BoxShape3D" id="Shape_RampLR"]
+size = Vector3(4.8, 0.25, 4)
+
+[sub_resource type="BoxMesh" id="Mesh_Pillar"]
+material = SubResource("Mat_Pillar")
+size = Vector3(2.2, 6, 2.2)
+
+[sub_resource type="BoxShape3D" id="Shape_Pillar"]
+size = Vector3(2.2, 6, 2.2)
+
+[sub_resource type="TorusMesh" id="Mesh_PillarRing"]
+material = SubResource("Mat_NeonCyan")
+inner_radius = 1.35
+outer_radius = 1.48
+
+[sub_resource type="BoxMesh" id="Mesh_SpirePlatform"]
+material = SubResource("Mat_Spire")
+size = Vector3(8, 1, 8)
+
+[sub_resource type="BoxShape3D" id="Shape_SpirePlatform"]
+size = Vector3(8, 1, 8)
+
+[sub_resource type="BoxMesh" id="Mesh_SpirePedestal"]
+material = SubResource("Mat_Spire")
+size = Vector3(2.4, 0.5, 2.4)
+
+[sub_resource type="BoxShape3D" id="Shape_SpirePedestal"]
+size = Vector3(2.4, 0.5, 2.4)
+
+[sub_resource type="CylinderMesh" id="Mesh_SpireColumn"]
+material = SubResource("Mat_SupportCone")
+top_radius = 3.6
+bottom_radius = 1.2
+height = 19
+
+[sub_resource type="CylinderShape3D" id="Shape_SpireColumn"]
+height = 19
+radius = 3.6
+
+[sub_resource type="BoxMesh" id="Mesh_FlankPlatform"]
+material = SubResource("Mat_Flank")
+size = Vector3(10, 1, 12)
+
+[sub_resource type="BoxShape3D" id="Shape_FlankPlatform"]
+size = Vector3(10, 1, 12)
+
+[sub_resource type="BoxMesh" id="Mesh_FlankCover"]
+material = SubResource("Mat_Pillar")
+size = Vector3(1.2, 1.6, 2.4)
+
+[sub_resource type="BoxShape3D" id="Shape_FlankCover"]
+size = Vector3(1.2, 1.6, 2.4)
+
+[sub_resource type="CylinderMesh" id="Mesh_FlankColumn"]
+material = SubResource("Mat_SupportCone")
+top_radius = 3.2
+bottom_radius = 1.0
+height = 12
+
+[sub_resource type="CylinderShape3D" id="Shape_FlankColumn"]
+height = 12
+radius = 3.2
+
+[sub_resource type="BoxMesh" id="Mesh_SouthPlatform"]
+material = SubResource("Mat_MainBase")
+size = Vector3(12, 1, 10)
+
+[sub_resource type="BoxShape3D" id="Shape_SouthPlatform"]
+size = Vector3(12, 1, 10)
+
+[sub_resource type="CylinderMesh" id="Mesh_BaseColumn"]
+material = SubResource("Mat_SupportCone")
+top_radius = 11
+bottom_radius = 3
+height = 12
+
+[sub_resource type="CylinderShape3D" id="Shape_BaseColumn"]
+height = 12
+radius = 11
+
+[sub_resource type="BoxShape3D" id="Shape_Void"]
+size = Vector3(400, 4, 400)
+
+[node name="OrbitalVoid" type="Node3D"]
+script = ExtResource("1_arena")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 35, 0)
+light_color = Color(0.9, 0.92, 1, 1)
+light_energy = 1.15
+shadow_enabled = true
+
+[node name="AccentSpire" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 17, -34)
+light_color = Color(1, 0.35, 0.2, 1)
+light_energy = 3.5
+omni_range = 16.0
+
+[node name="AccentWest" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 6, 0)
+light_color = Color(0.2, 1, 0.6, 1)
+light_energy = 2.8
+omni_range = 14.0
+
+[node name="AccentEast" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 6, 0)
+light_color = Color(0.2, 0.8, 1, 1)
+light_energy = 2.8
+omni_range = 14.0
+
+[node name="AccentSouth" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 28)
+light_color = Color(0.95, 0.35, 0.9, 1)
+light_energy = 3.0
+omni_range = 14.0
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_1")
+
+[node name="Geometry" type="Node3D" parent="NavigationRegion3D"]
+
+[node name="MainPlatformBase" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/MainPlatformBase"]
+mesh = SubResource("Mesh_MainBase")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/MainPlatformBase"]
+shape = SubResource("Shape_MainBase")
+
+[node name="MainBaseColumn" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7.0, 0)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/MainBaseColumn"]
+mesh = SubResource("Mesh_BaseColumn")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/MainBaseColumn"]
+shape = SubResource("Shape_BaseColumn")
+
+[node name="MainPlatformUpper" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/MainPlatformUpper"]
+mesh = SubResource("Mesh_MainUpper")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/MainPlatformUpper"]
+shape = SubResource("Shape_MainUpper")
+
+[node name="RampNorth" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 0.942315, 0.334728, 0, -0.334728, 0.942315, 0, 0.8, -9.25)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/RampNorth"]
+mesh = SubResource("Mesh_RampFB")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/RampNorth"]
+shape = SubResource("Shape_RampFB")
+
+[node name="RampSouth" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 0.942315, -0.334728, 0, 0.334728, 0.942315, 0, 0.8, 9.25)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/RampSouth"]
+mesh = SubResource("Mesh_RampFB")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/RampSouth"]
+shape = SubResource("Shape_RampFB")
+
+[node name="RampEast" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(0.942315, 0.334728, 0, -0.334728, 0.942315, 0, 0, 0, 1, 9.25, 0.8, 0)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/RampEast"]
+mesh = SubResource("Mesh_RampLR")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/RampEast"]
+shape = SubResource("Shape_RampLR")
+
+[node name="RampWest" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(0.942315, -0.334728, 0, 0.334728, 0.942315, 0, 0, 0, 1, -9.25, 0.8, 0)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/RampWest"]
+mesh = SubResource("Mesh_RampLR")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/RampWest"]
+shape = SubResource("Shape_RampLR")
+
+[node name="PillarSW" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.50, 3.00, 9.50)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/PillarSW"]
+mesh = SubResource("Mesh_Pillar")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/PillarSW"]
+shape = SubResource("Shape_Pillar")
+[node name="RingLow" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/PillarSW"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.8, 0)
+mesh = SubResource("Mesh_PillarRing")
+[node name="RingHigh" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/PillarSW"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+mesh = SubResource("Mesh_PillarRing")
+
+[node name="PillarSE" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.50, 3.00, 9.50)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/PillarSE"]
+mesh = SubResource("Mesh_Pillar")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/PillarSE"]
+shape = SubResource("Shape_Pillar")
+[node name="RingLow" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/PillarSE"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.8, 0)
+mesh = SubResource("Mesh_PillarRing")
+[node name="RingHigh" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/PillarSE"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+mesh = SubResource("Mesh_PillarRing")
+
+[node name="PillarNW" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.50, 3.00, -9.50)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/PillarNW"]
+mesh = SubResource("Mesh_Pillar")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/PillarNW"]
+shape = SubResource("Shape_Pillar")
+[node name="RingLow" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/PillarNW"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.8, 0)
+mesh = SubResource("Mesh_PillarRing")
+[node name="RingHigh" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/PillarNW"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+mesh = SubResource("Mesh_PillarRing")
+
+[node name="PillarNE" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.50, 3.00, -9.50)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/PillarNE"]
+mesh = SubResource("Mesh_Pillar")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/PillarNE"]
+shape = SubResource("Shape_Pillar")
+[node name="RingLow" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/PillarNE"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.8, 0)
+mesh = SubResource("Mesh_PillarRing")
+[node name="RingHigh" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/PillarNE"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+mesh = SubResource("Mesh_PillarRing")
+
+[node name="SpirePlatform" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 13.5, -34)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/SpirePlatform"]
+mesh = SubResource("Mesh_SpirePlatform")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/SpirePlatform"]
+shape = SubResource("Shape_SpirePlatform")
+
+[node name="SpirePedestal" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.25, -34)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/SpirePedestal"]
+mesh = SubResource("Mesh_SpirePedestal")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/SpirePedestal"]
+shape = SubResource("Shape_SpirePedestal")
+
+[node name="SpireColumn" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5, -34)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/SpireColumn"]
+mesh = SubResource("Mesh_SpireColumn")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/SpireColumn"]
+shape = SubResource("Shape_SpireColumn")
+
+[node name="WestFlankPlatform" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 3, 0)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/WestFlankPlatform"]
+mesh = SubResource("Mesh_FlankPlatform")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/WestFlankPlatform"]
+shape = SubResource("Shape_FlankPlatform")
+
+[node name="WestCoverNorth" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29, 4.3, -3.5)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/WestCoverNorth"]
+mesh = SubResource("Mesh_FlankCover")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/WestCoverNorth"]
+shape = SubResource("Shape_FlankCover")
+
+[node name="WestCoverSouth" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29, 4.3, 3.5)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/WestCoverSouth"]
+mesh = SubResource("Mesh_FlankCover")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/WestCoverSouth"]
+shape = SubResource("Shape_FlankCover")
+
+[node name="WestColumn" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, -3.5, 0)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/WestColumn"]
+mesh = SubResource("Mesh_FlankColumn")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/WestColumn"]
+shape = SubResource("Shape_FlankColumn")
+
+[node name="EastFlankPlatform" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 3, 0)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/EastFlankPlatform"]
+mesh = SubResource("Mesh_FlankPlatform")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/EastFlankPlatform"]
+shape = SubResource("Shape_FlankPlatform")
+
+[node name="EastCoverNorth" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29, 4.3, -3.5)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/EastCoverNorth"]
+mesh = SubResource("Mesh_FlankCover")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/EastCoverNorth"]
+shape = SubResource("Shape_FlankCover")
+
+[node name="EastCoverSouth" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29, 4.3, 3.5)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/EastCoverSouth"]
+mesh = SubResource("Mesh_FlankCover")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/EastCoverSouth"]
+shape = SubResource("Shape_FlankCover")
+
+[node name="EastColumn" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, -3.5, 0)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/EastColumn"]
+mesh = SubResource("Mesh_FlankColumn")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/EastColumn"]
+shape = SubResource("Shape_FlankColumn")
+
+[node name="SouthPlatform" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3.5, 28)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/SouthPlatform"]
+mesh = SubResource("Mesh_SouthPlatform")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/SouthPlatform"]
+shape = SubResource("Shape_SouthPlatform")
+
+[node name="SouthColumn" type="StaticBody3D" parent="NavigationRegion3D/Geometry"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -9.5, 28)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Geometry/SouthColumn"]
+mesh = SubResource("Mesh_FlankColumn")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Geometry/SouthColumn"]
+shape = SubResource("Shape_FlankColumn")
+
+[node name="JumpPads" type="Node3D" parent="."]
+
+[node name="SpireTarget" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00, 14.20, -34.50)
+
+[node name="CenterTarget" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00, 1.80, 2.00)
+
+[node name="WestTarget" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.00, 3.70, 3.00)
+
+[node name="CenterWestTarget" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.50, 1.80, 0.00)
+
+[node name="EastTarget" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.00, 3.70, 3.00)
+
+[node name="CenterEastTarget" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.50, 1.80, 0.00)
+
+[node name="CenterSouthTarget" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00, 1.80, 7.50)
+
+[node name="PadToSpire" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("8_pad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00, 1.60, -5.50)
+target = NodePath("../SpireTarget")
+apex_height = 5.0
+
+[node name="PadSpireDown" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("8_pad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00, 14.00, -31.00)
+target = NodePath("../CenterTarget")
+apex_height = 3.5
+
+[node name="PadToWest" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("8_pad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.50, 0.00, 0.00)
+target = NodePath("../WestTarget")
+apex_height = 4.0
+
+[node name="PadFromWest" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("8_pad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25.00, 3.50, -3.00)
+target = NodePath("../CenterWestTarget")
+apex_height = 3.5
+
+[node name="PadToEast" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("8_pad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.50, 0.00, 0.00)
+target = NodePath("../EastTarget")
+apex_height = 4.0
+
+[node name="PadFromEast" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("8_pad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25.00, 3.50, -3.00)
+target = NodePath("../CenterEastTarget")
+apex_height = 3.5
+
+[node name="PadFromSouth" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("8_pad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00, -3.00, 24.50)
+target = NodePath("../CenterSouthTarget")
+apex_height = 4.5
+
+[node name="VoidKillZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -22, 0)
+script = ExtResource("17_void")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VoidKillZone"]
+shape = SubResource("Shape_Void")
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+
+[node name="SpawnPoint1" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0.00, 2.00, 5.00)
+
+[node name="SpawnPoint2" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(-1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, -1.000000, 0.00, 2.00, -2.00)
+
+[node name="SpawnPoint3" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -8.00, 0.80, 8.00)
+
+[node name="SpawnPoint4" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 8.00, 0.80, 8.00)
+
+[node name="SpawnPoint5" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(-0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, -0.707107, -8.00, 0.80, -8.00)
+
+[node name="SpawnPoint6" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(-0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, -0.707107, 8.00, 0.80, -8.00)
+
+[node name="SpawnPoint7" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1, 0, -1.000000, 0, 0.000000, -28.00, 4.30, -2.00)
+
+[node name="SpawnPoint8" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1, 0, 1.000000, 0, 0.000000, 28.00, 4.30, -2.00)
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 5.0)
+
+[node name="Items" type="Node3D" parent="."]
+
+[node name="RailgunSpire" parent="Items" instance=ExtResource("12_wpick")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.8, -34)
+weapon_id = &"railgun"
+weapon_scene = ExtResource("13_rail")
+display_name = "Railgun"
+[node name="OmniLight3D" parent="Items/RailgunSpire" index="4"]
+light_color = Color(0.3, 0.8, 1, 1)
+
+[node name="RocketWest" parent="Items" instance=ExtResource("12_wpick")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 4.3, 0)
+weapon_id = &"rocket_launcher"
+weapon_scene = ExtResource("14_rpg")
+display_name = "Rocket Launcher"
+[node name="OmniLight3D" parent="Items/RocketWest" index="4"]
+light_color = Color(1, 0.45, 0.1, 1)
+
+[node name="PlasmaEast" parent="Items" instance=ExtResource("12_wpick")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 4.3, 0)
+weapon_id = &"plasma"
+weapon_scene = ExtResource("15_plasma")
+display_name = "Plasma"
+[node name="OmniLight3D" parent="Items/PlasmaEast" index="4"]
+light_color = Color(0.25, 0.75, 1, 1)
+
+[node name="ShotgunCenter" parent="Items" instance=ExtResource("12_wpick")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0)
+weapon_id = &"shotgun"
+weapon_scene = ExtResource("16_sg")
+display_name = "Shotgun"
+[node name="OmniLight3D" parent="Items/ShotgunCenter" index="4"]
+light_color = Color(1, 0.7, 0.2, 1)
+
+[node name="MegaSpire" parent="Items" instance=ExtResource("11_mega")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.8, -36.5)
+
+[node name="QuadSouth" parent="Items" instance=ExtResource("10_quad")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.2, 28)
+
+[node name="ArmorWest" parent="Items" instance=ExtResource("6_armor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.00, 4.30, 3.50)
+
+[node name="ArmorEast" parent="Items" instance=ExtResource("6_armor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.00, 4.30, 3.50)
+
+[node name="ArmorCenter" parent="Items" instance=ExtResource("6_armor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00, 0.80, -11.00)
+
+[node name="HealthCenter" parent="Items" instance=ExtResource("5_health")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00, 0.80, 11.00)
+
+[node name="HealthWestFlank" parent="Items" instance=ExtResource("5_health")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.00, 0.80, 0.00)
+
+[node name="HealthEastFlank" parent="Items" instance=ExtResource("5_health")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.00, 0.80, 0.00)
+
+[node name="HealthSouth1" parent="Items" instance=ExtResource("5_health")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.00, -2.20, 28.00)
+
+[node name="HealthSouth2" parent="Items" instance=ExtResource("5_health")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.00, -2.20, 28.00)
+
+[node name="AmmoSW" parent="Items" instance=ExtResource("4_ammo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.50, 0.80, 6.00)
+
+[node name="AmmoSE" parent="Items" instance=ExtResource("4_ammo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.50, 0.80, 6.00)
+
+[node name="AmmoNW" parent="Items" instance=ExtResource("4_ammo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.50, 0.80, -6.00)
+
+[node name="AmmoNE" parent="Items" instance=ExtResource("4_ammo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.50, 0.80, -6.00)
+
+[node name="AmmoWest" parent="Items" instance=ExtResource("4_ammo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28.00, 4.30, -3.50)
+
+[node name="AmmoEast" parent="Items" instance=ExtResource("4_ammo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.00, 4.30, -3.50)
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="BarrelSW" parent="Props" instance=ExtResource("18_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.50, 0.80, 7.50)
+
+[node name="BarrelSE" parent="Props" instance=ExtResource("18_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.50, 0.80, 7.50)
+
+[node name="CrateNW" parent="Props" instance=ExtResource("19_crate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.50, 0.80, -7.50)
+
+[node name="CrateNE" parent="Props" instance=ExtResource("19_crate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.50, 0.80, -7.50)
+
+[node name="BarrelWest" parent="Props" instance=ExtResource("18_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26.00, 4.30, 4.00)
+
+[node name="BarrelEast" parent="Props" instance=ExtResource("18_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.00, 4.30, -4.00)
+
+[node name="BarrelSouth" parent="Props" instance=ExtResource("18_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00, -2.20, 31.00)
+

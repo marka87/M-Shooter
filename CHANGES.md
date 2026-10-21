@@ -1,3 +1,12 @@
+# Änderungen (Runde 27: Orbital Void, Physik-Props, Brandkrater)
+
+- **Map: Orbital Void (`levels/orbital_void.tscn`):** Schwebende Weltraum-Arena über dem Void mit Center-Terrasse, Flankenplattformen, Jump-Pad-Katapulten zum hohen Spire und tödlicher `VoidKillZone` (`scripts/levels/void_kill_zone.gd`). Im Match-Menü wählbar.
+- **Dynamische Physik-Props:** Metallfässer (`scenes/props/physics_barrel.tscn`, rot explodierend) und Kisten (`scenes/props/physics_crate.tscn`) mit Jolt Physics (Layer 5 `Props`). Reagieren auf Beschuss, Druckwellen und Stürze mit echtem physikalischem Impuls.
+- **Brandkrater / Scorch Decals:** Explosionen hinterlassen an getroffenen Wänden und Böden verblassende Brandkrater (`scenes/effects/scorch_decal.tscn`, `scripts/effects/scorch_decal.gd`).
+- Neuer automatischer Test `tests/orbital_void_test.gd`. Alle fünf Tests grün.
+
+---
+
 # Änderungen (Runde 26: Zurück-Button, Auflösung)
 
 - **Fehler behoben:** „Zurück“ in den Einstellungen tat nichts. Beim Umbau auf zwei Spalten war der Button umgezogen, die Signal-Verbindung in `main_menu.tscn` zeigte noch auf den alten Pfad. Ein Test drückt den Button jetzt über das echte Signal.
