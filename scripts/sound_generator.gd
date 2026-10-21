@@ -53,8 +53,10 @@ static func load_music(name: String) -> AudioStream:
 static func load_announcer(name: String) -> AudioStream:
 	var key := "announcer/" + name
 	if not _cache.has(key):
-		var path := SOUND_DIR + key + ".wav"
-		_cache[key] = load(path) if ResourceLoader.exists(path) else null
+		# Eigene Ansager (custom/, MP3, auch mit Varianten) vor den erzeugten WAVs
+		_cache[key] = _load_variants(SOUND_DIR + "custom/" + key, ".mp3")
+		if _cache[key] == null:
+			_cache[key] = _load_variants(SOUND_DIR + key, ".wav")
 	return _cache[key]
 
 
@@ -71,22 +73,29 @@ static func _cached(key: String, builder: Callable) -> AudioStream:
 	return _cache[key]
 
 
-## Echtes Sample (tools/import_kenney.py) vor erzeugtem WAV (tools/make_sounds.py):
-## <key>.ogg, sonst <key>_1.ogg, <key>_2.ogg ... als Zufallsauswahl, sonst <key>.wav, sonst null
+## Reihenfolge: eigene Sounds (custom/, tools/import_custom_sounds.py), Kenney-OGG (tools/import_kenney.py),
+## erzeugtes WAV (tools/make_sounds.py). Null, wenn nichts davon existiert.
 static func _load_sample(key: String) -> AudioStream:
-	if ResourceLoader.exists(SOUND_DIR + key + ".ogg"):
-		return load(SOUND_DIR + key + ".ogg")
-	if ResourceLoader.exists(SOUND_DIR + key + "_1.ogg"):
-		var variants := AudioStreamRandomizer.new()
-		variants.random_pitch = 1.0
-		var i := 1
-		while ResourceLoader.exists(SOUND_DIR + "%s_%d.ogg" % [key, i]):
-			variants.add_stream(-1, load(SOUND_DIR + "%s_%d.ogg" % [key, i]))
-			i += 1
-		return variants
-	if ResourceLoader.exists(SOUND_DIR + key + ".wav"):
-		return load(SOUND_DIR + key + ".wav")
+	for source in [["custom/", ".wav"], ["custom/", ".ogg"], ["", ".ogg"], ["", ".wav"]]:
+		var stream := _load_variants(SOUND_DIR + source[0] + key, source[1])
+		if stream:
+			return stream
 	return null
+
+
+## <base><ext>, sonst <base>_1<ext>, <base>_2<ext> ... als Zufallsauswahl, sonst null
+static func _load_variants(base: String, ext: String) -> AudioStream:
+	if ResourceLoader.exists(base + ext):
+		return load(base + ext)
+	if not ResourceLoader.exists(base + "_1" + ext):
+		return null
+	var variants := AudioStreamRandomizer.new()
+	variants.random_pitch = 1.0
+	var i := 1
+	while ResourceLoader.exists("%s_%d%s" % [base, i, ext]):
+		variants.add_stream(-1, load("%s_%d%s" % [base, i, ext]))
+		i += 1
+	return variants
 
 
 ## Wandelt einen Sample-Wert (-128..127) in ein vorzeichenbehaftetes 8-Bit-Byte um.

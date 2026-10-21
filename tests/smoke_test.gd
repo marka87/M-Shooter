@@ -372,8 +372,14 @@ func run() -> void:
 	var snd: AudioStream = SoundGenerator.create_hitsound()
 	check(snd == SoundGenerator.create_hitsound(), "Sound-Cache liefert dieselbe Instanz")
 	var impact: AudioStream = SoundGenerator.create_impact_sound()
-	check(SoundGenerator.create_railgun_sound() is AudioStreamOggVorbis and impact is AudioStreamRandomizer and impact.streams_count == 4,
-		"CC0-Samples: Railgun als OGG, Einschlag mit 4 Varianten")
+	# Eigene Sounds (custom/) vor Kenney-OGG: Einschlag hat in beiden 4 Varianten, also auf den Ordner pruefen
+	var first_impact: AudioStream = impact.get_stream(0) if impact is AudioStreamRandomizer else null
+	check(impact is AudioStreamRandomizer and impact.streams_count == 4 and first_impact and first_impact.resource_path.contains("/custom/"),
+		"Eigene Sounds: Einschlag aus custom/ mit 4 Varianten")
+	check(SoundGenerator.create_machinegun_sound() != null, "Fehlender eigener Sound faellt zurueck (MG)")
+	var first_blood: AudioStream = SoundGenerator.load_announcer("first_blood")
+	check(SoundGenerator.load_announcer("fight") is AudioStreamMP3 and first_blood is AudioStreamRandomizer and first_blood.streams_count == 2,
+		"Eigene Ansager: MP3, First Blood mit 2 Varianten")
 
 	var hud = player.hud
 	# Fallschaden: 9 m nichts, 15 m 5, 25 m 15
