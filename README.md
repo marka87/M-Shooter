@@ -73,10 +73,12 @@ Nach „Spiel starten“ wählst du **Anzahl (1–7)** und **Schwierigkeit** der
 Die Bots besitzen eine 4-stufige Zustandsmaschine:
 - **PATROL (Patrouille)**: Läuft Arena-Wegpunkte ab und sucht per Raycast nach freier Sichtlinie zum Spieler.
 - **CHASE (Verfolgen)**: Nutzt `NavigationAgent3D` und die dynamisch gebackene `NavigationRegion3D`, um den Spieler anzulaufen.
-- **ATTACK (Angriff)**: Fixiert den Spieler, strafet seitlich und feuert mit menschlicher Streuung (ca. 4°), um faire Ausweichmanöver zu ermöglichen.
-- **DEAD (Tot)**: Schaltet Kollision ab, kippt um, schreibt dem Spieler einen Frag gut und respawnt nach 4 Sekunden an einem zufälligen Spawnpunkt.
+- **ATTACK (Angriff)**: Fixiert das Ziel, strafet seitlich, wählt die passende Waffe und feuert mit Streuung je nach Schwierigkeit.
+- **DEAD (Tot)**: Schaltet Kollision ab, fällt als Ragdoll um (oder zerplatzt), schreibt dem Schützen einen Frag gut und respawnt nach 4 Sekunden am freiesten Spawnpunkt.
 
 Die Bots sind animierte Figuren (Mannequin aus der **Quaternius Universal Animation Library**, CC0, `assets/characters/ual/`): Idle, Gehen, Joggen und Sprinten je nach Tempo, Sprung-Pose in der Luft, Pistolen-Zielhaltung im Kampf und Zucken bei Treffern. Beim Tod fallen sie als **Ragdoll** um; große Treffer (Explosion aus der Nähe, ab 120 Schaden) lassen sie in Würfel zerplatzen.
+
+Bots benutzen **dieselben Waffen wie der Spieler** (sichtbar in der Hand, mit Munition) und wählen sie nach Entfernung: Shotgun und Lightning Gun nah, Raketen und Plasma mittel, Railgun weit. Raketen und Plasma werden **vorgehalten**, Raketen auf die Füße gezielt. Sie sammeln Waffen und Munition ein und kennen die **Respawn-Zeiten** von Quad, Mega Health und Rüstung: Kurz vorher laufen sie hin und warten.
 
 Über den Köpfen der Bots schwebt ein 3D-Namensschild (`Label3D`) mit Live-Status und Lebenspunkten.
 
@@ -84,7 +86,7 @@ Die Bots sind animierte Figuren (Mannequin aus der **Quaternius Universal Animat
 
 ## 🛡️ Schadens- & Pickup-System
 
-- **Einstellungen**: Mausempfindlichkeit und Lautstärke werden in `user://settings.cfg` gespeichert.
+- **Einstellungen**: Mausempfindlichkeit, Lautstärke, Sichtfeld, Kamera-Effekte, **Grafik-Stufe** (Niedrig/Mittel mit FSR-Hochskalierung und ohne SSAO/Nebel, Ultra mit 4x MSAA), **V-Sync** und **Tastenbelegung** (Taste anklicken, neue Taste oder Maustaste drücken) werden in `user://settings.cfg` gespeichert.
 - **Lebenspunkte (HP)**: 100 Basis-HP. Sinkt HP auf 0, erscheint das Todes-Overlay mit 3-Sekunden-Respawn-Countdown.
 - **Rüstung**: Startet bei 50 (bis max. 100). Fängt **66 %** allen Schadens ab, während nur 34 % die Lebenspunkte schwächen.
 - **Treffer-Feedback**: 
@@ -191,7 +193,9 @@ Dunkle Low-Poly-Körper mit leuchtenden Wireframe-Kanten. Der Nachbearbeitungs-S
 - Bots fallen beim Tod als Ragdoll um oder zerplatzen bei großen Treffern in leuchtende Würfel (`scenes/effects/voxel_burst.tscn`)
 - Waffenmodelle aus facettierten Grundformen mit Leuchtteilen in der Waffenfarbe (`scenes/weapons/models/`), erzeugt von `python tools/make_weapon_models.py`. Form und Maße stehen als Teileliste im Skript; nach Änderungen das Skript neu ausführen
 - Leuchtspuren für MG, Shotgun und Bot-Schüsse (`scenes/effects/tracer.tscn`)
-- HUD als Panel-Leiste unten: HP und Rüstung mit Balken, Spielerbild, Munition mit Balken, Waffe und Slots 1–4
+- HUD: große Zahlen für Leben und Rüstung unten links, Munition mit Waffenname und Waffenleiste (1 MG … 7 SR) unten rechts, Quad-Timer unten mittig, Tacho mit FPS oben
+- Shader: Pickups mit leuchtendem Fresnel-Rand, die beim Respawn als Hologramm erscheinen (auch Bots), Teleporter mit animiertem Portal, blauer Schild-Puls am Bildrand, wenn die Rüstung einen Treffer schluckt
+- Rauchspur hinter Raketen, Messinghülsen beim MG, alle Partikel als GPU-Partikel
 
 Neue Flächen bekommen den Look automatisch: dunkle, leicht farbige Grundfarbe wählen, die Kanten erledigt der Shader.
 

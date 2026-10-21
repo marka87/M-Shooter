@@ -94,29 +94,34 @@ theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 24
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer"]
+[node name="Columns" type="HBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 32
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns"]
+custom_minimum_size = Vector2(330, 0)
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="SettingsTitle" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+[node name="SettingsTitle" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
 theme_override_font_sizes/font_size = 30
 text = "EINSTELLUNGEN"
 horizontal_alignment = 1
 
-[node name="SensContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+[node name="SensContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/SensContainer"]
+[node name="Label" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/SensContainer"]
 layout_mode = 2
 text = "Mausempfindlichkeit:"
 
-[node name="HBox" type="HBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/SensContainer"]
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/SensContainer"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="SensSlider" type="HSlider" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/SensContainer/HBox"]
+[node name="SensSlider" type="HSlider" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/SensContainer/HBox"]
 custom_minimum_size = Vector2(240, 24)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -125,23 +130,23 @@ max_value = 0.008
 step = 0.0001
 value = 0.002
 
-[node name="SensValueLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/SensContainer/HBox"]
+[node name="SensValueLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/SensContainer/HBox"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 text = "0.0020"
 
-[node name="VolumeContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+[node name="VolumeContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/VolumeContainer"]
+[node name="Label" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/VolumeContainer"]
 layout_mode = 2
 text = "Gesamtlautstärke:"
 
-[node name="HBox" type="HBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/VolumeContainer"]
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/VolumeContainer"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="VolumeSlider" type="HSlider" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/VolumeContainer/HBox"]
+[node name="VolumeSlider" type="HSlider" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/VolumeContainer/HBox"]
 custom_minimum_size = Vector2(240, 24)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -149,23 +154,23 @@ max_value = 1.0
 step = 0.05
 value = 1.0
 
-[node name="VolumeValueLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/VolumeContainer/HBox"]
+[node name="VolumeValueLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/VolumeContainer/HBox"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 text = "100%"
 
-[node name="MusicContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+[node name="MusicContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/MusicContainer"]
+[node name="Label" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/MusicContainer"]
 layout_mode = 2
 text = "Musik:"
 
-[node name="HBox" type="HBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/MusicContainer"]
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/MusicContainer"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="MusicSlider" type="HSlider" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/MusicContainer/HBox"]
+[node name="MusicSlider" type="HSlider" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/MusicContainer/HBox"]
 custom_minimum_size = Vector2(240, 24)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -173,23 +178,23 @@ max_value = 1.0
 step = 0.05
 value = 0.7
 
-[node name="MusicValueLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/MusicContainer/HBox"]
+[node name="MusicValueLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/MusicContainer/HBox"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 text = "70%"
 
-[node name="FovContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+[node name="FovContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/FovContainer"]
+[node name="Label" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/FovContainer"]
 layout_mode = 2
 text = "Sichtfeld (FOV):"
 
-[node name="HBox" type="HBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/FovContainer"]
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/FovContainer"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="FovSlider" type="HSlider" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/FovContainer/HBox"]
+[node name="FovSlider" type="HSlider" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/FovContainer/HBox"]
 custom_minimum_size = Vector2(240, 24)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -198,25 +203,54 @@ max_value = 120.0
 step = 1.0
 value = 100.0
 
-[node name="FovValueLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/FovContainer/HBox"]
+[node name="FovValueLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/FovContainer/HBox"]
 custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 text = "100°"
 
-[node name="CameraFxCheck" type="CheckButton" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+[node name="CameraFxCheck" type="CheckButton" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer"]
 layout_mode = 2
 button_pressed = true
 text = "Kamera-Effekte (Wackeln, Landung, Tempo-Sichtfeld)"
 
-[node name="Spacer" type="Control" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+[node name="Spacer" type="Control" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer"]
 custom_minimum_size = Vector2(0, 8)
 layout_mode = 2
 
-[node name="BackButton" type="Button" parent="CenterContainer/SettingsPanel/MarginContainer/VBoxContainer"]
+[node name="BackButton" type="Button" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "ZURÜCK"
+
+[node name="RightColumn" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns"]
+custom_minimum_size = Vector2(330, 0)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="GraphicsLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn"]
+layout_mode = 2
+text = "Grafik:"
+
+[node name="GraphicsOption" type="OptionButton" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+
+[node name="VsyncCheck" type="CheckButton" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn"]
+layout_mode = 2
+button_pressed = true
+text = "V-Sync"
+
+[node name="KeysLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn"]
+layout_mode = 2
+text = "Tastenbelegung (klicken, dann Taste drücken; ESC bricht ab):"
+autowrap_mode = 3
+
+[node name="KeysGrid" type="GridContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn"]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 4
+columns = 2
 
 [node name="MatchPanel" type="PanelContainer" parent="CenterContainer"]
 visible = false

@@ -60,5 +60,12 @@ func _explode(pos: Vector3, direct_target: Object = null) -> void:
 		explosion.position = pos
 		get_parent().add_child(explosion)
 		explosion.global_position = pos
-	
+
+	# Rauchspur bleibt stehen und verweht, statt mit der Rakete zu verschwinden
+	var smoke := get_node_or_null("Smoke") as GPUParticles3D
+	if smoke:
+		smoke.emitting = false
+		smoke.reparent(get_parent())
+		get_tree().create_timer(smoke.lifetime, false).timeout.connect(smoke.queue_free)
+
 	queue_free()

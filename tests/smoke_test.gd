@@ -67,7 +67,14 @@ func run() -> void:
 	# Bots patrouillieren?
 	var b1 = bots[0]
 	var start_pos: Vector3 = b1.global_position
+	# Nur patrouillieren, nicht kaempfen: Sonst fliegen Raketen der Gott-Bots durch die folgenden Pruefungen
+	for b in bots:
+		b.sight_range = 0.0
+		b.target = null
+		b._switch_state(b.State.PATROL)
 	await wait(3.0)
+	for b in bots:
+		b.apply_skill(gm.bot_skill)
 	print("Bot1 bewegt: ", start_pos.distance_to(b1.global_position), " m, Zustand ", b1.current_state, ", Ziel ", b1.patrol_target)
 
 	# MG auf Bot
@@ -75,6 +82,10 @@ func run() -> void:
 	for b in bots:
 		b.set_physics_process(false)
 	b1.velocity = Vector3.ZERO
+	# Feste, freie Stelle (Raketen der kaempfenden Bots koennen den Spieler verschoben haben)
+	player.global_position = Vector3(0, 0.1, 25)
+	player.velocity = Vector3.ZERO
+	await wait(0.3)
 	var clear := false
 	for ang in [0.0, 90.0, 180.0, 270.0, 45.0, 135.0, 225.0, 315.0]:
 		var dir := Vector3.FORWARD.rotated(Vector3.UP, deg_to_rad(ang))
@@ -143,14 +154,14 @@ func run() -> void:
 	await wait(2.0)
 	# Die Waffe haengt am Handknochen und zeigt so, dass das sichtbare Modell dem Ragdoll folgt
 	var head_y: float = b1.ragdoll.get_node("Rag_DEF-head").global_position.y - b1.global_position.y
-	var gun_y: float = b1.gun_mesh.global_position.y - b1.global_position.y
+	var gun_y: float = b1.weapon_manager.global_position.y - b1.global_position.y
 	check(head_y < 0.7 and gun_y < 0.7, "Ragdoll liegt am Boden (Kopf %.2f m, Waffe %.2f m hoch)" % [head_y, gun_y])
 	b1._respawn()
 	b1.set_physics_process(false)
-	check(not b1.ragdoll.is_simulating_physics() and b1.anim_tree.active, "Respawn beendet den Ragdoll")
+	check(b1.ragdoll == null and b1.anim_tree.active, "Respawn beendet den Ragdoll")
 	# Grosser Treffer -> Wuerfel statt Ragdoll
 	b1.take_damage(DamageInfo.create(200.0, player, b1.global_position, Vector3.FORWARD, "Test"))
-	check(not b1.model.visible and not b1.ragdoll.is_simulating_physics(), "Grosser Treffer: Bot zerplatzt (Gib)")
+	check(not b1.model.visible and b1.ragdoll == null, "Grosser Treffer: Bot zerplatzt (Gib)")
 	b1._respawn()
 	b1.set_physics_process(false)
 	# Bots bleiben bis zum Bot-gegen-Bot-Test eingefroren, sonst stoeren sie die folgenden Pruefungen
@@ -219,7 +230,7 @@ func run() -> void:
 	await wait(0.5)
 	check(not ammo_box.is_active, "Munitionskiste eingesammelt")
 	check(rail.current_ammo == 1 + rail.data.ammo_box_amount, "Railgun +%d Munition (%d)" % [rail.data.ammo_box_amount, rail.current_ammo])
-	check(wm.get_current_weapon().weapon_name == player.hud.weapon_name_label.text, "HUD zeigt aktive Waffe")
+	check(wm.get_current_weapon().weapon_name.to_upper() == player.hud.weapon_name_label.text, "HUD zeigt aktive Waffe")
 
 	# Tod durch Bot und Respawn
 	var b2 = bots[1]
@@ -271,6 +282,69 @@ func run() -> void:
 	print("Bot-gegen-Bot-Treffer: ", bot_hits.size())
 	check(bot_hits.size() > 0, "Bots kaempfen gegeneinander (%d Treffer)" % bot_hits.size())
 
+	# --- Bot-Waffen: Wahl nach Entfernung, Vorhalt bei Raketen ---
+	var shooter_bot = bots[0]
+	for b in bots:
+		b.set_physics_process(false)
+	# Ausstehende Respawns aus dem Bot-Kampf abwarten, sonst versetzen sie die Bots mitten im Test
+	if bots.any(func(b): return b.health.is_dead):
+		await wait(shooter_bot.respawn_delay + 0.3)
+	var arsenal = shooter_bot.weapon_manager
+	for w in arsenal.weapons:
+		w.owned = true
+		w.current_ammo = w.max_ammo
+	var picks: Array = [5.0, 15.0, 30.0].map(func(d): return arsenal.choose_for(d).weapon_id)
+	check(picks == [&"shotgun", &"rocket_launcher", &"railgun"], "Bot-Waffe nach Entfernung (%s)" % [picks])
+	# Ziel 15 m vor dem Bot, laeuft mit 8 m/s nach rechts: Rakete muss vorgehalten werden
+	var victim = bots[1]
+	shooter_bot.global_position = Vector3(-35, 1.0, 30)
+	shooter_bot.rotation = Vector3.ZERO
+	victim.global_position = Vector3(-35, 1.0, 15)
+	victim.velocity = Vector3(8, 0, 0)
+	shooter_bot.inaccuracy_degrees = 0.0
+	arsenal.choose_for(15.0)
+	await wait(1.0)  # Waffe hochziehen
+	var rockets_before: Array = current_scene.get_children().filter(func(n): return n.has_method("_explode"))
+	# Ein Respawn aus dem Bot-Kampf kann die Waffen zurueckgesetzt haben: Rakete schussbereit machen
+	var launcher = arsenal.get_weapon(&"rocket_launcher")
+	launcher.owned = true
+	launcher.current_ammo = launcher.max_ammo
+	arsenal.choose_for(15.0)
+	launcher.cooldown_timer = 0.0
+	var fired: bool = shooter_bot._fire_at(victim, 15.0)
+	var rocket = current_scene.get_children().filter(func(n): return n.has_method("_explode") and not n in rockets_before).front() if fired else null
+	var rocket_dir: Vector3 = -rocket.global_transform.basis.z if rocket else Vector3.ZERO
+	check(fired and rocket_dir.x > 0.15, "Bot haelt Raketen vor (Richtung %s)" % rocket_dir)
+	victim.velocity = Vector3.ZERO
+
+	# --- Item-Timing: Grosse Items lohnen sich schon kurz vor dem Respawn ---
+	var armor_item = current_scene.find_children("*", "Area3D", true, false).filter(func(a): return a.get("pickup_type") == 3).front()
+	victim.health.armor = 0.0
+	armor_item._collect()
+	armor_item._respawn_timer.time_left = 20.0
+	var useful_early: bool = armor_item.is_useful_for(victim)
+	armor_item._respawn_timer.time_left = 4.0
+	check(not useful_early and armor_item.is_useful_for(victim), "Bot kennt Respawn-Zeit der Ruestung (20 s: nein, 4 s: ja)")
+
+	# Tastenbelegung: neue Taste ersetzt die alte (danach Original wiederherstellen)
+	var jump_events: Array = InputMap.action_get_events("jump")
+	var q_key := InputEventKey.new()
+	q_key.physical_keycode = KEY_Q
+	gm.set_binding(&"jump", q_key)
+	check(InputMap.action_get_events("jump").size() == 1 and gm.binding_text(&"jump") == "Q", "Tastenbelegung: Springen auf Q")
+	InputMap.action_erase_events("jump")
+	for ev in jump_events:
+		InputMap.action_add_event("jump", ev)
+
+	# Grafik-Preset "Niedrig": geringere Aufloesung mit FSR, ohne SSAO, Nebel und Schatten
+	var orig_preset: int = gm.graphics_preset
+	gm.graphics_preset = 0
+	gm.apply_graphics(current_scene)
+	var env: Environment = current_scene.find_children("*", "WorldEnvironment", true, false)[0].environment
+	check(is_equal_approx(root.scaling_3d_scale, 0.67) and not env.ssao_enabled and not env.volumetric_fog_enabled, "Grafik-Preset Niedrig angewendet")
+	gm.graphics_preset = orig_preset
+	gm.apply_graphics(current_scene)
+
 	# Einstellungen (echte Werte wiederherstellen, damit der Test sie nicht ueberschreibt)
 	gm.bot_count = orig_bot_count
 	gm.bot_skill = orig_bot_skill
@@ -282,6 +356,23 @@ func run() -> void:
 	# Sound-Daten signed: Stille nahe 0
 	var snd: AudioStream = SoundGenerator.create_hitsound()
 	check(snd == SoundGenerator.create_hitsound(), "Sound-Cache liefert dieselbe Instanz")
+
+	# HUD-Layout: Hauptelemente ueberlappen sich nicht und liegen im Bild (1280x720 und 1152x648)
+	var hud = player.hud
+	hud.quad_label.visible = true
+	var hud_ok := true
+	for screen in [Vector2i(1280, 720), Vector2i(1152, 648)]:
+		root.size = screen
+		await process_frame
+		await process_frame
+		var parts: Array = ["Vitals", "AmmoBox", "QuadLabel", "ControlHints", "KillFeed", "TimerLabel", "FragsLabel"].map(func(n): return hud.get_node(n).get_global_rect())
+		for i in parts.size():
+			hud_ok = hud_ok and Rect2(Vector2.ZERO, Vector2(screen)).encloses(parts[i])
+			for j in range(i + 1, parts.size()):
+				hud_ok = hud_ok and not parts[i].intersects(parts[j])
+	check(hud_ok, "HUD-Elemente ueberlappen nicht")
+	hud.quad_label.visible = false
+	root.size = Vector2i(1280, 720)
 
 	# Pools: Funken bleiben bei Dauerfeuer begrenzt, abgelaufene Leuchtspuren werden wiederverwendet
 	var count_sparks := func() -> int: return current_scene.find_children("*", "HitSpark", false, false).size()

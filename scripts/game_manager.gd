@@ -78,6 +78,18 @@ var fov: float = 100.0
 ## Kamera-Feedback (Wackeln, Einknicken, Tempo-Sichtfeld) an/aus
 var camera_effects: bool = true
 
+## Grafik-Stufe (Index in GRAPHICS_PRESETS) und V-Sync
+const GRAPHICS_PRESETS: Array[String] = ["Niedrig", "Mittel", "Hoch", "Ultra"]
+var graphics_preset: int = 2
+var vsync: bool = true
+
+## Belegbare Aktionen (InputMap) mit Anzeigenamen fuer die Einstellungen
+const BINDABLE_ACTIONS := {
+	&"move_forward": "Vorwärts", &"move_backward": "Rückwärts", &"move_left": "Links", &"move_right": "Rechts",
+	&"jump": "Springen", &"sprint": "Sprinten", &"shoot": "Schießen", &"shoot_alt": "Alt-Feuer",
+	&"scoreboard": "Punkteliste",
+}
+
 # Match-Einstellungen
 ## Anzahl Bots in der Arena (1-7)
 var bot_count: int = 3
@@ -471,6 +483,16 @@ func load_settings() -> void:
 		frag_limit = cfg.get_value("match", "frag_limit", frag_limit)
 		time_limit_minutes = cfg.get_value("match", "time_limit", time_limit_minutes)
 		instagib = cfg.get_value("match", "instagib", instagib)
+		graphics_preset = clampi(cfg.get_value("video", "graphics_preset", graphics_preset), 0, GRAPHICS_PRESETS.size() - 1)
+		vsync = cfg.get_value("video", "vsync", vsync)
+		for action in BINDABLE_ACTIONS:
+			var events = cfg.get_value("keys", action) if cfg.has_section_key("keys", action) else []
+			if events is Array and not events.is_empty():
+				InputMap.action_erase_events(action)
+				for ev in events:
+					if ev is InputEvent:
+						InputMap.action_add_event(action, ev)
+	apply_graphics()
 	apply_master_volume()
 
 
@@ -488,7 +510,68 @@ func save_settings() -> void:
 	cfg.set_value("match", "frag_limit", frag_limit)
 	cfg.set_value("match", "time_limit", time_limit_minutes)
 	cfg.set_value("match", "instagib", instagib)
+	cfg.set_value("video", "graphics_preset", graphics_preset)
+	cfg.set_value("video", "vsync", vsync)
+	for action in BINDABLE_ACTIONS:
+		cfg.set_value("keys", action, InputMap.action_get_events(action))
 	cfg.save(SETTINGS_PATH)
+
+
+## Grafik-Stufe anwenden. Niedrig/Mittel rendern mit FSR in geringerer Aufloesung, darunter fallen
+## SSAO, Nebel und Schatten weg, Ultra glaettet zusaetzlich mit 4x MSAA und feineren Schatten. Die Welt-Einstellungen gelten
+## fuer die geladene Arena (die Arena ruft das nach dem Laden auf).
+func apply_graphics(level: Node = null) -> void:
+	var p := graphics_preset
+	var viewport := get_viewport()
+	viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR if p < 2 else Viewport.SCALING_3D_MODE_BILINEAR
+	viewport.scaling_3d_scale = [0.67, 0.85, 1.0, 1.0][p]
+	viewport.msaa_3d = Viewport.MSAA_4X if p == 3 else Viewport.MSAA_DISABLED
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if vsync else DisplayServer.VSYNC_DISABLED)
+	if level == null:
+		level = get_tree().current_scene
+	if level == null:
+		return
+	for env_node in level.find_children("*", "WorldEnvironment", true, false):
+		var env: Environment = env_node.environment
+		if p < 2:
+			env.ssao_enabled = false
+		if p < 1:
+			env.volumetric_fog_enabled = false
+	# Sonnenschatten nur so weit wie die Arena reicht, Filterqualitaet je Stufe
+	RenderingServer.directional_soft_shadow_filter_set_quality([RenderingServer.SHADOW_QUALITY_HARD,
+		RenderingServer.SHADOW_QUALITY_SOFT_LOW, RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, RenderingServer.SHADOW_QUALITY_SOFT_HIGH][p])
+	for light in level.find_children("*", "DirectionalLight3D", true, false):
+		light.directional_shadow_max_distance = 70.0
+		light.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS if p == 3 else DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	if p < 1:
+		for light in level.find_children("*", "Light3D", true, false):
+			light.shadow_enabled = false
+
+
+## Neue Taste fuer eine Aktion (ersetzt die bisherige Belegung)
+func set_binding(action: StringName, event: InputEvent) -> void:
+	var stored := event.duplicate() as InputEvent
+	stored.set("pressed", false)
+	InputMap.action_erase_events(action)
+	InputMap.action_add_event(action, stored)
+
+
+## Lesbarer Name der ersten Taste einer Aktion
+func binding_text(action: StringName) -> String:
+	var events := InputMap.action_get_events(action)
+	if events.is_empty():
+		return "-"
+	var ev := events[0]
+	if ev is InputEventMouseButton:
+		return {MOUSE_BUTTON_LEFT: "Maus links", MOUSE_BUTTON_RIGHT: "Maus rechts", MOUSE_BUTTON_MIDDLE: "Maus Mitte"}.get(ev.button_index, "Maustaste %d" % ev.button_index)
+	if ev is InputEventKey:
+		var key: InputEventKey = ev
+		# Physische Taste in die Beschriftung des aktuellen Tastaturlayouts umrechnen (nicht ohne Bildschirm)
+		var code := key.keycode
+		if code == KEY_NONE:
+			code = key.physical_keycode if DisplayServer.get_name() == "headless" else DisplayServer.keyboard_get_keycode_from_physical(key.physical_keycode)
+		return OS.get_keycode_string(code)
+	return ev.as_text()
 
 
 ## Setzt die Master-Lautstaerke (0 = stumm)

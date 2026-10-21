@@ -16,7 +16,7 @@ func _ready() -> void:
 	audio_player.stream = SoundGenerator.create_shock_beam_sound()
 
 
-func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
+func _on_fire(shooter: Node3D, camera: Node3D) -> void:
 	audio_player.stream = SoundGenerator.create_shock_beam_sound()
 	audio_player.pitch_scale = randf_range(0.97, 1.03)
 	audio_player.play()
@@ -50,7 +50,7 @@ func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
 		HitSpark.spawn(shooter.get_parent(), end, hit.normal)
 
 
-func _on_fire_alt(shooter: Node3D, camera: Camera3D) -> void:
+func _on_fire_alt(shooter: Node3D, camera: Node3D) -> void:
 	audio_player.stream = SoundGenerator.create_shock_ball_sound()
 	audio_player.pitch_scale = randf_range(0.95, 1.05)
 	audio_player.play()

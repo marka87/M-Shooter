@@ -11,7 +11,7 @@ func _ready() -> void:
 	audio_player.stream = SoundGenerator.create_plasma_sound()
 
 
-func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
+func _on_fire(shooter: Node3D, camera: Node3D) -> void:
 	audio_player.pitch_scale = randf_range(0.92, 1.08)
 	audio_player.play()
 	var bolt := BOLT_SCENE.instantiate() as EnergyProjectile
@@ -24,7 +24,7 @@ func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
 
 ## Projektil auf den Punkt unter dem Fadenkreuz ausrichten (nicht parallel zur Kamera,
 ## sonst fliegt es wegen der seitlich sitzenden Muendung am Ziel vorbei)
-static func aim_projectile(projectile: Node3D, camera: Camera3D, shooter: Node3D) -> void:
+static func aim_projectile(projectile: Node3D, camera: Node3D, shooter: Node3D) -> void:
 	var from: Vector3 = camera.global_position
 	var forward: Vector3 = -camera.global_transform.basis.z
 	var target: Vector3 = from + forward * 200.0

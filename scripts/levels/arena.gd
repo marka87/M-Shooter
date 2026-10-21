@@ -30,6 +30,7 @@ func _ready() -> void:
 				GameManager.register_spawn_point(spawn)
 
 	_spawn_bots()
+	GameManager.apply_graphics(self)
 	GameManager.start_match()
 
 

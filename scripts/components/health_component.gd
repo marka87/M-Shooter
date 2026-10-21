@@ -27,6 +27,8 @@ var armor: float = 0.0
 var is_dead: bool = false
 ## Letzter Treffer (z. B. um den Killer zu bestimmen)
 var last_damage: DamageInfo = null
+## Wie viel davon die Ruestung geschluckt hat (fuer den Schild-Effekt im HUD)
+var last_absorbed: float = 0.0
 
 
 func _ready() -> void:
@@ -49,6 +51,7 @@ func apply_damage(info: DamageInfo) -> void:
 	var absorbed: float = minf(armor, info.amount * armor_absorption)
 	var health_lost: float = minf(info.amount - absorbed, health)
 	armor -= absorbed
+	last_absorbed = absorbed
 	health -= health_lost
 	damaged.emit(info, health_lost)
 	changed.emit(health, armor)

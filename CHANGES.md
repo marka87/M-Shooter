@@ -1,3 +1,16 @@
+# Änderungen (Runde 23: Bot-Waffen, Item-Timing, HUD, Shader, Einstellungen, Leistung)
+
+- **Bots mit allen Waffen (5.2):** Jeder Bot trägt dieselben Waffenszenen wie der Spieler (`scripts/components/bot_arsenal.gd`), sichtbar an der rechten Hand, mit Munition, Abklingzeit, echten Raketen, Plasma und Shock-Kugeln. Waffenwahl nach Entfernung (Shotgun < 9 m, Raketen 4,5–25 m, Railgun ab 18 m usw.). Raketen und Plasma werden vorgehalten, Raketen auf die Füße gezielt. Die Waffen nehmen dafür statt einer Kamera einen beliebigen Zielknoten. Die alte Bot-eigene Schusslogik ist entfallen.
+- **Item-Timing (5.3):** Bots sammeln Waffen und Munitionskisten ein und kennen die Respawn-Zeiten großer Items (Quad, Mega Health, Rüstung): 6 s vorher laufen sie hin und warten am Platz.
+- **Rauchspur und Hülsen (2.6):** Raketen ziehen eine Rauchspur, die nach der Explosion stehen bleibt und verweht. Das MG wirft Messinghülsen aus.
+- **Shader (3.6):** `rim_hologram.gdshader` gibt Pickups einen Fresnel-Rand in ihrer Farbe; beim Respawn erscheinen sie als Hologramm mit Scanlines und ploppen auf. Bots erscheinen beim Respawn ebenso. Teleporter haben ein animiertes Portal (`teleporter_portal.gdshader`). Schluckt die Rüstung des Spielers einen Treffer, leuchtet am Bildrand kurz ein blaues Wabenmuster.
+- **Modernes HUD (7.1):** Große Zahlen für Leben und Rüstung unten links, Munition und Waffenname unten rechts mit Waffenleiste (Kurznamen), Quad-Timer unten mittig, Tastenhilfe oben. Die alte Rahmenleiste und das Spielerbild sind entfallen. Ein Test prüft, dass sich die Elemente bei 1280×720 und 1152×648 nicht überlappen.
+- **Einstellungen (7.4):** Zweite Spalte im Einstellungsfenster mit Grafik-Stufe (Niedrig, Mittel, Hoch, Ultra), V-Sync und Tastenbelegung für Bewegung, Springen, Sprinten, Schießen, Alt-Feuer und Punkteliste (gespeichert in `settings.cfg`).
+- **Leistung (9.1):** Ragdoll-Knochen entstehen erst beim Tod (vorher folgten 77 Physik-Knochen ständig den Skeletten), Sichtlinie zum Ziel höchstens alle 0,1 s, neue Wegsuche nur bei merklicher Zielbewegung, Sonnenschatten auf 70 m begrenzt mit Qualität je Grafik-Stufe, FPS-Anzeige im Tacho. Gemessen (CPU, ohne Fenster, 7 Bots): Skripte ca. 1,5 ms, Physik 3,8–4,7 ms pro Frame; die GPU-Last ist ohne Fenster nicht messbar.
+- Tests: Smoke-Test um Bot-Waffenwahl, Raketen-Vorhalt, Item-Timing, HUD-Layout, Tastenbelegung und Grafik-Preset erweitert und gegen Störungen durch kämpfende Bots abgesichert. Alle vier Tests grün.
+
+---
+
 # Änderungen (Runde 22: Waffenwechsel, Sprung-Bewegung, GPU-Partikel, Pools, Interpolation)
 
 - **Waffenwechsel-Animation:** Die neue Waffe schwenkt in 0,15 s von unten hoch (schnell wie in Quake 3) und feuert erst, wenn sie oben ist.

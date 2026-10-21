@@ -114,7 +114,7 @@ func run() -> void:
 	check(owned_ids == [&"railgun"] and wm.get_current_weapon().weapon_id == &"railgun", "Instagib: nur Railgun (%s)" % [owned_ids])
 	var items: Array = current_scene.find_children("*", "Area3D", true, false).filter(func(a): return a.has_method("is_useful_for"))
 	check(items.all(func(i): return not i.visible and not i.is_active), "Instagib: keine Items (%d versteckt)" % items.size())
-	check(bot.damage_per_shot == gm.INSTAGIB_DAMAGE and bot.shoot_interval >= 1.25, "Instagib: Bots mit Railgun")
+	check(bot.weapon_manager.current.weapon_id == &"railgun" and bot.weapon_manager.weapons.filter(func(w): return w.owned).size() == 1, "Instagib: Bots nur mit Railgun")
 	player.rotation = Vector3.ZERO
 	player.head.rotation = Vector3.ZERO
 	# 3 m vor dem Spieler (in 5 m steht in der Testarena eine Rampe)

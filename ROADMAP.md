@@ -65,7 +65,7 @@ Dazu:
 | 2.3 | ✅ Hochziehen in 0,15 s (Wegstecken sofort). Waffenwechsel mit Ab-/Aufzieh-Animation und schnellem „Weapon Switch“ wie in Q3 | S |
 | 2.4 | ✅ Pool für Funken/Einschusslöcher und Leuchtspuren (Projektile nicht, zu selten). Object-Pooling für Projektile, Funken, Einschläge | S |
 | 2.5 | ✅ Headshots für Hitscan (Railgun/Shock) mit eigenem Hitsound | S |
-| 2.6 | ✅ teilweise: glühende Einschusslöcher. Einschusslöcher als Decals, Rauchspuren hinter Raketen, Hülsen beim MG | M |
+| 2.6 | ✅ Glühende Einschusslöcher, Rauchspur hinter Raketen, Hülsen beim MG. Einschusslöcher als Decals, Rauchspuren hinter Raketen, Hülsen beim MG | M |
 | 2.7 | ✅ **Waffenmodelle** im Neon-Low-Poly-Stil: eigene Silhouette pro Waffe, leuchtende Teile in der Waffenfarbe | M |
 | 2.8 | ✅ **Viewmodel-Bewegung**: Wippen beim Laufen, Nachziehen beim Umsehen, Absenken beim Springen, Einknicken beim Landen, Rückstoß beim Schuss (evtl. schon zu Hause gebaut, erst mergen) | S |
 | 2.9 | Eigene Effekte pro Waffe: Plasma-Spritzer, Railgun-Spiralspur, Mündungsfeuer je Waffe | S |
@@ -83,7 +83,7 @@ Der aktuelle Stand sind einfache Meshes und prozedurale Effekte. Für einen mode
 | 3.3 | Licht: **LightmapGI** backen (beste Qualität bei statischer Arena) oder SDFGI für schnelle Iteration | M |
 | 3.4 | ✅ Neon-Brutalism (dunkle Low-Poly-Körper, Neonkanten). Stilrichtung festlegen. Empfehlung: **Sci-Fi-Industrial mit Neon-Akzenten** (UT99/UT4-Anmutung), das kaschiert einfache Geometrie und ist gut lesbar | – |
 | 3.5 | ✅ Bots: animiertes Quaternius-Mannequin mit Ragdoll (Waffenmodelle offen). Modelle: Waffen und Bots aus Blender oder CC0-Paketen (z. B. Kenney, Quaternius), Bots mit Lauf-/Schuss-/Todes-Animation und Ragdoll | L |
-| 3.6 | Shader: leuchtende Pickups mit Fresnel-Rand, Schild-Effekt bei Rüstung, Teleporter-Portal, Hologramm-Respawn | M |
+| 3.6 | ✅ Fresnel-Rand und Hologramm-Respawn (Pickups, Bots), Teleporter-Portal, Schild-Puls am Bildrand (nur Spieler, Bot-Rüstung absorbiert nichts). Shader: leuchtende Pickups mit Fresnel-Rand, Schild-Effekt bei Rüstung, Teleporter-Portal, Hologramm-Respawn | M |
 | 3.7 | ✅ GPUParticles statt CPUParticles für Explosionen, Funken, Rauch | S |
 | 3.8 | ✅ **Lesbarkeit vor Schönheit**: Gegner in Team-/Hervorhebungsfarbe (Brightskins wie in Q3), optional abschaltbar | S |
 | 3.9 | Level von zu Hause mergen (nur lokal committet, noch nicht gepusht) | S |
@@ -111,8 +111,8 @@ Heute können Bots nur patrouillieren, verfolgen und mit einer Waffe schießen.
 | # | Aufgabe | Aufwand |
 |---|---|---|
 | 5.1 | ✅ Skill-Stufen (Zielgenauigkeit, Reaktionszeit, Bewegung) wie „Novice … Godlike“ | S |
-| 5.2 | Bots nutzen alle Waffen, wählen die passende nach Distanz und **zielen bei Projektilen vor** (Vorhalt) | M |
-| 5.3 | ✅ teilweise: Bots steuern lohnende Items an (ohne Respawn-Timing). **Item-Bewusstsein**: Bots holen Health/Armor bei wenig Leben und kennen die Respawn-Zeiten großer Items | M |
+| 5.2 | ✅ Bots nutzen alle Waffen, wählen die passende nach Distanz und **zielen bei Projektilen vor** (Vorhalt) | M |
+| 5.3 | ✅ Bots holen Items und Waffen und kennen die Respawn-Zeit von Quad, Mega Health und Rüstung. **Item-Bewusstsein**: Bots holen Health/Armor bei wenig Leben und kennen die Respawn-Zeiten großer Items | M |
 | 5.4 | Ausweichen: Dodge, Strafe-Jumping, Rocket-Jump auf hohe Plattformen | L |
 | 5.5 | Entscheidungslogik als **Utility-AI** statt fester Zustandsmaschine (jede Aktion bekommt eine Punktzahl, der Bot wählt die beste) | M |
 | 5.6 | Namen, Persönlichkeiten (aggressiv, vorsichtig, Camper), Sprüche im Chat | S |
@@ -136,10 +136,10 @@ Heute können Bots nur patrouillieren, verfolgen und mit einer Waffe schießen.
 
 | # | Aufgabe | Aufwand |
 |---|---|---|
-| 7.1 | Modernes HUD: große Zahlen für HP/Rüstung unten links, Munition unten rechts, Waffenleiste, Power-up-Timer | M |
+| 7.1 | ✅ Modernes HUD: große Zahlen für HP/Rüstung unten links, Munition unten rechts, Waffenleiste, Power-up-Timer | M |
 | 7.2 | **Trefferrichtungs-Anzeige** (rote Markierung, aus welcher Richtung der Schaden kam) | S |
 | 7.3 | Fadenkreuz-Editor (Form, Farbe, Größe), Hitmarker-Optionen | S |
-| 7.4 | ✅ teilweise: FOV-Regler. Einstellungen: **FOV**, Grafik-Presets, Auflösungsskalierung (FSR), V-Sync/FPS-Limit, **Tastenbelegung**, Gamepad | M |
+| 7.4 | ✅ teilweise: FOV, Grafik-Presets (FSR, SSAO, Nebel, Schatten, MSAA), V-Sync, Tastenbelegung; Gamepad und FPS-Limit fehlen. Einstellungen: **FOV**, Grafik-Presets, Auflösungsskalierung (FSR), V-Sync/FPS-Limit, **Tastenbelegung**, Gamepad | M |
 | 7.5 | ✅ teilweise: Map-, Bot- und Regelauswahl, 3D-Hintergrund fehlt. Hauptmenü mit 3D-Hintergrund (Kamerafahrt durch die Arena), Map- und Modusauswahl, Bot-Anzahl und -Stärke | M |
 
 ---
@@ -166,7 +166,7 @@ Bei reinem LAN entfallen Lag-Compensation und dedizierter Server.
 
 | # | Aufgabe | Aufwand |
 |---|---|---|
-| 9.1 | Ziel 144+ FPS: Profiler nutzen, Occlusion Culling, LODs, Schatten sparsam | M |
+| 9.1 | ✅ teilweise: Ragdoll erst beim Tod, seltenere Sichtlinien- und Wegsuche, Schatten je Preset, FPS im Tacho. GPU-Messung und Occlusion Culling (im Editor backen) offen. Ziel 144+ FPS: Profiler nutzen, Occlusion Culling, LODs, Schatten sparsam | M |
 | 9.2 | ✅ teilweise: Windows-Export und Versionsnummer, Linux fehlt. Exporte für Windows/Linux, Versionsnummer im Hauptmenü | S |
 | 9.3 | Automatische Tests für Schadensberechnung und Movement (GUT oder gdUnit4) | M |
 | 9.4 | Itch.io-Seite oder Steam-Playtest | M |

@@ -15,7 +15,7 @@ func _ready() -> void:
 	audio_player.volume_db = -9.0
 
 
-func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
+func _on_fire(shooter: Node3D, camera: Node3D) -> void:
 	_tick += 1
 	if _tick % 2 == 0:
 		audio_player.pitch_scale = randf_range(0.9, 1.15)
@@ -43,7 +43,7 @@ func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
 
 ## Zickzack-Blitz: seitlich versetzte Knickpunkte plus duenne weisse Kernlinie.
 ## Jede Leuchtspur lebt nur kurz, bei Dauerfeuer entsteht ein zuckender Strahl.
-func _draw_bolt(parent: Node, start: Vector3, end: Vector3, camera: Camera3D) -> void:
+func _draw_bolt(parent: Node, start: Vector3, end: Vector3, camera: Node3D) -> void:
 	var right: Vector3 = camera.global_transform.basis.x
 	var up: Vector3 = camera.global_transform.basis.y
 	var segments: int = clampi(int(start.distance_to(end) / 2.0), 3, 12)

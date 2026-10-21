@@ -3,7 +3,7 @@ class_name ItemPickup
 
 ## Drehbares, schwebendes Item-Pickup fuer Munition, Leben, Ruestung und Power-ups.
 ## Wird beim Beruehren aufgesammelt und respawnt automatisch nach einigen Sekunden.
-## Spieler sammeln alles, Bots alles ausser Munition (sie haben keinen WeaponManager).
+## Spieler und Bots sammeln alles (Bots haben ein BotArsenal als weapon_manager).
 
 enum PickupType { AMMO_BOX, WEAPON_AMMO, HEALTH, ARMOR, QUAD_DAMAGE, MEGA_HEALTH, WEAPON }
 
@@ -31,9 +31,19 @@ enum PickupType { AMMO_BOX, WEAPON_AMMO, HEALTH, ARMOR, QUAD_DAMAGE, MEGA_HEALTH
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 @onready var audio_player: AudioStreamPlayer3D = $AudioStreamPlayer3D
 
+const RIM_SHADER: Shader = preload("res://assets/shaders/rim_hologram.gdshader")
+
 var initial_y: float = 0.0
+# Leuchtender Rand in der Item-Farbe, beim Respawn kurz als Hologramm
+var _rim: ShaderMaterial
 var anim_time: float = 0.0
 var is_active: bool = true
+var _respawn_timer: SceneTreeTimer
+
+## Grosse Items, deren Respawn-Zeit die Bots kennen (wie Spieler in Quake, die das Item-Timing lernen)
+const TIMED_TYPES: Array[PickupType] = [PickupType.QUAD_DAMAGE, PickupType.MEGA_HEALTH, PickupType.ARMOR]
+## So viele Sekunden vor dem Respawn laufen Bots schon zu einem grossen Item
+const RESPAWN_LOOKAHEAD: float = 6.0
 
 
 func _ready() -> void:
@@ -61,6 +71,11 @@ func _ready() -> void:
 	
 	if pickup_type == PickupType.WEAPON and weapon_scene:
 		_build_weapon_visual()
+	_rim = ShaderMaterial.new()
+	_rim.shader = RIM_SHADER
+	_rim.set_shader_parameter("rim_color", light.light_color if light else Color(0.3, 0.9, 1.0))
+	for mesh in visual_mesh.find_children("*", "GeometryInstance3D", true, false):
+		mesh.material_overlay = _rim
 
 	# Signal verbinden; Gruppe "pickups" nutzen die Bots zur Item-Suche
 	body_entered.connect(_on_body_entered)
@@ -134,9 +149,13 @@ func _strip_scripts(node: Node) -> void:
 
 
 ## Lohnt es sich fuer diesen Kaempfer, das Item zu holen? (fuer die Bot-Planung)
+## Grosse Items gelten schon kurz vor dem Respawn als lohnend, damit Bots rechtzeitig dort sind.
 func is_useful_for(body: Node) -> bool:
-	if not is_active or body.get("health") == null:
+	if body.get("health") == null:
 		return false
+	if not is_active and not (pickup_type in TIMED_TYPES and seconds_until_respawn() <= RESPAWN_LOOKAHEAD):
+		return false
+	var arsenal = body.get("weapon_manager")
 	match pickup_type:
 		PickupType.HEALTH:
 			return body.health.health < body.health.max_health
@@ -146,7 +165,18 @@ func is_useful_for(body: Node) -> bool:
 			return true
 		PickupType.MEGA_HEALTH:
 			return body.health.health < body.health.overheal_max
+		PickupType.WEAPON:
+			return arsenal != null and not arsenal.get_weapon(weapon_id).owned
+		PickupType.AMMO_BOX:
+			return arsenal != null and arsenal.has_method("needs_ammo") and arsenal.needs_ammo()
 	return false
+
+
+## Sekunden bis das Item wieder da ist (0 = liegt bereit)
+func seconds_until_respawn() -> float:
+	if is_active:
+		return 0.0
+	return _respawn_timer.time_left if _respawn_timer else INF
 
 
 ## Wie wertvoll ist das Item (fuer die Bot-Planung)? Power-ups am meisten.
@@ -160,6 +190,10 @@ func value_for(body: Node) -> float:
 			return 60.0 * (1.0 - body.health.health / body.health.max_health) + 10.0
 		PickupType.ARMOR:
 			return 40.0 * (1.0 - body.health.armor / body.health.max_armor) + 10.0
+		PickupType.WEAPON:
+			return 50.0
+		PickupType.AMMO_BOX:
+			return 25.0
 	return 0.0
 
 
@@ -177,13 +211,20 @@ func _collect() -> void:
 		collision_shape.set_deferred("disabled", true)
 	
 	# Nach Ablauf der Respawn-Zeit wieder anzeigen
-	get_tree().create_timer(respawn_time, false).timeout.connect(_respawn)
+	_respawn_timer = get_tree().create_timer(respawn_time, false)
+	_respawn_timer.timeout.connect(_respawn)
 
 
 func _respawn() -> void:
 	is_active = true
+	_respawn_timer = null
 	if visual_mesh:
 		visual_mesh.visible = true
+		# Hologramm-Respawn: Scanlines klingen ab, das Item ploppt auf
+		visual_mesh.scale = Vector3.ONE * 0.4
+		var tween := create_tween().set_parallel()
+		tween.tween_property(visual_mesh, "scale", Vector3.ONE, 0.4).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tween.tween_method(func(v: float): _rim.set_shader_parameter("hologram", v), 1.0, 0.0, 0.9)
 	if light:
 		light.visible = true
 	if collision_shape:

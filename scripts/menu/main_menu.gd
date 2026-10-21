@@ -18,17 +18,24 @@ extends Control
 @onready var fight_button: Button = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/FightButton
 @onready var match_back_button: Button = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/MatchBackButton
 
-@onready var sens_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/SensContainer/HBox/SensSlider
-@onready var sens_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/SensContainer/HBox/SensValueLabel
+@onready var sens_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/SensContainer/HBox/SensSlider
+@onready var sens_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/SensContainer/HBox/SensValueLabel
 
-@onready var volume_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/VolumeContainer/HBox/VolumeSlider
-@onready var volume_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/VolumeContainer/HBox/VolumeValueLabel
+@onready var volume_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/VolumeContainer/HBox/VolumeSlider
+@onready var volume_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/VolumeContainer/HBox/VolumeValueLabel
 
-@onready var music_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/MusicContainer/HBox/MusicSlider
-@onready var music_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/MusicContainer/HBox/MusicValueLabel
-@onready var camera_fx_check: CheckButton = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/CameraFxCheck
-@onready var fov_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/FovContainer/HBox/FovSlider
-@onready var fov_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/VBoxContainer/FovContainer/HBox/FovValueLabel
+@onready var music_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/MusicContainer/HBox/MusicSlider
+@onready var music_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/MusicContainer/HBox/MusicValueLabel
+@onready var camera_fx_check: CheckButton = $CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/CameraFxCheck
+@onready var fov_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/FovContainer/HBox/FovSlider
+@onready var fov_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/FovContainer/HBox/FovValueLabel
+@onready var graphics_option: OptionButton = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/GraphicsOption
+@onready var vsync_check: CheckButton = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/VsyncCheck
+@onready var keys_grid: GridContainer = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/KeysGrid
+
+# Aktion, die gerade neu belegt wird (leer = keine), und ihr Button
+var _rebind_action: StringName = &""
+var _rebind_button: Button = null
 
 
 func _ready() -> void:
@@ -62,6 +69,17 @@ func _ready() -> void:
 	camera_fx_check.toggled.connect(func(on: bool): GameManager.camera_effects = on)
 	fov_slider.value = GameManager.fov
 	_update_fov_label(GameManager.fov)
+	for preset_name in GameManager.GRAPHICS_PRESETS:
+		graphics_option.add_item(preset_name)
+	graphics_option.selected = GameManager.graphics_preset
+	graphics_option.item_selected.connect(func(i: int):
+		GameManager.graphics_preset = i
+		GameManager.apply_graphics())
+	vsync_check.button_pressed = GameManager.vsync
+	vsync_check.toggled.connect(func(on: bool):
+		GameManager.vsync = on
+		GameManager.apply_graphics())
+	_build_key_rows()
 
 	# Match-Einstellungen
 	bot_slider.max_value = GameManager.MAX_BOTS
@@ -133,8 +151,49 @@ func _on_settings_button_pressed() -> void:
 	settings_panel.visible = true
 
 
+## Eine Zeile pro belegbarer Aktion: Name und Button mit der aktuellen Taste
+func _build_key_rows() -> void:
+	for action in GameManager.BINDABLE_ACTIONS:
+		var label := Label.new()
+		label.text = GameManager.BINDABLE_ACTIONS[action]
+		keys_grid.add_child(label)
+		var button := Button.new()
+		button.custom_minimum_size = Vector2(150, 30)
+		button.text = GameManager.binding_text(action)
+		button.pressed.connect(func():
+			_cancel_rebind()
+			_rebind_action = action
+			_rebind_button = button
+			button.text = "Taste drücken ...")
+		keys_grid.add_child(button)
+
+
+func _cancel_rebind() -> void:
+	if _rebind_button:
+		_rebind_button.text = GameManager.binding_text(_rebind_action)
+	_rebind_action = &""
+	_rebind_button = null
+
+
+## Waehrend einer Neubelegung die naechste Taste oder Maustaste uebernehmen (ESC bricht ab)
+func _input(event: InputEvent) -> void:
+	if _rebind_action == &"" or not event.is_pressed() or event.is_echo():
+		return
+	var is_key := event is InputEventKey
+	var is_button := event is InputEventMouseButton and (event as InputEventMouseButton).button_index not in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]
+	if not (is_key or is_button):
+		return
+	get_viewport().set_input_as_handled()
+	if is_key and (event as InputEventKey).keycode == KEY_ESCAPE:
+		_cancel_rebind()
+		return
+	GameManager.set_binding(_rebind_action, event)
+	_cancel_rebind()
+
+
 ## Zurueck zu den Haupt-Buttons
 func _on_back_button_pressed() -> void:
+	_cancel_rebind()
 	GameManager.save_settings()
 	settings_panel.visible = false
 	main_buttons.visible = true

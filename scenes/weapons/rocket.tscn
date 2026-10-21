@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://rocket_projectile_001"]
+[gd_scene format=3 uid="uid://rocket_projectile_001"]
 
 [ext_resource type="Script" path="res://scripts/weapons/rocket.gd" id="1_rkt"]
 
@@ -34,6 +34,44 @@ material = SubResource("Mat_Exhaust")
 radius = 0.07
 height = 0.14
 
+[sub_resource type="Gradient" id="Grad_Smoke"]
+offsets = PackedFloat32Array(0, 0.12, 1)
+colors = PackedColorArray(1, 0.7, 0.35, 0.85, 0.6, 0.58, 0.62, 0.5, 0.35, 0.35, 0.4, 0)
+
+[sub_resource type="GradientTexture1D" id="Tex_SmokeColor"]
+gradient = SubResource("Grad_Smoke")
+
+[sub_resource type="Curve" id="Curve_SmokeScale"]
+_data = [Vector2(0, 0.35), 0.0, 1.2, 0, 0, Vector2(1, 1), 0.3, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="Tex_SmokeScale"]
+curve = SubResource("Curve_SmokeScale")
+
+[sub_resource type="ParticleProcessMaterial" id="Proc_Smoke"]
+direction = Vector3(0, 0, 1)
+spread = 20.0
+initial_velocity_min = 0.5
+initial_velocity_max = 1.5
+gravity = Vector3(0, 0.5, 0)
+damping_min = 1.0
+damping_max = 2.0
+scale_min = 0.7
+scale_max = 1.1
+scale_curve = SubResource("Tex_SmokeScale")
+color_ramp = SubResource("Tex_SmokeColor")
+
+[sub_resource type="StandardMaterial3D" id="Mat_Smoke"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+billboard_mode = 3
+billboard_keep_scale = true
+
+[sub_resource type="QuadMesh" id="Mesh_Smoke"]
+material = SubResource("Mat_Smoke")
+size = Vector2(0.45, 0.45)
+
 [node name="Rocket" type="Node3D"]
 script = ExtResource("1_rkt")
 
@@ -54,3 +92,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.35)
 light_color = Color(1, 0.6, 0.15, 1)
 light_energy = 2.0
 omni_range = 4.0
+
+[node name="Smoke" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.38)
+amount = 48
+lifetime = 1.2
+local_coords = false
+process_material = SubResource("Proc_Smoke")
+draw_pass_1 = SubResource("Mesh_Smoke")

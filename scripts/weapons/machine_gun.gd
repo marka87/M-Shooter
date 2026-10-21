@@ -7,6 +7,9 @@ extends WeaponBase
 
 @onready var muzzle_flash: OmniLight3D = $Muzzle/MuzzleFlash
 @onready var muzzle_mesh: MeshInstance3D = $Muzzle/MuzzleMesh
+## Ausgeworfene Huelsen: laufen, solange geschossen wird
+@onready var casings: GPUParticles3D = $Casings
+var _casing_time: float = 0.0
 
 
 func _ready() -> void:
@@ -23,14 +26,24 @@ func _ready() -> void:
 		muzzle_mesh.visible = false
 
 
-func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
+func _process(delta: float) -> void:
+	super._process(delta)
+	if _casing_time > 0.0:
+		_casing_time -= delta
+		if _casing_time <= 0.0:
+			casings.emitting = false
+
+
+func _on_fire(shooter: Node3D, camera: Node3D) -> void:
 	# Schuss-Sound abspielen (mit leichter Tonhoehenvariation fuer Realismus)
 	if audio_player:
 		audio_player.pitch_scale = randf_range(0.95, 1.05)
 		audio_player.play()
 	
-	# Muendungsfeuer kurz aufblitzen lassen
+	# Muendungsfeuer kurz aufblitzen lassen, Huelse auswerfen
 	_flash_muzzle()
+	casings.emitting = true
+	_casing_time = 0.12
 	
 	# Hitscan-Raycast aus der Mitte der Kamera durchfuehren
 	var space_state := camera.get_world_3d().direct_space_state

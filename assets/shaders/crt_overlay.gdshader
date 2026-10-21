@@ -12,6 +12,8 @@ uniform float noise_strength : hint_range(0.0, 0.2) = 0.02;
 uniform float damage_pulse : hint_range(0.0, 1.0) = 0.0;
 // Violetter Bildrand, solange Quad Damage aktiv ist
 uniform float quad_glow : hint_range(0.0, 1.0) = 0.0;
+// Blaues Wabenmuster am Rand, wenn die Ruestung einen Treffer schluckt
+uniform float shield_pulse : hint_range(0.0, 1.0) = 0.0;
 
 float rand(vec2 p) {
 	return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
@@ -41,6 +43,13 @@ void fragment() {
 	col *= mix(1.0, vig, clamp(vignette, 0.0, 1.0));
 	col = mix(col, vec3(0.8, 0.05, 0.05), damage_pulse * smoothstep(0.3, 0.75, dist) * 0.6);
 	col += vec3(0.55, 0.2, 1.0) * quad_glow * smoothstep(0.35, 0.8, dist) * 0.9;
+	// Sechseck-Raster (zwei versetzte Gitter) nur am Bildrand
+	vec2 hex_uv = uv / SCREEN_PIXEL_SIZE / 26.0;
+	vec2 a = mod(hex_uv, vec2(1.732, 1.0)) - vec2(0.866, 0.5);
+	vec2 b = mod(hex_uv + vec2(0.866, 0.5), vec2(1.732, 1.0)) - vec2(0.866, 0.5);
+	float cell = min(length(a), length(b));
+	float hex_line = smoothstep(0.38, 0.46, cell);
+	col += vec3(0.25, 0.65, 1.0) * shield_pulse * smoothstep(0.3, 0.75, dist) * (0.35 + hex_line);
 
 	COLOR = vec4(col, 1.0);
 }

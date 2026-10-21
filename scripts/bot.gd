@@ -24,8 +24,8 @@ var current_state: State = State.PATROL
 @export var combat_speed: float = 3.5
 @export var attack_range: float = 16.0
 @export var sight_range: float = 35.0
-@export var shoot_interval: float = 0.28 # Zeit zwischen Schuessen im Angriffsmodus
-@export var damage_per_shot: float = 8.0 # Schaden pro Treffer
+## Mindestzeit zwischen Schuessen (Schwierigkeit); die Waffe selbst hat zusaetzlich ihre Abklingzeit
+@export var shoot_interval: float = 0.28
 @export var inaccuracy_degrees: float = 4.0 # Ungenauigkeit (Streuung) in Grad
 @export var respawn_delay: float = 4.0 # Zeit in Sekunden bis zum Wiederbeleben
 @export var gravity: float = 22.0
@@ -60,11 +60,10 @@ const SKILL_PRESETS: Array[Dictionary] = [
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
 @onready var model: Node3D = $Model
 @onready var mannequin: MeshInstance3D = $Model/Rig/Skeleton3D/Mannequin
-@onready var gun_mesh: MeshInstance3D = $Model/Rig/Skeleton3D/GunAttach/GunMesh
+## Waffen in der Hand (Name wie beim Spieler, damit Pickups sie finden)
+@onready var weapon_manager: BotArsenal = $Model/Rig/Skeleton3D/GunAttach/Arsenal
 @onready var skeleton: Skeleton3D = $Model/Rig/Skeleton3D
 @onready var nameplate: Label3D = $Nameplate
-@onready var muzzle: Node3D = $Muzzle
-@onready var muzzle_flash: OmniLight3D = $Muzzle/MuzzleFlash
 @onready var audio_player: AudioStreamPlayer3D = $AudioStreamPlayer3D
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 @onready var health: HealthComponent = $Health
@@ -98,7 +97,13 @@ var _step_distance: float = 0.0
 var _step_audio: AudioStreamPlayer3D = null
 # Animation (Quaternius Universal Animation Library) und Ragdoll beim Tod
 var anim_tree: AnimationTree
-var ragdoll: PhysicalBoneSimulator3D
+var _aim: Node3D
+## Erst beim Tod aufgebaut und beim Respawn wieder entfernt (lebende Bots ohne 11 Physik-Knochen)
+var ragdoll: PhysicalBoneSimulator3D = null
+# Sichtlinie zum Ziel: hoechstens alle 0,1 s neu pruefen (ein Raycast weniger pro Physik-Tick)
+var _los_timer: float = 0.0
+var _los_visible: bool = false
+var _los_target: Node3D = null
 ## Ab diesem Schaden zerplatzt der Bot in Wuerfel statt als Ragdoll umzufallen
 const GIB_DAMAGE: float = 120.0
 const GIB_SPLASH_DAMAGE: float = 50.0
@@ -119,7 +124,6 @@ const RAGDOLL_BONES: Array = [
 var floating_number_scene: PackedScene = preload("res://scenes/effects/floating_number.tscn")
 var voxel_burst_scene: PackedScene = preload("res://scenes/effects/voxel_burst.tscn")
 # Vorgenerierte Sounds und Trefferfarbe (einmal pro Bot statt bei jedem Schuss)
-var snd_shot: AudioStream
 var snd_hurt: AudioStream
 var snd_death: AudioStream
 var flash_mat: StandardMaterial3D
@@ -130,9 +134,11 @@ func _ready() -> void:
 		display_name = name
 	GameManager.register_participant(display_name, false)
 	_setup_animation()
-	_setup_ragdoll()
+	# Zielknoten fuer die Waffen: Schuss vom Auge entlang -Z (wie die Kamera beim Spieler)
+	_aim = Node3D.new()
+	_aim.top_level = true
+	add_child(_aim)
 
-	snd_shot = SoundGenerator.create_railgun_sound() if GameManager.instagib else SoundGenerator.create_machinegun_sound()
 	snd_hurt = SoundGenerator.create_bot_hurt_sound()
 	snd_death = SoundGenerator.create_bot_death_sound()
 
@@ -142,8 +148,6 @@ func _ready() -> void:
 	flash_mat.emission = Color(1.0, 1.0, 1.0)
 	flash_mat.emission_energy_multiplier = 2.0
 
-	if muzzle_flash:
-		muzzle_flash.visible = false
 	_apply_skin_color()
 	_step_audio = AudioStreamPlayer3D.new()
 	_step_audio.unit_size = 4.0
@@ -203,7 +207,12 @@ func _physics_process(delta: float) -> void:
 	var distance_to_target: float = 9999.0
 	if _is_alive(target):
 		distance_to_target = global_position.distance_to(target.global_position)
-		target_visible = _check_line_of_sight(target)
+		_los_timer -= delta
+		if _los_timer <= 0.0 or _los_target != target:
+			_los_timer = 0.1
+			_los_target = target
+			_los_visible = _check_line_of_sight(target)
+		target_visible = _los_visible
 
 	# Zustandsmaschine abarbeiten
 	match current_state:
@@ -251,10 +260,16 @@ func _process_patrol(delta: float, _target: CharacterBody3D, target_visible: boo
 	var to_target := patrol_target - global_position
 	to_target.y = 0.0
 	# Items muessen beruehrt werden (Ankunft 0,5 m), normale Wegpunkte reichen auf 2 m
-	var item_active: bool = is_instance_valid(patrol_item) and patrol_item.get("is_active") == true
-	var arrive_dist: float = 0.5 if item_active else 2.0
-	var arrived: bool = to_target.length() < arrive_dist or (not item_active and nav_agent.is_navigation_finished())
-	if arrived or patrol_travel_timer > 12.0 or (patrol_item != null and not item_active):
+	var item_wanted: bool = is_instance_valid(patrol_item) and patrol_item.is_useful_for(self)
+	# Grosses Item respawnt gleich: auf dem Platz warten, bis es erscheint
+	if item_wanted and not patrol_item.is_active and to_target.length() < 1.0:
+		velocity.x = 0.0
+		velocity.z = 0.0
+		patrol_travel_timer = 0.0
+		return
+	var arrive_dist: float = 0.5 if item_wanted else 2.0
+	var arrived: bool = to_target.length() < arrive_dist or (not item_wanted and nav_agent.is_navigation_finished())
+	if arrived or patrol_travel_timer > 12.0 or (patrol_item != null and not item_wanted):
 		patrol_wait_timer = randf_range(1.5, 3.5)
 		_pick_new_patrol_point()
 		return
@@ -329,8 +344,8 @@ func _process_attack(delta: float, attack_target: CharacterBody3D, target_visibl
 	# Erst nach der Reaktionszeit schiessen, dann im Takt der Abklingzeit
 	reaction_timer -= delta
 	if reaction_timer <= 0.0 and shoot_timer <= 0.0 and target_visible:
-		_bot_fire(attack_target)
-		shoot_timer = shoot_interval
+		if _fire_at(attack_target, distance):
+			shoot_timer = shoot_interval
 
 
 ## Zustand wechseln und vorbereiten
@@ -439,6 +454,7 @@ func _setup_ragdoll() -> void:
 ## Ragdoll loslassen: Schwung des Bots plus Treffer-Impuls (vom Schuss oder von der Explosion weg)
 func _start_ragdoll(info: DamageInfo) -> void:
 	anim_tree.active = false
+	_setup_ragdoll()
 	ragdoll.active = true
 	ragdoll.physical_bones_start_simulation()
 	var push: Vector3 = info.direction
@@ -451,8 +467,10 @@ func _start_ragdoll(info: DamageInfo) -> void:
 
 
 func _stop_ragdoll() -> void:
-	ragdoll.physical_bones_stop_simulation()
-	ragdoll.active = false
+	if ragdoll:
+		ragdoll.physical_bones_stop_simulation()
+		ragdoll.queue_free()
+		ragdoll = null
 	anim_tree.active = true
 
 
@@ -514,65 +532,33 @@ func apply_skill(level: int) -> void:
 	combat_speed = preset.combat_speed
 	sight_range = preset.sight
 	dodge_chance = preset.dodge
-	# Instagib: Railgun-Takt wie beim Spieler, jeder Treffer toetet
-	if GameManager.instagib:
-		shoot_interval = maxf(shoot_interval, 1.25)
-		damage_per_shot = GameManager.INSTAGIB_DAMAGE
 
 
-## Bot schiesst mit Streuung auf sein Ziel (trifft auch, wer im Weg steht)
-func _bot_fire(fire_target: CharacterBody3D) -> void:
-	# Schuss-Sound
-	if audio_player:
-		audio_player.stream = snd_shot
-		audio_player.pitch_scale = randf_range(0.85, 0.95)
-		audio_player.play()
+## Passende Waffe fuer die Entfernung waehlen und mit Streuung auf das Ziel feuern. Projektile
+## (Rakete, Plasma) werden vorgehalten, Raketen auf die Fuesse gezielt (Flaechenschaden).
+## Gibt true zurueck, wenn ein Schuss fiel.
+func _fire_at(fire_target: CharacterBody3D, distance: float) -> bool:
+	var weapon := weapon_manager.choose_for(distance)
+	if not weapon.can_fire():
+		return false
+	var eye: Vector3 = global_position + Vector3(0.0, 1.5, 0.0)
+	var aim_point: Vector3 = fire_target.global_position + Vector3(0.0, 1.0, 0.0)
+	var speed: float = BotArsenal.PROJECTILE_SPEED.get(weapon.weapon_id, 0.0)
+	if speed > 0.0:
+		if weapon.weapon_id == &"rocket_launcher" and fire_target.is_on_floor():
+			aim_point.y = fire_target.global_position.y + 0.2
+		# Vorhalt: Wo ist das Ziel, wenn das Projektil ankommt? (zweimal verfeinert)
+		var lead_point := aim_point
+		for i in 2:
+			lead_point = aim_point + fire_target.velocity * (eye.distance_to(lead_point) / speed)
+		aim_point = lead_point
 
-	# Muendungsfeuer aufblitzen lassen
-	_flash_muzzle()
-
-	var from: Vector3 = muzzle.global_position if muzzle else global_position + Vector3(0.0, 1.2, 0.0)
-	var target_chest: Vector3 = fire_target.global_position + Vector3(0.0, 1.0, 0.0)
-	var base_dir: Vector3 = (target_chest - from).normalized()
-
-	# Leichte Ungenauigkeit hinzufuegen (faire Bot-Praezision)
-	var spread_rad: float = deg_to_rad(inaccuracy_degrees)
-	var random_offset := Vector3(
-		randf_range(-spread_rad, spread_rad),
-		randf_range(-spread_rad, spread_rad),
-		randf_range(-spread_rad, spread_rad)
-	)
-	var shoot_dir: Vector3 = (base_dir + random_offset).normalized()
-	var to: Vector3 = from + shoot_dir * 100.0
-
-	# Raycast fuer Schuss
-	var space_state := get_world_3d().direct_space_state
-	var query := PhysicsRayQueryParameters3D.create(from, to, Layers.HITTABLE)
-	query.exclude = [get_rid()]
-
-	var hit := space_state.intersect_ray(query)
-	# Leuchtspur in der Farbe des Bots (zeigt, woher geschossen wird)
-	Tracer.spawn(get_parent(), from, hit.position if hit else to, skin_color, 0.08 if GameManager.instagib else 0.035)
-	if hit:
-		var hit_collider: Object = hit.collider
-		var hit_pos: Vector3 = hit.position
-		var hit_normal: Vector3 = hit.normal
-
-		# Funken am Treffpunkt
-		HitSpark.spawn(get_parent(), hit_pos, hit_normal)
-
-		# Schaden am Getroffenen anrichten
-		if hit_collider and hit_collider.has_method("take_damage"):
-			hit_collider.take_damage(DamageInfo.create(damage_per_shot, self, hit_pos, shoot_dir, "Railgun" if GameManager.instagib else "Maschinengewehr"))
-
-
-func _flash_muzzle() -> void:
-	if muzzle_flash:
-		muzzle_flash.visible = true
-		get_tree().create_timer(0.05, false).timeout.connect(func():
-			if is_instance_valid(muzzle_flash):
-				muzzle_flash.visible = false
-		)
+	# Streuung je nach Schwierigkeit
+	var spread: float = deg_to_rad(inaccuracy_degrees)
+	var dir: Vector3 = ((aim_point - eye).normalized() + Vector3(randf_range(-spread, spread), randf_range(-spread, spread), randf_range(-spread, spread))).normalized()
+	_aim.global_position = eye
+	_aim.look_at(eye + dir, Vector3.UP if absf(dir.y) < 0.98 else Vector3.FORWARD)
+	return weapon.try_fire(self, _aim)
 
 
 # ==============================================================================
@@ -652,11 +638,23 @@ func _flash_hit() -> void:
 func _exit_tree() -> void:
 	for mesh in _model_meshes():
 		mesh.material_override = null
+		mesh.material_overlay = null
+
+
+## Respawn-Effekt: Das Modell erscheint kurz als Hologramm (Scanlines in der Bot-Farbe)
+func _hologram_in() -> void:
+	var holo := ShaderMaterial.new()
+	holo.shader = ItemPickup.RIM_SHADER
+	holo.set_shader_parameter("rim_color", skin_color)
+	mannequin.material_overlay = holo
+	var tween := create_tween()
+	tween.tween_method(func(v: float): holo.set_shader_parameter("hologram", v), 1.0, 0.0, 1.0)
+	tween.tween_callback(func(): mannequin.material_overlay = null)
 
 
 ## Alle sichtbaren Teile des Bots
 func _model_meshes() -> Array[MeshInstance3D]:
-	return [mannequin, gun_mesh]
+	return [mannequin]
 
 
 ## Mannequin einfaerben: Koerper (Oberflaeche 0) dunkel in skin_color getoent, Gelenke
@@ -718,9 +716,12 @@ func _respawn() -> void:
 	reset_physics_interpolation()
 	target = null
 
+	weapon_manager.reset_loadout()
+
 	# Ragdoll beenden, Modell und Kollision zuruecksetzen
 	_stop_ragdoll()
 	model.visible = true
+	_hologram_in()
 	nameplate.visible = true
 	if collision_shape:
 		collision_shape.disabled = false
@@ -737,7 +738,9 @@ func _respawn() -> void:
 
 ## Bewegt den Bot zu einer Zielposition (ueber NavAgent oder direkte Lenkung)
 func _move_towards(target_pos: Vector3, speed: float, _delta: float) -> void:
-	nav_agent.target_position = target_pos
+	# Neuen Weg nur anfordern, wenn sich das Ziel merklich bewegt hat (jede Zuweisung loest eine Wegsuche aus)
+	if nav_agent.target_position.distance_squared_to(target_pos) > 1.0:
+		nav_agent.target_position = target_pos
 
 	var next_path_pos: Vector3 = nav_agent.get_next_path_position()
 	var dir: Vector3 = (next_path_pos - global_position)

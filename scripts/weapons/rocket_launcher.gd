@@ -12,7 +12,7 @@ func _ready() -> void:
 		audio_player.stream = SoundGenerator.create_rocket_fire_sound()
 
 
-func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
+func _on_fire(shooter: Node3D, camera: Node3D) -> void:
 	if audio_player:
 		audio_player.pitch_scale = randf_range(0.95, 1.05)
 		audio_player.play()

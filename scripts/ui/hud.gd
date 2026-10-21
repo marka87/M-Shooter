@@ -6,15 +6,14 @@ class_name HUD
 
 @onready var speed_label: Label = $SpeedLabel
 @onready var frags_label: Label = $FragsLabel
-@onready var health_label: Label = $BottomBar/HBox/HealthCell/VBox/Row/HealthLabel
-@onready var health_bar: ProgressBar = $BottomBar/HBox/HealthCell/VBox/HealthBar
-@onready var armor_label: Label = $BottomBar/HBox/ArmorCell/VBox/Row/ArmorLabel
-@onready var armor_bar: ProgressBar = $BottomBar/HBox/ArmorCell/VBox/ArmorBar
-@onready var ammo_label: Label = $BottomBar/HBox/AmmoCell/VBox/Row/AmmoLabel
-@onready var ammo_bar: ProgressBar = $BottomBar/HBox/AmmoCell/VBox/AmmoBar
-@onready var weapon_name_label: Label = $BottomBar/HBox/WeaponCell/VBox/WeaponNameLabel
-@onready var weapon_slots: HBoxContainer = $BottomBar/HBox/WeaponCell/VBox/Slots
-@onready var portrait_face: Control = $BottomBar/HBox/Portrait/Face
+@onready var health_label: Label = $Vitals/HealthBox/Row/HealthLabel
+@onready var health_bar: ProgressBar = $Vitals/HealthBox/HealthBar
+@onready var armor_label: Label = $Vitals/ArmorBox/Row/ArmorLabel
+@onready var armor_bar: ProgressBar = $Vitals/ArmorBox/ArmorBar
+@onready var ammo_label: Label = $AmmoBox/AmmoLabel
+@onready var ammo_bar: ProgressBar = $AmmoBox/AmmoBar
+@onready var weapon_name_label: Label = $AmmoBox/WeaponNameLabel
+@onready var weapon_slots: HBoxContainer = $AmmoBox/WeaponBar
 @onready var control_hints: Label = $ControlHints
 @onready var announce_label: Label = $AnnounceLabel
 @onready var quad_label: Label = $QuadLabel
@@ -27,6 +26,10 @@ var _announce_tween: Tween = null
 @onready var kill_feed: VBoxContainer = $KillFeed
 @onready var scoreboard: PanelContainer = $Scoreboard
 @onready var scoreboard_grid: GridContainer = $Scoreboard/Margin/VBox/Grid
+
+## Kurznamen in der Waffenleiste
+const SLOT_NAMES := { &"machine_gun": "MG", &"shotgun": "SG", &"plasma": "PL", &"rocket_launcher": "RL",
+	&"lightning": "LG", &"railgun": "RG", &"shock_rifle": "SR" }
 
 ## Wie viele Killfeed-Zeilen gleichzeitig sichtbar sind und wie lange
 const KILL_FEED_MAX: int = 5
@@ -80,7 +83,7 @@ func _process(_delta: float) -> void:
 		respawn_countdown_label.text = "Respawn in %.1f Sekunden..." % maxf(player.death_timer, 0.0)
 
 
-## Quad-Countdown ueber der Leiste und violetter Bildrand (CRT-Overlay)
+## Quad-Countdown ueber der Waffenleiste und violetter Bildrand (CRT-Overlay)
 func _update_quad() -> void:
 	var t: float = player.powerups.quad_time_left
 	quad_label.visible = t > 0.0
@@ -137,11 +140,11 @@ func _on_item_picked(pickup_type: int, item_name: String) -> void:
 			announce("MEGA HEALTH", Color(0.4, 0.75, 1.0))
 
 
-## Tacho: gruen bei Strafe-Jump-Tempo, gelb beim Sprinten
+## Tacho mit FPS: gruen bei Strafe-Jump-Tempo, gelb beim Sprinten
 func _update_speed() -> void:
 	var horizontal_speed: float = Vector2(player.velocity.x, player.velocity.z).length()
 	var ground_state: String = "BODEN" if player.is_on_floor() else "LUFT"
-	speed_label.text = "Geschwindigkeit: %4.1f m/s [%s]" % [horizontal_speed, ground_state]
+	speed_label.text = "Geschwindigkeit: %4.1f m/s [%s]   %d FPS" % [horizontal_speed, ground_state, Engine.get_frames_per_second()]
 	if horizontal_speed > player.sprint_speed + 1.0:
 		speed_label.modulate = Color(0.2, 1.0, 0.4)
 	elif player.is_sprinting:
@@ -169,10 +172,10 @@ func _on_health_changed(health: float, armor: float) -> void:
 
 
 ## Roter Bildschirmblitz bei Treffern, dazu ein kurzer Puls im CRT-Overlay (roter Rand, Farbsaum)
-## und das Spielerbild zuckt rot
+## und die Lebensanzeige zuckt rot
 func _on_damaged(_info: DamageInfo, health_lost: float) -> void:
-	portrait_face.modulate = Color(1.0, 0.3, 0.3)
-	create_tween().tween_property(portrait_face, "modulate", Color.WHITE, 0.3)
+	health_label.self_modulate = Color(1.0, 0.3, 0.3)
+	create_tween().tween_property(health_label, "self_modulate", Color.WHITE, 0.3)
 	damage_flash.color = Color(0.9, 0.1, 0.1, 0.18)
 	var tween := create_tween()
 	tween.tween_property(damage_flash, "color:a", 0.0, 0.25)
@@ -182,6 +185,10 @@ func _on_damaged(_info: DamageInfo, health_lost: float) -> void:
 		mat.set_shader_parameter("damage_pulse", clampf(0.3 + health_lost / 40.0, 0.3, 1.0))
 		var pulse := create_tween()
 		pulse.tween_method(func(v: float): mat.set_shader_parameter("damage_pulse", v), mat.get_shader_parameter("damage_pulse"), 0.0, 0.4)
+		# Ruestung hat einen Teil geschluckt: blauer Schild am Rand
+		if player.health.last_absorbed > 0.0:
+			var shield := create_tween()
+			shield.tween_method(func(v: float): mat.set_shader_parameter("shield_pulse", v), 0.8, 0.0, 0.45)
 
 
 ## Roter Hitmarker am Fadenkreuz
@@ -194,12 +201,15 @@ func show_hitmarker() -> void:
 
 
 func _on_weapon_switched(w_name: String, current_ammo: int, max_ammo: int) -> void:
-	weapon_name_label.text = w_name
+	weapon_name_label.text = w_name.to_upper()
+	var weapon := player.weapon_manager.get_current_weapon()
+	if weapon:
+		weapon_name_label.add_theme_color_override("font_color", weapon.data.color.lightened(0.2))
 	_on_ammo_updated(current_ammo, max_ammo)
 	_refresh_slots()
 
 
-## Slot-Ziffern: aktive Waffe in ihrer Farbe, eingesammelte hell, fehlende kaum sichtbar
+## Waffenleiste: Taste und Kurzname; aktive Waffe in ihrer Farbe, eingesammelte hell, fehlende kaum sichtbar
 func _refresh_slots() -> void:
 	var weapons: Array[WeaponBase] = player.weapon_manager.weapons
 	var active: int = player.weapon_manager.current_weapon_index
@@ -207,7 +217,9 @@ func _refresh_slots() -> void:
 		var slot := weapon_slots.get_child(i) as Label
 		if i >= weapons.size():
 			slot.visible = false
-		elif i == active:
+			continue
+		slot.text = "%d %s" % [i + 1, SLOT_NAMES.get(weapons[i].weapon_id, "")]
+		if i == active:
 			slot.modulate = weapons[i].data.color.lightened(0.2)
 		elif weapons[i].owned:
 			slot.modulate = Color(1, 1, 1, 0.6)

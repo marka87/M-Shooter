@@ -1,29 +1,11 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
 
-[sub_resource type="StyleBoxFlat" id="Style_Bar"]
-content_margin_left = 10.0
-content_margin_top = 8.0
-content_margin_right = 10.0
-content_margin_bottom = 8.0
-bg_color = Color(0.02, 0.04, 0.07, 0.82)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.2, 0.85, 1, 0.9)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-shadow_color = Color(0.2, 0.85, 1, 0.25)
-shadow_size = 8
-
 [sub_resource type="StyleBoxFlat" id="Style_Cell"]
-content_margin_left = 14.0
+content_margin_left = 6.0
 content_margin_top = 4.0
-content_margin_right = 14.0
+content_margin_right = 6.0
 content_margin_bottom = 4.0
 bg_color = Color(0.04, 0.08, 0.12, 0.9)
 border_width_left = 1
@@ -178,252 +160,206 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(1, 0, 0, 0)
 
-[node name="BottomBar" type="PanelContainer" parent="."]
-anchors_preset = 7
-anchor_left = 0.5
+[node name="Vitals" type="HBoxContainer" parent="."]
+anchors_preset = 2
 anchor_top = 1.0
-anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -430.0
-offset_top = -96.0
-offset_right = 430.0
-offset_bottom = -14.0
-grow_horizontal = 2
+offset_left = 36.0
+offset_top = -122.0
+offset_right = 420.0
+offset_bottom = -26.0
 grow_vertical = 0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("Style_Bar")
+theme_override_constants/separation = 36
 
-[node name="HBox" type="HBoxContainer" parent="BottomBar"]
+[node name="HealthBox" type="VBoxContainer" parent="Vitals"]
 layout_mode = 2
-theme_override_constants/separation = 10
-alignment = 1
+alignment = 2
 
-[node name="HealthCell" type="PanelContainer" parent="BottomBar/HBox"]
-custom_minimum_size = Vector2(170, 0)
+[node name="Row" type="HBoxContainer" parent="Vitals/HealthBox"]
 layout_mode = 2
-theme_override_styles/panel = SubResource("Style_Cell")
+theme_override_constants/separation = 8
 
-[node name="VBox" type="VBoxContainer" parent="BottomBar/HBox/HealthCell"]
+[node name="Icon" type="Label" parent="Vitals/HealthBox/Row"]
 layout_mode = 2
-theme_override_constants/separation = 2
-
-[node name="Row" type="HBoxContainer" parent="BottomBar/HBox/HealthCell/VBox"]
-layout_mode = 2
-
-[node name="Title" type="Label" parent="BottomBar/HBox/HealthCell/VBox/Row"]
-layout_mode = 2
-size_flags_vertical = 8
-theme_override_colors/font_color = Color(1, 0.4, 0.5, 1)
-theme_override_font_sizes/font_size = 14
-text = "HP"
-
-[node name="HealthLabel" type="Label" parent="BottomBar/HBox/HealthCell/VBox/Row"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(1, 0.3, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
 theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 38
-text = "100"
-horizontal_alignment = 2
+theme_override_font_sizes/font_size = 40
+text = "+"
 
-[node name="HealthBar" type="ProgressBar" parent="BottomBar/HBox/HealthCell/VBox"]
-custom_minimum_size = Vector2(0, 6)
+[node name="HealthLabel" type="Label" parent="Vitals/HealthBox/Row"]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 72
+text = "100"
+
+[node name="HealthBar" type="ProgressBar" parent="Vitals/HealthBox"]
+custom_minimum_size = Vector2(190, 6)
+layout_mode = 2
+size_flags_horizontal = 0
 theme_override_styles/background = SubResource("Style_BarBg")
 theme_override_styles/fill = SubResource("Style_HealthFill")
 value = 100.0
 show_percentage = false
 
-[node name="ArmorCell" type="PanelContainer" parent="BottomBar/HBox"]
-custom_minimum_size = Vector2(170, 0)
+[node name="ArmorBox" type="VBoxContainer" parent="Vitals"]
 layout_mode = 2
-theme_override_styles/panel = SubResource("Style_Cell")
+alignment = 2
 
-[node name="VBox" type="VBoxContainer" parent="BottomBar/HBox/ArmorCell"]
+[node name="Row" type="HBoxContainer" parent="Vitals/ArmorBox"]
 layout_mode = 2
-theme_override_constants/separation = 2
+theme_override_constants/separation = 8
 
-[node name="Row" type="HBoxContainer" parent="BottomBar/HBox/ArmorCell/VBox"]
+[node name="Icon" type="Label" parent="Vitals/ArmorBox/Row"]
 layout_mode = 2
-
-[node name="Title" type="Label" parent="BottomBar/HBox/ArmorCell/VBox/Row"]
-layout_mode = 2
-size_flags_vertical = 8
-theme_override_colors/font_color = Color(0.4, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 14
-text = "AR"
-
-[node name="ArmorLabel" type="Label" parent="BottomBar/HBox/ArmorCell/VBox/Row"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(0.3, 0.8, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
 theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 38
-text = "50"
-horizontal_alignment = 2
+theme_override_font_sizes/font_size = 30
+text = "◆"
 
-[node name="ArmorBar" type="ProgressBar" parent="BottomBar/HBox/ArmorCell/VBox"]
-custom_minimum_size = Vector2(0, 6)
+[node name="ArmorLabel" type="Label" parent="Vitals/ArmorBox/Row"]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 52
+text = "0"
+
+[node name="ArmorBar" type="ProgressBar" parent="Vitals/ArmorBox"]
+custom_minimum_size = Vector2(140, 6)
+layout_mode = 2
+size_flags_horizontal = 0
 theme_override_styles/background = SubResource("Style_BarBg")
 theme_override_styles/fill = SubResource("Style_ArmorFill")
 value = 100.0
 show_percentage = false
 
-[node name="Portrait" type="PanelContainer" parent="BottomBar/HBox"]
-custom_minimum_size = Vector2(70, 64)
+[node name="AmmoBox" type="VBoxContainer" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -400.0
+offset_top = -176.0
+offset_right = -36.0
+offset_bottom = -26.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+alignment = 2
+
+[node name="WeaponBar" type="HBoxContainer" parent="AmmoBox"]
 layout_mode = 2
-theme_override_styles/panel = SubResource("Style_Cell")
+size_flags_horizontal = 8
+mouse_filter = 2
+theme_override_constants/separation = 5
 
-[node name="Face" type="Control" parent="BottomBar/HBox/Portrait"]
+[node name="Slot1" type="Label" parent="AmmoBox/WeaponBar"]
+custom_minimum_size = Vector2(46, 0)
 layout_mode = 2
+theme_override_styles/normal = SubResource("Style_Cell")
+theme_override_font_sizes/font_size = 13
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Head" type="ColorRect" parent="BottomBar/HBox/Portrait/Face"]
-layout_mode = 0
-offset_left = 4.0
-offset_top = 4.0
-offset_right = 38.0
-offset_bottom = 46.0
-color = Color(0.12, 0.3, 0.4, 1)
-
-[node name="Visor" type="ColorRect" parent="BottomBar/HBox/Portrait/Face"]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 16.0
-offset_right = 34.0
-offset_bottom = 24.0
-color = Color(0.3, 0.95, 1, 1)
-
-[node name="Chin" type="ColorRect" parent="BottomBar/HBox/Portrait/Face"]
-layout_mode = 0
-offset_left = 14.0
-offset_top = 34.0
-offset_right = 28.0
-offset_bottom = 38.0
-color = Color(0.3, 0.95, 1, 0.6)
-
-[node name="AmmoCell" type="PanelContainer" parent="BottomBar/HBox"]
-custom_minimum_size = Vector2(170, 0)
+[node name="Slot2" type="Label" parent="AmmoBox/WeaponBar"]
+custom_minimum_size = Vector2(46, 0)
 layout_mode = 2
-theme_override_styles/panel = SubResource("Style_Cell")
+theme_override_styles/normal = SubResource("Style_Cell")
+theme_override_font_sizes/font_size = 13
+text = "2"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="VBox" type="VBoxContainer" parent="BottomBar/HBox/AmmoCell"]
+[node name="Slot3" type="Label" parent="AmmoBox/WeaponBar"]
+custom_minimum_size = Vector2(46, 0)
 layout_mode = 2
-theme_override_constants/separation = 2
+theme_override_styles/normal = SubResource("Style_Cell")
+theme_override_font_sizes/font_size = 13
+text = "3"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Row" type="HBoxContainer" parent="BottomBar/HBox/AmmoCell/VBox"]
+[node name="Slot4" type="Label" parent="AmmoBox/WeaponBar"]
+custom_minimum_size = Vector2(46, 0)
 layout_mode = 2
+theme_override_styles/normal = SubResource("Style_Cell")
+theme_override_font_sizes/font_size = 13
+text = "4"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Title" type="Label" parent="BottomBar/HBox/AmmoCell/VBox/Row"]
+[node name="Slot5" type="Label" parent="AmmoBox/WeaponBar"]
+custom_minimum_size = Vector2(46, 0)
 layout_mode = 2
-size_flags_vertical = 8
-theme_override_colors/font_color = Color(1, 0.8, 0.35, 1)
-theme_override_font_sizes/font_size = 14
-text = "MUN"
+theme_override_styles/normal = SubResource("Style_Cell")
+theme_override_font_sizes/font_size = 13
+text = "5"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="AmmoLabel" type="Label" parent="BottomBar/HBox/AmmoCell/VBox/Row"]
+[node name="Slot6" type="Label" parent="AmmoBox/WeaponBar"]
+custom_minimum_size = Vector2(46, 0)
 layout_mode = 2
-size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("Style_Cell")
+theme_override_font_sizes/font_size = 13
+text = "6"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot7" type="Label" parent="AmmoBox/WeaponBar"]
+custom_minimum_size = Vector2(46, 0)
+layout_mode = 2
+theme_override_styles/normal = SubResource("Style_Cell")
+theme_override_font_sizes/font_size = 13
+text = "7"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="WeaponNameLabel" type="Label" parent="AmmoBox"]
+layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
 theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 38
-text = "120"
+theme_override_font_sizes/font_size = 20
+text = "Maschinengewehr"
 horizontal_alignment = 2
 
-[node name="AmmoBar" type="ProgressBar" parent="BottomBar/HBox/AmmoCell/VBox"]
-custom_minimum_size = Vector2(0, 6)
+[node name="AmmoLabel" type="Label" parent="AmmoBox"]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 72
+text = "100"
+horizontal_alignment = 2
+
+[node name="AmmoBar" type="ProgressBar" parent="AmmoBox"]
+custom_minimum_size = Vector2(190, 6)
+layout_mode = 2
+size_flags_horizontal = 8
 theme_override_styles/background = SubResource("Style_BarBg")
 theme_override_styles/fill = SubResource("Style_AmmoFill")
 value = 100.0
 show_percentage = false
 
-[node name="WeaponCell" type="PanelContainer" parent="BottomBar/HBox"]
-custom_minimum_size = Vector2(200, 0)
-layout_mode = 2
-theme_override_styles/panel = SubResource("Style_Cell")
-
-[node name="VBox" type="VBoxContainer" parent="BottomBar/HBox/WeaponCell"]
-layout_mode = 2
-alignment = 1
-
-[node name="WeaponNameLabel" type="Label" parent="BottomBar/HBox/WeaponCell/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 18
-text = "Maschinengewehr"
-horizontal_alignment = 1
-
-[node name="Slots" type="HBoxContainer" parent="BottomBar/HBox/WeaponCell/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 6
-alignment = 1
-
-[node name="Slot1" type="Label" parent="BottomBar/HBox/WeaponCell/VBox/Slots"]
-custom_minimum_size = Vector2(18, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "1"
-horizontal_alignment = 1
-
-[node name="Slot2" type="Label" parent="BottomBar/HBox/WeaponCell/VBox/Slots"]
-custom_minimum_size = Vector2(18, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "2"
-horizontal_alignment = 1
-
-[node name="Slot3" type="Label" parent="BottomBar/HBox/WeaponCell/VBox/Slots"]
-custom_minimum_size = Vector2(18, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "3"
-horizontal_alignment = 1
-
-[node name="Slot4" type="Label" parent="BottomBar/HBox/WeaponCell/VBox/Slots"]
-custom_minimum_size = Vector2(18, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "4"
-horizontal_alignment = 1
-
-[node name="Slot5" type="Label" parent="BottomBar/HBox/WeaponCell/VBox/Slots"]
-custom_minimum_size = Vector2(18, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "5"
-horizontal_alignment = 1
-
-[node name="Slot6" type="Label" parent="BottomBar/HBox/WeaponCell/VBox/Slots"]
-custom_minimum_size = Vector2(18, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "6"
-horizontal_alignment = 1
-
-[node name="Slot7" type="Label" parent="BottomBar/HBox/WeaponCell/VBox/Slots"]
-custom_minimum_size = Vector2(18, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "7"
-horizontal_alignment = 1
-
 [node name="ControlHints" type="Label" parent="."]
-anchors_preset = 7
+anchors_preset = 5
 anchor_left = 0.5
-anchor_top = 1.0
 anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -420.0
-offset_top = -124.0
-offset_right = 420.0
-offset_bottom = -102.0
+offset_left = -210.0
+offset_top = 92.0
+offset_right = 210.0
+offset_bottom = 150.0
 grow_horizontal = 2
-grow_vertical = 0
 theme_override_font_sizes/font_size = 13
+autowrap_mode = 3
 text = "[WASD] Bewegen | [Leertaste] Springen & Doppelsprung | [2x Richtung] Dodge | [Shift] Sprint | [1-7 / Mausrad] Waffe | [Rechtsklick] Alt-Feuer | [Tab] Punkte | [ESC] Pause"
 horizontal_alignment = 1
 
@@ -477,7 +413,7 @@ horizontal_alignment = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -420.0
+offset_left = -360.0
 offset_top = 64.0
 offset_right = -30.0
 offset_bottom = 220.0
@@ -547,10 +483,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = 250.0
-offset_top = -170.0
-offset_right = 430.0
-offset_bottom = -134.0
+offset_left = -110.0
+offset_top = -70.0
+offset_right = 110.0
+offset_bottom = -30.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_colors/font_color = Color(0.8, 0.55, 1, 1)
@@ -558,7 +494,7 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 26
 text = "QUAD 30"
-horizontal_alignment = 2
+horizontal_alignment = 1
 
 [node name="TimerLabel" type="Label" parent="."]
 anchors_preset = 5

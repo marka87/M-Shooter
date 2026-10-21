@@ -83,8 +83,8 @@ func can_fire() -> bool:
 	return cooldown_timer <= 0.0 and current_ammo > 0
 
 
-## Haupt-Schussfunktion, die vom Spieler aufgerufen wird
-func try_fire(shooter: Node3D, camera: Camera3D) -> bool:
+## Haupt-Schussfunktion. camera = Zielknoten: Schuss von dort entlang -Z (Spielerkamera oder Zielknoten des Bots)
+func try_fire(shooter: Node3D, camera: Node3D) -> bool:
 	if cooldown_timer > 0.0:
 		return false
 	
@@ -116,12 +116,12 @@ func try_fire(shooter: Node3D, camera: Camera3D) -> bool:
 
 
 ## Virtuelle Methode: Wird von Maschinengewehr, Raketenwerfer etc. ueberschrieben
-func _on_fire(_shooter: Node3D, _camera: Camera3D) -> void:
+func _on_fire(_shooter: Node3D, _camera: Node3D) -> void:
 	pass
 
 
 ## Alt-Feuer (rechte Maustaste). Nur Waffen mit alt_cooldown > 0 haben eins.
-func try_fire_alt(shooter: Node3D, camera: Camera3D) -> bool:
+func try_fire_alt(shooter: Node3D, camera: Node3D) -> bool:
 	if data.alt_cooldown <= 0.0 or cooldown_timer > 0.0:
 		return false
 	if current_ammo < data.alt_ammo_cost:
@@ -136,7 +136,7 @@ func try_fire_alt(shooter: Node3D, camera: Camera3D) -> bool:
 
 
 ## Virtuelle Methode fuer das Alt-Feuer
-func _on_fire_alt(_shooter: Node3D, _camera: Camera3D) -> void:
+func _on_fire_alt(_shooter: Node3D, _camera: Node3D) -> void:
 	pass
 
 
