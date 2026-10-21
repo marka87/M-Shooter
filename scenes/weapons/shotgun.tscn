@@ -1,34 +1,8 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/weapons/shotgun.gd" id="1_sg"]
 [ext_resource type="Resource" path="res://resources/weapons/shotgun.tres" id="9_data"]
-
-[sub_resource type="StandardMaterial3D" id="Mat_GunMetal"]
-albedo_color = Color(0.32, 0.34, 0.38, 1)
-metallic = 0.5
-roughness = 0.35
-
-[sub_resource type="StandardMaterial3D" id="Mat_Accent"]
-albedo_color = Color(0.85, 0.35, 0.08, 1)
-metallic = 0.4
-roughness = 0.45
-emission_enabled = true
-emission = Color(1, 0.35, 0.05, 1)
-emission_energy_multiplier = 0.6
-
-[sub_resource type="BoxMesh" id="Mesh_Body"]
-material = SubResource("Mat_GunMetal")
-size = Vector3(0.13, 0.14, 0.38)
-
-[sub_resource type="CylinderMesh" id="Mesh_Barrel"]
-material = SubResource("Mat_GunMetal")
-top_radius = 0.032
-bottom_radius = 0.032
-height = 0.36
-
-[sub_resource type="BoxMesh" id="Mesh_Pump"]
-material = SubResource("Mat_Accent")
-size = Vector3(0.1, 0.07, 0.16)
+[ext_resource type="PackedScene" path="res://scenes/weapons/models/shotgun.tscn" id="20_model"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_MuzzleGlow"]
 albedo_color = Color(1, 0.85, 0.3, 1)
@@ -45,21 +19,7 @@ height = 0.2
 script = ExtResource("1_sg")
 data = ExtResource("9_data")
 
-[node name="Body" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.1)
-mesh = SubResource("Mesh_Body")
-
-[node name="BarrelLeft" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, -0.034, 0.03, -0.45)
-mesh = SubResource("Mesh_Barrel")
-
-[node name="BarrelRight" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.034, 0.03, -0.45)
-mesh = SubResource("Mesh_Barrel")
-
-[node name="Pump" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.035, -0.4)
-mesh = SubResource("Mesh_Pump")
+[node name="Model" parent="." instance=ExtResource("20_model")]
 
 [node name="Muzzle" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -0.65)

@@ -1,3 +1,12 @@
+# Änderungen (Runde 19: Waffenmodelle)
+
+- **Neue Waffenmodelle** für alle 7 Waffen im Neon-Low-Poly-Stil: dunkler Grafit-Körper, metallische Zierteile, Leuchtteile in der Waffenfarbe. Facettierte Formen (Sechs- und Achtecke), damit der Kanten-Shader klare Kanten zeichnet. Jede Waffe hat eine eigene Silhouette: MG mit Magazin und Laufmantel, Doppelflinte mit Pumpe, Plasma mit drei Spulen und Energiezelle, sechseckiges Raketenrohr mit Munitionsbox, Lightning Gun mit drei Zinken, Railgun mit Schienen, Zielfernrohr und Ringen, Shock Rifle mit Finnen und Zelle.
+- Generator `tools/make_weapon_models.py` schreibt die Modelle nach `scenes/weapons/models/`. Die Waffenszenen binden sie als Instanz `Model` ein; Muzzle, Licht und Sound bleiben. Die Waffen-Pickups zeigen automatisch die neuen Modelle.
+- **ROADMAP** um neue Punkte ergänzt: 2.7–2.9 (Waffenmodelle, Viewmodel-Bewegung, Effekte pro Waffe), 3.9–3.11 (Level von zu Hause mergen, Map-Baukasten, weitere Maps).
+- Alle vier Tests grün. Laufspitzen headless gegen die Muzzle-Punkte geprüft.
+
+---
+
 # Änderungen (Runde 18: Animierte Bots mit Ragdoll)
 
 - **Bots als animierte Figuren** statt Block-Roboter: Mannequin aus der **Quaternius Universal Animation Library** (CC0, `assets/characters/ual/`, Lizenzdatei liegt bei). Körper dunkel in der Bot-Farbe, Gelenke leuchten in der Bot-Farbe (die Neonkanten übernehmen sie). Waffe hängt an der rechten Hand (`BoneAttachment3D`), die Mündung sitzt an der Hand in Zielhaltung.

@@ -1,0 +1,129 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="graphite"]
+albedo_color = Color(0.1, 0.11, 0.14, 1)
+metallic = 0.5
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="trim"]
+albedo_color = Color(0.379, 0.342, 0.439, 1)
+metallic = 0.7
+roughness = 0.25
+
+[sub_resource type="StandardMaterial3D" id="glow"]
+albedo_color = Color(0.6, 0.35, 1, 1)
+emission_enabled = true
+emission = Color(0.6, 0.35, 1, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="BoxMesh" id="mesh_0"]
+material = SubResource("graphite")
+size = Vector3(0.14, 0.1, 0.36)
+
+[sub_resource type="CylinderMesh" id="mesh_1"]
+material = SubResource("trim")
+top_radius = 0.035
+bottom_radius = 0.035
+height = 0.5
+radial_segments = 8
+rings = 1
+
+[sub_resource type="TorusMesh" id="mesh_2"]
+material = SubResource("glow")
+inner_radius = 0.04
+outer_radius = 0.056
+rings = 8
+ring_segments = 4
+
+[sub_resource type="TorusMesh" id="mesh_3"]
+material = SubResource("glow")
+inner_radius = 0.04
+outer_radius = 0.056
+rings = 8
+ring_segments = 4
+
+[sub_resource type="TorusMesh" id="mesh_4"]
+material = SubResource("glow")
+inner_radius = 0.04
+outer_radius = 0.056
+rings = 8
+ring_segments = 4
+
+[sub_resource type="BoxMesh" id="mesh_5"]
+material = SubResource("trim")
+size = Vector3(0.08, 0.04, 0.18)
+
+[sub_resource type="BoxMesh" id="mesh_6"]
+material = SubResource("glow")
+size = Vector3(0.06, 0.012, 0.15)
+
+[sub_resource type="BoxMesh" id="mesh_7"]
+material = SubResource("trim")
+size = Vector3(0.01, 0.06, 0.18)
+
+[sub_resource type="BoxMesh" id="mesh_8"]
+material = SubResource("trim")
+size = Vector3(0.01, 0.06, 0.18)
+
+[sub_resource type="PrismMesh" id="mesh_9"]
+material = SubResource("graphite")
+left_to_right = 0.0
+size = Vector3(0.18, 0.1, 0.08)
+
+[sub_resource type="BoxMesh" id="mesh_10"]
+material = SubResource("graphite")
+size = Vector3(0.06, 0.15, 0.075)
+
+[sub_resource type="BoxMesh" id="mesh_11"]
+material = SubResource("trim")
+size = Vector3(0.02, 0.012, 0.09)
+
+[node name="ShockRifleModel" type="Node3D"]
+
+[node name="Body" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.08)
+mesh = SubResource("mesh_0")
+
+[node name="Barrel" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.03, -0.52)
+mesh = SubResource("mesh_1")
+
+[node name="Ring1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.03, -0.42)
+mesh = SubResource("mesh_2")
+
+[node name="Ring2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.03, -0.57)
+mesh = SubResource("mesh_3")
+
+[node name="Ring3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.03, -0.72)
+mesh = SubResource("mesh_4")
+
+[node name="CellFrame" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.07, -0.1)
+mesh = SubResource("mesh_5")
+
+[node name="Cell" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.092, -0.1)
+mesh = SubResource("mesh_6")
+
+[node name="FinL" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0, 0, 1, -0.08, 0.02, -0.3)
+mesh = SubResource("mesh_7")
+
+[node name="FinR" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.939693, -0.34202, 0, 0.34202, 0.939693, 0, 0, 0, 1, 0.08, 0.02, -0.3)
+mesh = SubResource("mesh_8")
+
+[node name="Stock" type="MeshInstance3D" parent="."]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, -0.03, 0.18)
+mesh = SubResource("mesh_9")
+
+[node name="Grip" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, -0.258819, 0, 0.258819, 0.965926, 0, -0.11, 0)
+mesh = SubResource("mesh_10")
+
+[node name="Guard" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.075, -0.07)
+mesh = SubResource("mesh_11")

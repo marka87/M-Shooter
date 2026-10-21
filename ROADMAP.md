@@ -66,6 +66,9 @@ Dazu:
 | 2.4 | Object-Pooling für Projektile, Funken, Einschläge | S |
 | 2.5 | Headshots für Hitscan (Railgun/Shock) mit eigenem Hitsound | S |
 | 2.6 | ✅ teilweise: glühende Einschusslöcher. Einschusslöcher als Decals, Rauchspuren hinter Raketen, Hülsen beim MG | M |
+| 2.7 | ✅ **Waffenmodelle** im Neon-Low-Poly-Stil: eigene Silhouette pro Waffe, leuchtende Teile in der Waffenfarbe | M |
+| 2.8 | **Viewmodel-Bewegung**: Wippen beim Laufen, Nachziehen beim Umsehen, Absenken beim Springen, Einknicken beim Landen, Rückstoß beim Schuss (evtl. schon zu Hause gebaut, erst mergen) | S |
+| 2.9 | Eigene Effekte pro Waffe: Plasma-Spritzer, Railgun-Spiralspur, Mündungsfeuer je Waffe | S |
 
 ---
 
@@ -83,6 +86,9 @@ Der aktuelle Stand sind einfache Meshes und prozedurale Effekte. Für einen mode
 | 3.6 | Shader: leuchtende Pickups mit Fresnel-Rand, Schild-Effekt bei Rüstung, Teleporter-Portal, Hologramm-Respawn | M |
 | 3.7 | GPUParticles statt CPUParticles für Explosionen, Funken, Rauch | S |
 | 3.8 | ✅ **Lesbarkeit vor Schönheit**: Gegner in Team-/Hervorhebungsfarbe (Brightskins wie in Q3), optional abschaltbar | S |
+| 3.9 | Level von zu Hause mergen (nur lokal committet, noch nicht gepusht) | S |
+| 3.10 | **Map-Baukasten**: Generator mit Modulen (Turm, Steg, Treppe, Jump-Pad, Teleporter), damit eine neue Map in Stunden statt Tagen steht | M |
+| 3.11 | Weitere Maps: kleine Duell-Map (1 gegen 1), offene Railgun-/Instagib-Map | M |
 
 ---
 

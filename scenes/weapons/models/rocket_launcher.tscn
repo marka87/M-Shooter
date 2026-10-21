@@ -1,0 +1,130 @@
+[gd_scene format=3]
+
+[sub_resource type="StandardMaterial3D" id="graphite"]
+albedo_color = Color(0.1, 0.11, 0.14, 1)
+metallic = 0.5
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="trim"]
+albedo_color = Color(0.439, 0.349, 0.304, 1)
+metallic = 0.7
+roughness = 0.25
+
+[sub_resource type="StandardMaterial3D" id="glow"]
+albedo_color = Color(1, 0.4, 0.1, 1)
+emission_enabled = true
+emission = Color(1, 0.4, 0.1, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="CylinderMesh" id="mesh_0"]
+material = SubResource("graphite")
+top_radius = 0.075
+bottom_radius = 0.075
+height = 0.6
+radial_segments = 6
+rings = 1
+
+[sub_resource type="CylinderMesh" id="mesh_1"]
+material = SubResource("trim")
+top_radius = 0.09
+bottom_radius = 0.09
+height = 0.06
+radial_segments = 6
+rings = 1
+
+[sub_resource type="TorusMesh" id="mesh_2"]
+material = SubResource("glow")
+inner_radius = 0.072
+outer_radius = 0.086
+rings = 6
+ring_segments = 4
+
+[sub_resource type="CylinderMesh" id="mesh_3"]
+material = SubResource("trim")
+top_radius = 0.085
+bottom_radius = 0.085
+height = 0.05
+radial_segments = 6
+rings = 1
+
+[sub_resource type="BoxMesh" id="mesh_4"]
+material = SubResource("trim")
+size = Vector3(0.04, 0.1, 0.18)
+
+[sub_resource type="CylinderMesh" id="mesh_5"]
+material = SubResource("glow")
+top_radius = 0.012
+bottom_radius = 0.012
+height = 0.14
+radial_segments = 6
+rings = 1
+
+[sub_resource type="CylinderMesh" id="mesh_6"]
+material = SubResource("glow")
+top_radius = 0.012
+bottom_radius = 0.012
+height = 0.14
+radial_segments = 6
+rings = 1
+
+[sub_resource type="BoxMesh" id="mesh_7"]
+material = SubResource("trim")
+size = Vector3(0.03, 0.05, 0.08)
+
+[sub_resource type="BoxMesh" id="mesh_8"]
+material = SubResource("glow")
+size = Vector3(0.022, 0.03, 0.006)
+
+[sub_resource type="BoxMesh" id="mesh_9"]
+material = SubResource("graphite")
+size = Vector3(0.06, 0.15, 0.075)
+
+[sub_resource type="BoxMesh" id="mesh_10"]
+material = SubResource("graphite")
+size = Vector3(0.05, 0.12, 0.06)
+
+[node name="RocketLauncherModel" type="Node3D"]
+
+[node name="Tube" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.866025, 0, 0.5, 0.5, 0, -0.866025, 0, 1, 0, 0, 0, -0.33)
+mesh = SubResource("mesh_0")
+
+[node name="FrontRing" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.866025, 0, 0.5, 0.5, 0, -0.866025, 0, 1, 0, 0, 0, -0.6)
+mesh = SubResource("mesh_1")
+
+[node name="GlowRing" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.866025, 0, 0.5, 0.5, 0, -0.866025, 0, 1, 0, 0, 0, -0.54)
+mesh = SubResource("mesh_2")
+
+[node name="RearRing" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.866025, 0, 0.5, 0.5, 0, -0.866025, 0, 1, 0, 0, 0, -0.04)
+mesh = SubResource("mesh_3")
+
+[node name="AmmoBox" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.095, -0.02, -0.22)
+mesh = SubResource("mesh_4")
+
+[node name="Rocket1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0.118, 0.01, -0.22)
+mesh = SubResource("mesh_5")
+
+[node name="Rocket2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0.118, -0.05, -0.22)
+mesh = SubResource("mesh_6")
+
+[node name="Sight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -0.22)
+mesh = SubResource("mesh_7")
+
+[node name="SightLens" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.105, -0.262)
+mesh = SubResource("mesh_8")
+
+[node name="Grip" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, -0.258819, 0, 0.258819, 0.965926, 0, -0.13, 0)
+mesh = SubResource("mesh_9")
+
+[node name="ForeGrip" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, -0.12, -0.32)
+mesh = SubResource("mesh_10")

@@ -189,6 +189,7 @@ Landungen lassen die Kamera einknicken, Treffer und Rückstoß rucken sie, Explo
 Dunkle Low-Poly-Körper mit leuchtenden Wireframe-Kanten. Der Nachbearbeitungs-Shader `assets/shaders/neon_edges.gdshader` findet Kanten über Tiefen- und Normalensprünge und färbt sie im Farbton der jeweiligen Fläche: orange Plattformen bekommen orange Kanten, Bots die Kanten in ihrer eigenen Farbe. Dazu:
 - CRT-Look (`crt_overlay.gdshader`): Farbsaum, Vignette, feine Scanlines, roter Puls bei Treffern
 - Bots fallen beim Tod als Ragdoll um oder zerplatzen bei großen Treffern in leuchtende Würfel (`scenes/effects/voxel_burst.tscn`)
+- Waffenmodelle aus facettierten Grundformen mit Leuchtteilen in der Waffenfarbe (`scenes/weapons/models/`), erzeugt von `python tools/make_weapon_models.py`. Form und Maße stehen als Teileliste im Skript; nach Änderungen das Skript neu ausführen
 - Leuchtspuren für MG, Shotgun und Bot-Schüsse (`scenes/effects/tracer.tscn`)
 - HUD als Panel-Leiste unten: HP und Rüstung mit Balken, Spielerbild, Munition mit Balken, Waffe und Slots 1–4
 

@@ -2,75 +2,13 @@
 
 [ext_resource type="Script" path="res://scripts/weapons/shock_rifle.gd" id="1_script"]
 [ext_resource type="Resource" path="res://resources/weapons/shock_rifle.tres" id="9_data"]
-
-[sub_resource type="StandardMaterial3D" id="Mat_Body"]
-albedo_color = Color(0.28, 0.27, 0.34, 1)
-metallic = 0.45
-roughness = 0.4
-
-[sub_resource type="StandardMaterial3D" id="Mat_Glow"]
-shading_mode = 0
-albedo_color = Color(0.6, 0.35, 1, 1)
-metallic = 0
-roughness = 0.3
-emission_enabled = true
-emission = Color(0.6, 0.35, 1, 1)
-emission_energy_multiplier = 4.5
-
-[sub_resource type="BoxMesh" id="Mesh_Body"]
-material = SubResource("Mat_Body")
-size = Vector3(0.1, 0.14, 0.42)
-
-[sub_resource type="CylinderMesh" id="Mesh_Barrel"]
-material = SubResource("Mat_Body")
-top_radius = 0.028
-bottom_radius = 0.034
-height = 0.5
-
-[sub_resource type="TorusMesh" id="Mesh_Ring"]
-material = SubResource("Mat_Glow")
-inner_radius = 0.04
-outer_radius = 0.056
-
-[sub_resource type="BoxMesh" id="Mesh_Stock"]
-material = SubResource("Mat_Body")
-size = Vector3(0.08, 0.1, 0.16)
-
-[sub_resource type="BoxMesh" id="Mesh_Cell"]
-material = SubResource("Mat_Glow")
-size = Vector3(0.03, 0.06, 0.2)
+[ext_resource type="PackedScene" path="res://scenes/weapons/models/shock_rifle.tscn" id="20_model"]
 
 [node name="ShockRifle" type="Node3D"]
 script = ExtResource("1_script")
 data = ExtResource("9_data")
 
-[node name="Body" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.08)
-mesh = SubResource("Mesh_Body")
-
-[node name="Barrel" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.03, -0.5)
-mesh = SubResource("Mesh_Barrel")
-
-[node name="Ring1" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.03, -0.4)
-mesh = SubResource("Mesh_Ring")
-
-[node name="Ring2" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.03, -0.55)
-mesh = SubResource("Mesh_Ring")
-
-[node name="Ring3" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.03, -0.7)
-mesh = SubResource("Mesh_Ring")
-
-[node name="Stock" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.03, 0.18)
-mesh = SubResource("Mesh_Stock")
-
-[node name="Cell" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -0.1)
-mesh = SubResource("Mesh_Cell")
+[node name="Model" parent="." instance=ExtResource("20_model")]
 
 [node name="Muzzle" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.78)

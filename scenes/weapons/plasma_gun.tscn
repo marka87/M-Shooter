@@ -2,75 +2,13 @@
 
 [ext_resource type="Script" path="res://scripts/weapons/plasma_gun.gd" id="1_script"]
 [ext_resource type="Resource" path="res://resources/weapons/plasma.tres" id="9_data"]
-
-[sub_resource type="StandardMaterial3D" id="Mat_Body"]
-albedo_color = Color(0.3, 0.34, 0.4, 1)
-metallic = 0.45
-roughness = 0.4
-
-[sub_resource type="StandardMaterial3D" id="Mat_Glow"]
-shading_mode = 0
-albedo_color = Color(0.25, 0.75, 1, 1)
-metallic = 0
-roughness = 0.3
-emission_enabled = true
-emission = Color(0.25, 0.75, 1, 1)
-emission_energy_multiplier = 4.0
-
-[sub_resource type="BoxMesh" id="Mesh_Body"]
-material = SubResource("Mat_Body")
-size = Vector3(0.12, 0.13, 0.36)
-
-[sub_resource type="CylinderMesh" id="Mesh_Barrel"]
-material = SubResource("Mat_Body")
-top_radius = 0.03
-bottom_radius = 0.04
-height = 0.34
-
-[sub_resource type="TorusMesh" id="Mesh_Coil"]
-material = SubResource("Mat_Glow")
-inner_radius = 0.045
-outer_radius = 0.065
-
-[sub_resource type="BoxMesh" id="Mesh_Grip"]
-material = SubResource("Mat_Body")
-size = Vector3(0.07, 0.16, 0.08)
-
-[sub_resource type="BoxMesh" id="Mesh_Cell"]
-material = SubResource("Mat_Glow")
-size = Vector3(0.05, 0.05, 0.14)
+[ext_resource type="PackedScene" path="res://scenes/weapons/models/plasma_gun.tscn" id="20_model"]
 
 [node name="PlasmaGun" type="Node3D"]
 script = ExtResource("1_script")
 data = ExtResource("9_data")
 
-[node name="Body" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.1)
-mesh = SubResource("Mesh_Body")
-
-[node name="Barrel" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.02, -0.42)
-mesh = SubResource("Mesh_Barrel")
-
-[node name="Coil1" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.02, -0.34)
-mesh = SubResource("Mesh_Coil")
-
-[node name="Coil2" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.02, -0.44)
-mesh = SubResource("Mesh_Coil")
-
-[node name="Coil3" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.02, -0.54)
-mesh = SubResource("Mesh_Coil")
-
-[node name="Grip" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.12, 0)
-mesh = SubResource("Mesh_Grip")
-
-[node name="Cell" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.065, 0.02, -0.08)
-mesh = SubResource("Mesh_Cell")
+[node name="Model" parent="." instance=ExtResource("20_model")]
 
 [node name="Muzzle" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.62)

@@ -1,58 +1,14 @@
-[gd_scene load_steps=9 format=3 uid="uid://railgun_weapon_001"]
+[gd_scene format=3 uid="uid://railgun_weapon_001"]
 
 [ext_resource type="Script" path="res://scripts/weapons/railgun.gd" id="1_rail"]
 [ext_resource type="Resource" path="res://resources/weapons/railgun.tres" id="9_data"]
-
-[sub_resource type="StandardMaterial3D" id="Mat_Graphite"]
-albedo_color = Color(0.12, 0.14, 0.18, 1)
-metallic = 0.45
-roughness = 0.25
-
-[sub_resource type="BoxMesh" id="Mesh_Receiver"]
-material = SubResource("Mat_Graphite")
-size = Vector3(0.09, 0.12, 0.45)
-
-[sub_resource type="BoxMesh" id="Mesh_Rail"]
-material = SubResource("Mat_Graphite")
-size = Vector3(0.02, 0.04, 0.55)
-
-[sub_resource type="StandardMaterial3D" id="Mat_CoreCyan"]
-albedo_color = Color(0.1, 0.8, 1, 1)
-emission_enabled = true
-emission = Color(0.1, 0.85, 1, 1)
-emission_energy_multiplier = 4.0
-
-[sub_resource type="BoxMesh" id="Mesh_EnergyCore"]
-material = SubResource("Mat_CoreCyan")
-size = Vector3(0.04, 0.04, 0.4)
-
-[sub_resource type="BoxMesh" id="Mesh_Handle"]
-material = SubResource("Mat_Graphite")
-size = Vector3(0.07, 0.15, 0.07)
+[ext_resource type="PackedScene" path="res://scenes/weapons/models/railgun.tscn" id="20_model"]
 
 [node name="Railgun" type="Node3D"]
 script = ExtResource("1_rail")
 data = ExtResource("9_data")
 
-[node name="Receiver" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.1)
-mesh = SubResource("Mesh_Receiver")
-
-[node name="RailLeft" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.045, 0.02, -0.55)
-mesh = SubResource("Mesh_Rail")
-
-[node name="RailRight" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.045, 0.02, -0.55)
-mesh = SubResource("Mesh_Rail")
-
-[node name="EnergyCore" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.45)
-mesh = SubResource("Mesh_EnergyCore")
-
-[node name="Handle" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, -0.11, 0)
-mesh = SubResource("Mesh_Handle")
+[node name="Model" parent="." instance=ExtResource("20_model")]
 
 [node name="Muzzle" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.85)

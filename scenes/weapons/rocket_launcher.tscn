@@ -1,46 +1,14 @@
-[gd_scene load_steps=8 format=3 uid="uid://rocket_launcher_001"]
+[gd_scene format=3 uid="uid://rocket_launcher_001"]
 
 [ext_resource type="Script" path="res://scripts/weapons/rocket_launcher.gd" id="1_rpg"]
 [ext_resource type="Resource" path="res://resources/weapons/rocket_launcher.tres" id="9_data"]
-
-[sub_resource type="StandardMaterial3D" id="Mat_LauncherDark"]
-albedo_color = Color(0.36, 0.39, 0.44, 1)
-metallic = 0.4
-roughness = 0.4
-
-[sub_resource type="CylinderMesh" id="Mesh_MainTube"]
-material = SubResource("Mat_LauncherDark")
-top_radius = 0.07
-bottom_radius = 0.07
-height = 0.6
-
-[sub_resource type="StandardMaterial3D" id="Mat_AccentOrange"]
-albedo_color = Color(0.9, 0.45, 0.1, 1)
-roughness = 0.4
-
-[sub_resource type="BoxMesh" id="Mesh_Shield"]
-material = SubResource("Mat_AccentOrange")
-size = Vector3(0.17, 0.17, 0.06)
-
-[sub_resource type="BoxMesh" id="Mesh_Handle"]
-material = SubResource("Mat_LauncherDark")
-size = Vector3(0.08, 0.18, 0.08)
+[ext_resource type="PackedScene" path="res://scenes/weapons/models/rocket_launcher.tscn" id="20_model"]
 
 [node name="RocketLauncher" type="Node3D"]
 script = ExtResource("1_rpg")
 data = ExtResource("9_data")
 
-[node name="MainTube" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.3)
-mesh = SubResource("Mesh_MainTube")
-
-[node name="Shield" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.22)
-mesh = SubResource("Mesh_Shield")
-
-[node name="Handle" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, -0.14, 0.05)
-mesh = SubResource("Mesh_Handle")
+[node name="Model" parent="." instance=ExtResource("20_model")]
 
 [node name="Muzzle" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.65)
