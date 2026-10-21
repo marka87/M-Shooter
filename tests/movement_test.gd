@@ -31,6 +31,26 @@ func place(player, pos: Vector3) -> void:
 		await physics_frame
 
 
+## Feste Box (Layer World) in die Szene, optional um X gekippt (Rampe)
+func add_box(size: Vector3, pos: Vector3, tilt_x: float = 0.0) -> void:
+	var box := StaticBody3D.new()
+	box.collision_layer = Layers.WORLD
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	shape.shape.size = size
+	box.add_child(shape)
+	current_scene.add_child(box)
+	box.global_position = pos
+	box.rotation.x = tilt_x
+
+
+## n Physik-Ticks mit fester Eingabe direkt an den MovementController
+func drive(mv, wish: Vector3, jump_held: bool, ticks: int) -> void:
+	for i in ticks:
+		mv.step(wish, false, jump_held, false, 1.0 / 120.0)
+		await physics_frame
+
+
 func run() -> void:
 	await process_frame
 	var gm = root.get_node("GameManager")
@@ -91,6 +111,46 @@ func run() -> void:
 	var strafe_speed := Vector2(player.velocity.x, player.velocity.z).length()
 	player.set_physics_process(true)
 	check(strafe_speed > mv.sprint_speed, "Strafe-Jumping beschleunigt ueber Sprint-Tempo (%.1f m/s)" % strafe_speed)
+
+	# --- Stufen, Rampen, Bunnyhop: eigene Geometrie hoch ueber der Arena (Boden bei y = 40) ---
+	add_box(Vector3(40, 1, 200), Vector3(70, 39.5, 0))
+	add_box(Vector3(10, 0.4, 10), Vector3(55, 40.2, -8))  # Stufe 0,4 m, Vorderkante bei z = -3
+	add_box(Vector3(10, 1.0, 10), Vector3(85, 40.5, -8))  # Mauer 1 m
+	var slope := deg_to_rad(20.0)
+	add_box(Vector3(10, 1, 80), Vector3(-60, 40, 0), slope)  # Rampe (Richtung hangab aus der Bodennormale)
+	player.set_physics_process(false)
+
+	await place(player, Vector3(55, 40.05, 0))
+	await drive(mv, Vector3.FORWARD, false, 120)
+	check(player.global_position.y > 40.35 and player.global_position.z < -4.0, "Stufe 0,4 m wird hochgelaufen (%s)" % player.global_position)
+	await place(player, Vector3(85, 40.05, 0))
+	await drive(mv, Vector3.FORWARD, false, 120)
+	check(player.global_position.y < 40.2 and player.global_position.z > -3.0, "Mauer 1 m bleibt eine Mauer (%s)" % player.global_position)
+
+	# Bunnyhop: Sprung gehalten, keine Richtung -> Tempo bleibt ueber viele Landungen erhalten
+	await place(player, Vector3(70, 40.05, 80))
+	player.velocity = Vector3(0, 0, -15)
+	await drive(mv, Vector3.ZERO, true, 360)
+	var hop_speed := Vector2(player.velocity.x, player.velocity.z).length()
+	check(hop_speed > 14.9, "Bunnyhop verliert kein Tempo (15 -> %.2f m/s)" % hop_speed)
+
+	# Rampen-Sliding: schnell hangab ohne Eingabe -> keine Reibung, die Schwerkraft beschleunigt
+	await place(player, Vector3(-60, 40.5 + 30.0 * tan(slope), -10))
+	await drive(mv, Vector3.ZERO, false, 120)
+	var n: Vector3 = mv.body.get_floor_normal()
+	var downhill := Vector3(n.x, 0, n.z).normalized()
+	player.velocity = (downhill * 16.0).slide(n).normalized() * 16.0 / cos(slope)
+	await drive(mv, Vector3.ZERO, false, 60)
+	var slide_speed := Vector2(player.velocity.x, player.velocity.z).length()
+	check(mv.body.is_on_floor() and slide_speed > 16.0, "Rampen-Sliding hangab ohne Bremsen (%.1f m/s)" % slide_speed)
+	# Ramp-Jump: schnell hangauf springen -> der Schwung nach oben kommt zum Sprung dazu
+	await place(player, Vector3(-60, 40.5 + 30.0 * tan(slope), -10))
+	await drive(mv, Vector3.ZERO, false, 120)
+	player.velocity = (-downhill * 18.0).slide(n).normalized() * 18.0 / cos(slope)
+	await drive(mv, Vector3.ZERO, false, 2)
+	await drive(mv, Vector3.ZERO, true, 1)
+	check(player.velocity.y > mv.jump_velocity + 3.0, "Ramp-Jump hangauf springt hoeher (vy = %.1f m/s)" % player.velocity.y)
+	player.set_physics_process(true)
 
 	# In der Luft ohne Wand -> kein Dodge
 	await place(player, Vector3(0, 6.0, 20))

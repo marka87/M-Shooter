@@ -2,7 +2,7 @@ extends Node
 class_name MovementController
 
 ## Quake/UT-Bewegung fuer einen CharacterBody3D (Eltern-Knoten): Bodenbewegung mit Reibung, Bunnyhop,
-## Strafe-Jumping und CPM-Luftkontrolle, Doppelsprung, Dodge und Wall-Dodge, Jump-Pad-Starts.
+## Treppensteigen (Step-Up), Rampen-Sliding mit Ramp-Jump, Strafe-Jumping und CPM-Luftkontrolle, Doppelsprung, Dodge und Wall-Dodge, Jump-Pad-Starts.
 ## Arbeitet nur mit uebergebenen Eingabewerten (Richtung, Sprung, Sprint) statt direkt mit Input,
 ## damit dieselbe Bewegung spaeter auch fuer Netzwerk-Eingaben oder Bots nutzbar ist.
 ## Ton und Kamera haengen sich an die Signale.
@@ -23,6 +23,12 @@ signal landed(fall_speed: float)
 @export var ground_accel: float = 12.0
 ## Bodenreibung (wie stark ohne Richtungstaste gebremst wird)
 @export var ground_friction: float = 6.0
+## Hoechste Stufe, die man ohne Springen hochlaeuft (m, Quake: 18 Einheiten)
+@export var step_height: float = 0.45
+## Ab diesem Tempo auf einer Rampe keine Bodenreibung: man rutscht mit Schwung weiter (m/s)
+@export var ramp_slide_speed: float = 14.0
+## Wie weit vor der Stufe nach Boden gesucht wird (etwa der Kapselradius, m)
+const STEP_PROBE: float = 0.45
 
 @export_group("Quake-Luftbewegung & Strafe-Jumping")
 ## Beschleunigungsfaktor in der Luft bei seitlicher Eingabe (Strafe-Jump-Mechanik)
@@ -93,13 +99,21 @@ func step(wish_dir: Vector3, jump_pressed: bool, jump_held: bool, sprint: bool, 
 		jump_buffer_timer = maxf(jump_buffer_timer - delta, 0.0)
 
 	launch_grace = maxf(launch_grace - delta, 0.0)
-	if body.is_on_floor() and launch_grace <= 0.0:
+	var grounded := body.is_on_floor() and launch_grace <= 0.0
+	if grounded and _is_ramp_sliding():
+		_ramp_slide(wish_dir, jump_held, delta)
+	elif grounded:
 		_ground_move(wish_dir, jump_held, delta)
 	else:
 		_air_move(wish_dir, jump_pressed, delta)
 
 	_fall_speed = minf(_fall_speed, body.velocity.y)
+	var intended := body.velocity
 	body.move_and_slide()
+	if grounded and body.is_on_wall() and _try_step_up(Vector3(intended.x, 0.0, intended.z) * delta):
+		# Tempo vor der Kante behalten (move_and_slide hat es an der Stufe abgebremst)
+		body.velocity.x = intended.x
+		body.velocity.z = intended.z
 	_check_landing()
 
 
@@ -187,6 +201,53 @@ func _check_landing() -> void:
 	if on_floor:
 		_fall_speed = 0.0
 	_was_on_floor = on_floor
+
+
+## Stufe hochsteigen: hoch, vor, wieder runter auf begehbaren Boden. False, wenn es keine Stufe ist
+## (Wand hoeher als step_height, Decke darueber oder zu steiler Untergrund oben)
+func _try_step_up(motion: Vector3) -> bool:
+	if motion.length_squared() < 0.000001 or absf(body.get_wall_normal().y) > 0.1:
+		return false
+	# Mindestens ein paar Zentimeter vor, sonst reicht der Schritt bei langsamem Gehen nicht auf die Stufe
+	motion = motion.normalized() * maxf(motion.length(), 0.05)
+	var t := body.global_transform
+	var up := Vector3.UP * step_height
+	if body.test_move(t, up):
+		return false
+	t.origin += up
+	if body.test_move(t, motion):
+		return false
+	# Boden oben eine Kapselbreite weiter vorn pruefen: direkt an der Kante trifft die Rundung nur die Ecke
+	var hit := KinematicCollision3D.new()
+	if not body.test_move(t.translated(motion.normalized() * STEP_PROBE), -up, hit) or hit.get_normal().angle_to(Vector3.UP) > body.floor_max_angle:
+		return false
+	# Nur so weit absenken, wie es an der echten Position geht (dort kann die Ecke frueher bremsen)
+	t.origin += motion
+	var drop := hit.get_travel()
+	var corner := KinematicCollision3D.new()
+	body.global_position = t.origin + (corner.get_travel() if body.test_move(t, drop, corner) else drop)
+	return true
+
+
+## Schnell auf schraegem Boden? Dann gleitet man wie in der Luft (keine Reibung), Schwerkraft zieht hangab
+func _is_ramp_sliding() -> bool:
+	return body.get_floor_normal().y < 0.985 and Vector2(body.velocity.x, body.velocity.z).length() > ramp_slide_speed
+
+
+## Rampen-Sliding: Luftbewegung ohne Doppelsprung. Ein Sprung behaelt den Schwung nach oben (Ramp-Jump)
+func _ramp_slide(wish_dir: Vector3, jump_held: bool, delta: float) -> void:
+	if jump_buffer_timer > 0.0 or jump_held:
+		body.velocity.y = maxf(body.velocity.y, 0.0) + jump_velocity
+		jump_buffer_timer = 0.0
+		jumps_remaining = max_jumps - 1
+		jumped.emit()
+		return
+	_air_move(wish_dir, false, delta)
+	# move_and_slide liefert am Boden nur waagrechtes Tempo: auf die Rampenebene legen und
+	# Hangabtrieb dazu (hangab schneller, hangauf langsamer)
+	var n := body.get_floor_normal()
+	var flat := Vector3(body.velocity.x, 0.0, body.velocity.z)
+	body.velocity = flat + Vector3.UP * (-flat.dot(n) / n.y) + (Vector3.DOWN * gravity * delta).slide(n)
 
 
 ## Boden: Bunnyhop (Sprung ohne Reibung), sonst Reibung und Quake-Bodenbeschleunigung
