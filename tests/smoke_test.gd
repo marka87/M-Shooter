@@ -371,6 +371,9 @@ func run() -> void:
 	# Sound-Daten signed: Stille nahe 0
 	var snd: AudioStream = SoundGenerator.create_hitsound()
 	check(snd == SoundGenerator.create_hitsound(), "Sound-Cache liefert dieselbe Instanz")
+	var impact: AudioStream = SoundGenerator.create_impact_sound()
+	check(SoundGenerator.create_railgun_sound() is AudioStreamOggVorbis and impact is AudioStreamRandomizer and impact.streams_count == 4,
+		"CC0-Samples: Railgun als OGG, Einschlag mit 4 Varianten")
 
 	var hud = player.hud
 	# Fallschaden: 9 m nichts, 15 m 5, 25 m 15

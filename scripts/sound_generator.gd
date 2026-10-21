@@ -1,8 +1,8 @@
 extends RefCounted
 class_name SoundGenerator
 
-## Liefert die Sounds des Spiels. Zuerst wird res://assets/sounds/<name>.wav geladen
-## (erzeugt von tools/make_sounds.py); fehlt die Datei, wird der Sound wie frueher prozedural
+## Liefert die Sounds des Spiels. Zuerst wird ein CC0-Sample res://assets/sounds/<name>.ogg geladen
+## (tools/import_kenney.py), dann <name>.wav (tools/make_sounds.py); fehlt beides, wird der Sound wie frueher prozedural
 ## im RAM berechnet. Jeder Sound wird nur einmal geladen bzw. berechnet (Cache).
 
 const SOUND_DIR := "res://assets/sounds/"
@@ -65,9 +65,28 @@ static func clear_cache() -> void:
 
 static func _cached(key: String, builder: Callable) -> AudioStream:
 	if not _cache.has(key):
-		var path := SOUND_DIR + key + ".wav"
-		_cache[key] = load(path) if ResourceLoader.exists(path) else builder.call()
+		_cache[key] = _load_sample(key)
+		if _cache[key] == null:
+			_cache[key] = builder.call()
 	return _cache[key]
+
+
+## Echtes Sample (tools/import_kenney.py) vor erzeugtem WAV (tools/make_sounds.py):
+## <key>.ogg, sonst <key>_1.ogg, <key>_2.ogg ... als Zufallsauswahl, sonst <key>.wav, sonst null
+static func _load_sample(key: String) -> AudioStream:
+	if ResourceLoader.exists(SOUND_DIR + key + ".ogg"):
+		return load(SOUND_DIR + key + ".ogg")
+	if ResourceLoader.exists(SOUND_DIR + key + "_1.ogg"):
+		var variants := AudioStreamRandomizer.new()
+		variants.random_pitch = 1.0
+		var i := 1
+		while ResourceLoader.exists(SOUND_DIR + "%s_%d.ogg" % [key, i]):
+			variants.add_stream(-1, load(SOUND_DIR + "%s_%d.ogg" % [key, i]))
+			i += 1
+		return variants
+	if ResourceLoader.exists(SOUND_DIR + key + ".wav"):
+		return load(SOUND_DIR + key + ".wav")
+	return null
 
 
 ## Wandelt einen Sample-Wert (-128..127) in ein vorzeichenbehaftetes 8-Bit-Byte um.
