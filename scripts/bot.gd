@@ -58,7 +58,10 @@ const SKILL_PRESETS: Array[Dictionary] = [
 # ==============================================================================
 
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
-@onready var body_mesh: MeshInstance3D = $BodyMesh
+@onready var model: Node3D = $Model
+@onready var mannequin: MeshInstance3D = $Model/Rig/Skeleton3D/Mannequin
+@onready var gun_mesh: MeshInstance3D = $Model/Rig/Skeleton3D/GunAttach/GunMesh
+@onready var skeleton: Skeleton3D = $Model/Rig/Skeleton3D
 @onready var nameplate: Label3D = $Nameplate
 @onready var muzzle: Node3D = $Muzzle
 @onready var muzzle_flash: OmniLight3D = $Muzzle/MuzzleFlash
@@ -93,7 +96,26 @@ var patrol_item: Node3D = null
 # Schritte als 3D-Sound
 var _step_distance: float = 0.0
 var _step_audio: AudioStreamPlayer3D = null
-var original_mesh_transform: Transform3D
+# Animation (Quaternius Universal Animation Library) und Ragdoll beim Tod
+var anim_tree: AnimationTree
+var ragdoll: PhysicalBoneSimulator3D
+## Ab diesem Schaden zerplatzt der Bot in Wuerfel statt als Ragdoll umzufallen
+const GIB_DAMAGE: float = 120.0
+const GIB_SPLASH_DAMAGE: float = 50.0
+## Ragdoll-Knochen: Knochen, Endknochen (oder Versatz) fuer die Laenge, Radius, Gelenkspielraum in Grad
+const RAGDOLL_BONES: Array = [
+	["DEF-hips", "DEF-spine.002", 0.14, 0.0],
+	["DEF-spine.002", "DEF-neck", 0.15, 25.0],
+	["DEF-head", Vector3(0, 0.25, 0), 0.11, 35.0],
+	["DEF-upper_arm.L", "DEF-forearm.L", 0.05, 70.0],
+	["DEF-forearm.L", "DEF-hand.L", 0.045, 60.0],
+	["DEF-upper_arm.R", "DEF-forearm.R", 0.05, 70.0],
+	["DEF-forearm.R", "DEF-hand.R", 0.045, 60.0],
+	["DEF-thigh.L", "DEF-shin.L", 0.07, 45.0],
+	["DEF-shin.L", "DEF-foot.L", 0.055, 50.0],
+	["DEF-thigh.R", "DEF-shin.R", 0.07, 45.0],
+	["DEF-shin.R", "DEF-foot.R", 0.055, 50.0],
+]
 var hit_spark_scene: PackedScene = preload("res://scenes/weapons/hit_spark.tscn")
 var floating_number_scene: PackedScene = preload("res://scenes/effects/floating_number.tscn")
 var voxel_burst_scene: PackedScene = preload("res://scenes/effects/voxel_burst.tscn")
@@ -109,7 +131,8 @@ func _ready() -> void:
 	if display_name.is_empty():
 		display_name = name
 	GameManager.register_participant(display_name, false)
-	original_mesh_transform = body_mesh.transform
+	_setup_animation()
+	_setup_ragdoll()
 
 	snd_shot = SoundGenerator.create_machinegun_sound()
 	snd_hurt = SoundGenerator.create_bot_hurt_sound()
@@ -142,12 +165,10 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	# Tot-Zustand: Keine Bewegung
+	# Tot: Der Ragdoll (oder die Wuerfel) uebernimmt, der Bot selbst bleibt stehen
 	if current_state == State.DEAD:
-		if not is_on_floor():
-			velocity.y -= gravity * delta
-			move_and_slide()
 		return
+	_update_animation(delta)
 
 	# Countdown / Siegerbildschirm: nur Schwerkraft, keine KI
 	if GameManager.is_frozen():
@@ -322,6 +343,122 @@ func _switch_state(new_state: State) -> void:
 
 
 # ==============================================================================
+# ANIMATION & RAGDOLL
+# ==============================================================================
+
+## AnimationTree aus Code: Laufen (Idle/Walk/Jog/Sprint nach Tempo), Sprung in der Luft,
+## Zielhaltung mit der Pistole im Kampf (nur Oberkoerper) und Treffer-Zucken als OneShot
+func _setup_animation() -> void:
+	var tree := AnimationNodeBlendTree.new()
+	var loco := AnimationNodeBlendSpace1D.new()
+	loco.max_space = 8.0
+	for point in [["Idle", 0.0], ["Walk", 1.5], ["Jog_Fwd", 4.5], ["Sprint", 7.5]]:
+		loco.add_blend_point(_anim_node(point[0]), point[1], -1, point[0])
+	tree.add_node("loco", loco)
+	tree.add_node("jump", _anim_node("Jump"))
+	tree.add_node("air", AnimationNodeBlend2.new())
+	tree.connect_node("air", 0, "loco")
+	tree.connect_node("air", 1, "jump")
+	# Zielen und Treffer wirken nur auf den Oberkoerper (alles ausser Becken und Beinen)
+	var aim := AnimationNodeBlend2.new()
+	var hit := AnimationNodeOneShot.new()
+	hit.fadein_time = 0.05
+	hit.fadeout_time = 0.15
+	for node in [aim, hit]:
+		node.filter_enabled = true
+		for i in skeleton.get_bone_count():
+			var bone := skeleton.get_bone_name(i)
+			var lower: bool = bone in ["root", "DEF-hips", "DEF-spine.001"] or "thigh" in bone or "shin" in bone or "foot" in bone or "toe" in bone
+			if not lower:
+				node.set_filter_path(NodePath("Rig/Skeleton3D:" + bone), true)
+	tree.add_node("aim_pose", _anim_node("Pistol_Aim_Neutral"))
+	tree.add_node("aim", aim)
+	tree.connect_node("aim", 0, "air")
+	tree.connect_node("aim", 1, "aim_pose")
+	tree.add_node("hit_pose", _anim_node("Hit_Chest"))
+	tree.add_node("hit", hit)
+	tree.connect_node("hit", 0, "aim")
+	tree.connect_node("hit", 1, "hit_pose")
+	tree.connect_node("output", 0, "hit")
+	anim_tree = AnimationTree.new()
+	anim_tree.tree_root = tree
+	model.add_child(anim_tree)
+	anim_tree.anim_player = anim_tree.get_path_to(model.get_node("AnimationPlayer"))
+
+
+func _anim_node(anim_name: String) -> AnimationNodeAnimation:
+	var node := AnimationNodeAnimation.new()
+	node.animation = anim_name
+	return node
+
+
+## Tempo, Luft und Zielen weich in den AnimationTree uebertragen
+func _update_animation(delta: float) -> void:
+	var weight: float = clampf(delta * 10.0, 0.0, 1.0)
+	var air: float = 0.0 if is_on_floor() else 1.0
+	var aim: float = 1.0 if current_state == State.ATTACK else 0.0
+	anim_tree.set("parameters/loco/blend_position", Vector2(velocity.x, velocity.z).length())
+	anim_tree.set("parameters/air/blend_amount", lerpf(anim_tree.get("parameters/air/blend_amount"), air, weight))
+	anim_tree.set("parameters/aim/blend_amount", lerpf(anim_tree.get("parameters/aim/blend_amount"), aim, weight))
+
+
+## Physikalisches Skelett aus Code: Kapseln entlang der Hauptknochen, verbunden mit Kegelgelenken.
+## Die Kapseln kollidieren nur mit der Welt und sind fuer Schuesse unsichtbar.
+func _setup_ragdoll() -> void:
+	ragdoll = PhysicalBoneSimulator3D.new()
+	ragdoll.active = false
+	skeleton.add_child(ragdoll)
+	for entry in RAGDOLL_BONES:
+		var bone_rest: Transform3D = skeleton.get_bone_global_rest(skeleton.find_bone(entry[0]))
+		var tip: Vector3 = entry[1] if entry[1] is Vector3 else bone_rest.affine_inverse() * skeleton.get_bone_global_rest(skeleton.find_bone(entry[1])).origin
+		var half: float = tip.length() * 0.5
+		var shape := CapsuleShape3D.new()
+		shape.radius = entry[2]
+		shape.height = maxf(half * 2.0, shape.radius * 2.0 + 0.01)
+		# Wie "Physical Skeleton erstellen" im Editor: Kapsel in der Knochenmitte, Gelenk am Knochenanfang
+		var collision := CollisionShape3D.new()
+		collision.shape = shape
+		collision.transform.basis = Basis(Vector3(1, 0, 0), Vector3(0, 0, -1), Vector3(0, 1, 0))
+		var up := Vector3.BACK if Vector3.UP.cross(tip).is_zero_approx() else Vector3.UP
+		var rot := Basis.looking_at(tip, up)
+		var bone := PhysicalBone3D.new()
+		bone.name = "Rag_" + entry[0]
+		bone.bone_name = entry[0]
+		bone.body_offset = Transform3D(rot, rot * Vector3(0, 0, -half))
+		bone.joint_offset = Transform3D(Basis(), Vector3(0, 0, half))
+		bone.collision_layer = 0
+		bone.collision_mask = Layers.WORLD
+		bone.angular_damp = 3.0
+		bone.gravity_scale = 2.0
+		if entry[3] > 0.0:
+			bone.joint_type = PhysicalBone3D.JOINT_TYPE_CONE
+			bone.set("joint_constraints/swing_span", entry[3])
+			bone.set("joint_constraints/twist_span", 20.0)
+		bone.add_child(collision)
+		ragdoll.add_child(bone)
+
+
+## Ragdoll loslassen: Schwung des Bots plus Treffer-Impuls (vom Schuss oder von der Explosion weg)
+func _start_ragdoll(info: DamageInfo) -> void:
+	anim_tree.active = false
+	ragdoll.active = true
+	ragdoll.physical_bones_start_simulation()
+	var push: Vector3 = info.direction
+	if push.length_squared() < 0.01:
+		push = global_position + Vector3.UP - info.position
+	# Nur ein Teil des Rueckstosses aus take_damage, sonst fliegt der Koerper meterweit
+	var fling: Vector3 = velocity * 0.4 + push.normalized() * clampf(info.amount * 0.03, 1.0, 3.0) + Vector3.UP
+	for bone: PhysicalBone3D in ragdoll.get_children():
+		bone.linear_velocity = fling
+
+
+func _stop_ragdoll() -> void:
+	ragdoll.physical_bones_stop_simulation()
+	ragdoll.active = false
+	anim_tree.active = true
+
+
+# ==============================================================================
 # SCHIESSEN & SICHTLINIE
 # ==============================================================================
 
@@ -478,6 +615,9 @@ func take_damage(info: DamageInfo) -> void:
 		audio_player.pitch_scale = randf_range(0.9, 1.1)
 		audio_player.play()
 
+	# Treffer-Zucken im Oberkoerper
+	anim_tree.set("parameters/hit/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
+
 	# Treffer-Impuls (z.B. durch Raketen-Explosion)
 	velocity += info.direction * (amount * 0.12)
 
@@ -518,33 +658,26 @@ func _exit_tree() -> void:
 		mesh.material_override = null
 
 
-## Alle sichtbaren Teile des Roboters
+## Alle sichtbaren Teile des Bots
 func _model_meshes() -> Array[MeshInstance3D]:
-	var result: Array[MeshInstance3D] = [body_mesh]
-	for child in body_mesh.get_children():
-		if child is MeshInstance3D:
-			result.append(child)
-	return result
+	return [mannequin, gun_mesh]
 
 
-## Leuchtteile (Visier, Brustlicht) und Lackteile (Schultern) in skin_color einfaerben,
-## den Panzer dunkel in derselben Farbe toenen. So leuchten auch die Neonkanten
+## Mannequin einfaerben: Koerper (Oberflaeche 0) dunkel in skin_color getoent, Gelenke
+## (Oberflaeche 1) leuchten in skin_color. So leuchten auch die Neonkanten
 ## (neon_edges.gdshader) in der Bot-Farbe. Jeder Bot bekommt eigene Material-Kopien.
 func _apply_skin_color() -> void:
-	var recolored: Dictionary = {}
-	for mesh in _model_meshes():
-		var mat := mesh.mesh.surface_get_material(0) as StandardMaterial3D
-		if mat == null or mesh.name == "GunMesh":
-			continue
-		if not recolored.has(mat):
-			var copy: StandardMaterial3D = mat.duplicate()
-			if mat.emission_enabled:
-				copy.albedo_color = skin_color
-				copy.emission = skin_color
-			else:
-				copy.albedo_color = mat.albedo_color.lerp(skin_color.darkened(0.45), 0.85)
-			recolored[mat] = copy
-		mesh.set_surface_override_material(0, recolored[mat])
+	var body: StandardMaterial3D = mannequin.mesh.surface_get_material(0).duplicate()
+	body.albedo_color = body.albedo_color.lerp(skin_color.darkened(0.6), 0.85)
+	body.metallic = 0.4
+	body.roughness = 0.4
+	mannequin.set_surface_override_material(0, body)
+	var joints: StandardMaterial3D = mannequin.mesh.surface_get_material(1).duplicate()
+	joints.albedo_color = skin_color
+	joints.emission_enabled = true
+	joints.emission = skin_color
+	joints.emission_energy_multiplier = 2.5
+	mannequin.set_surface_override_material(1, joints)
 
 
 ## Tod des Bots: Kollision abschalten, Sound, Frag fuer Spieler und Respawn-Timer
@@ -564,13 +697,17 @@ func _die(info: DamageInfo) -> void:
 	if collision_shape:
 		collision_shape.disabled = true
 
-	# Zerplatzen in leuchtende Wuerfel in der Farbe des Bots
-	body_mesh.visible = false
 	nameplate.visible = false
-	var burst := voxel_burst_scene.instantiate() as VoxelBurst
-	get_parent().add_child(burst)
-	burst.global_position = global_position
-	burst.burst(skin_color)
+	# Grosse Treffer (Explosion aus der Naehe, Quad-Railgun, Telefrag): Zerplatzen in leuchtende
+	# Wuerfel in der Farbe des Bots. Sonst faellt der Bot als Ragdoll um.
+	if info.amount >= GIB_DAMAGE or (info.is_splash and info.amount >= GIB_SPLASH_DAMAGE):
+		model.visible = false
+		var burst := voxel_burst_scene.instantiate() as VoxelBurst
+		get_parent().add_child(burst)
+		burst.global_position = global_position
+		burst.burst(skin_color)
+	else:
+		_start_ragdoll(info)
 
 	# Respawn nach Verzoegerung
 	get_tree().create_timer(respawn_delay, false).timeout.connect(_respawn)
@@ -584,9 +721,9 @@ func _respawn() -> void:
 	global_transform = GameManager.get_spawn_transform(self)
 	target = null
 
-	# Mesh-Drehung und Kollision zuruecksetzen
-	body_mesh.transform = original_mesh_transform
-	body_mesh.visible = true
+	# Ragdoll beenden, Modell und Kollision zuruecksetzen
+	_stop_ragdoll()
+	model.visible = true
 	nameplate.visible = true
 	if collision_shape:
 		collision_shape.disabled = false

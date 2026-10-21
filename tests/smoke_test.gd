@@ -133,6 +133,22 @@ func run() -> void:
 	check(feed.get_child_count() >= 1 and b1.display_name in feed.get_child(feed.get_child_count() - 1).text, "Killfeed zeigt Abschuss")
 	var board: Array = gm.get_scoreboard()
 	check(board.size() == 3 and board[0].name == player.display_name, "Scoreboard: 3 Eintraege, Spieler vorn")
+
+	# Railgun (100 Schaden) -> Ragdoll faellt um; Kopf landet nahe am Boden
+	check(b1.model.visible and b1.ragdoll.is_simulating_physics(), "Bot faellt als Ragdoll um")
+	await wait(2.0)
+	# Die Waffe haengt am Handknochen und zeigt so, dass das sichtbare Modell dem Ragdoll folgt
+	var head_y: float = b1.ragdoll.get_node("Rag_DEF-head").global_position.y - b1.global_position.y
+	var gun_y: float = b1.gun_mesh.global_position.y - b1.global_position.y
+	check(head_y < 0.7 and gun_y < 0.7, "Ragdoll liegt am Boden (Kopf %.2f m, Waffe %.2f m hoch)" % [head_y, gun_y])
+	b1._respawn()
+	b1.set_physics_process(false)
+	check(not b1.ragdoll.is_simulating_physics() and b1.anim_tree.active, "Respawn beendet den Ragdoll")
+	# Grosser Treffer -> Wuerfel statt Ragdoll
+	b1.take_damage(DamageInfo.create(200.0, player, b1.global_position, Vector3.FORWARD, "Test"))
+	check(not b1.model.visible and not b1.ragdoll.is_simulating_physics(), "Grosser Treffer: Bot zerplatzt (Gib)")
+	b1._respawn()
+	b1.set_physics_process(false)
 	# Bots bleiben bis zum Bot-gegen-Bot-Test eingefroren, sonst stoeren sie die folgenden Pruefungen
 
 	# Rocket-Jump: nach unten schiessen

@@ -1,3 +1,13 @@
+# Änderungen (Runde 18: Animierte Bots mit Ragdoll)
+
+- **Bots als animierte Figuren** statt Block-Roboter: Mannequin aus der **Quaternius Universal Animation Library** (CC0, `assets/characters/ual/`, Lizenzdatei liegt bei). Körper dunkel in der Bot-Farbe, Gelenke leuchten in der Bot-Farbe (die Neonkanten übernehmen sie). Waffe hängt an der rechten Hand (`BoneAttachment3D`), die Mündung sitzt an der Hand in Zielhaltung.
+- **Animationen** über einen `AnimationTree` aus Code: Idle / Walk / Jog / Sprint je nach Tempo, Sprung-Pose in der Luft, Pistolen-Zielhaltung im Kampf (nur Oberkörper) und Treffer-Zucken (`Hit_Chest`).
+- **Ragdoll beim Tod:** `PhysicalBoneSimulator3D` mit 11 Kapseln (Becken, Rumpf, Kopf, Arme, Beine) und Kegelgelenken, aus Code erzeugt. Der Körper fliegt in Schussrichtung bzw. von der Explosion weg. Die Kapseln kollidieren nur mit der Welt.
+- **Gib** (Würfel-Burst) nur noch bei großen Treffern: ab 120 Schaden oder ab 50 Explosionsschaden.
+- Smoke-Test um 4 Prüfungen erweitert (Ragdoll startet, liegt am Boden, Respawn beendet ihn, Gib bei großem Treffer). Alle vier Tests grün.
+
+---
+
 # Änderungen (Runde 17: Windows-Build, Version 0.9.0)
 
 - **Versionsnummer** 0.9.0 in `project.godot` (`application/config/version`), unten rechts im Hauptmenü zusammen mit der Godot-Version.

@@ -79,7 +79,7 @@ Der aktuelle Stand sind einfache Meshes und prozedurale Effekte. Für einen mode
 | 3.2 | ✅ AgX, Bloom, SSAO, Volumetric Fog, Neon-Raster-Shader, Sternenhimmel-Shader (SSR bewusst weggelassen). `WorldEnvironment`: Tonemapping (AgX), Glow/Bloom, SSAO, SSR, leichter Volumetric Fog, eigener Skybox-Shader | S |
 | 3.3 | Licht: **LightmapGI** backen (beste Qualität bei statischer Arena) oder SDFGI für schnelle Iteration | M |
 | 3.4 | Stilrichtung festlegen. Empfehlung: **Sci-Fi-Industrial mit Neon-Akzenten** (UT99/UT4-Anmutung), das kaschiert einfache Geometrie und ist gut lesbar | – |
-| 3.5 | Modelle: Waffen und Bots aus Blender oder CC0-Paketen (z. B. Kenney, Quaternius), Bots mit Lauf-/Schuss-/Todes-Animation und Ragdoll | L |
+| 3.5 | ✅ Bots: animiertes Quaternius-Mannequin mit Ragdoll (Waffenmodelle offen). Modelle: Waffen und Bots aus Blender oder CC0-Paketen (z. B. Kenney, Quaternius), Bots mit Lauf-/Schuss-/Todes-Animation und Ragdoll | L |
 | 3.6 | Shader: leuchtende Pickups mit Fresnel-Rand, Schild-Effekt bei Rüstung, Teleporter-Portal, Hologramm-Respawn | M |
 | 3.7 | GPUParticles statt CPUParticles für Explosionen, Funken, Rauch | S |
 | 3.8 | ✅ **Lesbarkeit vor Schönheit**: Gegner in Team-/Hervorhebungsfarbe (Brightskins wie in Q3), optional abschaltbar | S |

@@ -1,80 +1,13 @@
-[gd_scene load_steps=23 format=3 uid="uid://bot_enemy_001"]
+[gd_scene format=3 uid="uid://bot_enemy_001"]
 
 [ext_resource type="Script" path="res://scripts/bot.gd" id="1_bot"]
 [ext_resource type="Script" path="res://scripts/components/health_component.gd" id="9_health"]
 [ext_resource type="Script" path="res://scripts/components/powerup_component.gd" id="10_pu"]
+[ext_resource type="PackedScene" path="res://assets/characters/ual/AnimationLibrary_Godot_Standard.glb" id="11_model"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.45
 height = 1.8
-
-[sub_resource type="StandardMaterial3D" id="Mat_BotArmor"]
-albedo_color = Color(0.42, 0.45, 0.5, 1)
-metallic = 0.35
-roughness = 0.45
-
-[sub_resource type="StandardMaterial3D" id="Mat_BotJoint"]
-albedo_color = Color(0.16, 0.17, 0.2, 1)
-metallic = 0.3
-roughness = 0.55
-
-[sub_resource type="StandardMaterial3D" id="Mat_BotAccent"]
-albedo_color = Color(1, 0.25, 0.2, 1)
-emission_enabled = true
-emission = Color(1, 0.25, 0.2, 1)
-emission_energy_multiplier = 3.0
-
-[sub_resource type="StandardMaterial3D" id="Mat_BotPaint"]
-albedo_color = Color(1, 0.25, 0.2, 1)
-metallic = 0.4
-roughness = 0.35
-emission_enabled = true
-emission = Color(1, 0.25, 0.2, 1)
-emission_energy_multiplier = 0.35
-
-[sub_resource type="BoxMesh" id="Mesh_Pelvis"]
-material = SubResource("Mat_BotJoint")
-size = Vector3(0.4, 0.18, 0.28)
-
-[sub_resource type="BoxMesh" id="Mesh_Torso"]
-material = SubResource("Mat_BotArmor")
-size = Vector3(0.62, 0.55, 0.38)
-
-[sub_resource type="BoxMesh" id="Mesh_Head"]
-material = SubResource("Mat_BotArmor")
-size = Vector3(0.32, 0.28, 0.32)
-
-[sub_resource type="BoxMesh" id="Mesh_Visor"]
-material = SubResource("Mat_BotAccent")
-size = Vector3(0.26, 0.07, 0.02)
-
-[sub_resource type="BoxMesh" id="Mesh_ChestLight"]
-material = SubResource("Mat_BotAccent")
-size = Vector3(0.3, 0.05, 0.02)
-
-[sub_resource type="BoxMesh" id="Mesh_Shoulder"]
-material = SubResource("Mat_BotPaint")
-size = Vector3(0.2, 0.18, 0.32)
-
-[sub_resource type="CylinderMesh" id="Mesh_Arm"]
-material = SubResource("Mat_BotJoint")
-top_radius = 0.07
-bottom_radius = 0.06
-height = 0.5
-
-[sub_resource type="CylinderMesh" id="Mesh_Leg"]
-material = SubResource("Mat_BotArmor")
-top_radius = 0.1
-bottom_radius = 0.08
-height = 0.82
-
-[sub_resource type="BoxMesh" id="Mesh_Backpack"]
-material = SubResource("Mat_BotArmor")
-size = Vector3(0.4, 0.36, 0.16)
-
-[sub_resource type="BoxMesh" id="Mesh_BackStrip"]
-material = SubResource("Mat_BotAccent")
-size = Vector3(0.05, 0.28, 0.02)
 
 [sub_resource type="StandardMaterial3D" id="Mat_BotGun"]
 albedo_color = Color(0.15, 0.17, 0.2, 1)
@@ -83,7 +16,7 @@ roughness = 0.3
 
 [sub_resource type="BoxMesh" id="Mesh_BotGun"]
 material = SubResource("Mat_BotGun")
-size = Vector3(0.1, 0.12, 0.5)
+size = Vector3(0.08, 0.42, 0.12)
 
 [node name="Bot" type="CharacterBody3D" groups=["enemies"]]
 collision_layer = 4
@@ -94,64 +27,19 @@ script = ExtResource("1_bot")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_1")
 
-[node name="BodyMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-mesh = SubResource("Mesh_Pelvis")
+[node name="Model" parent="." instance=ExtResource("11_model")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
 
-[node name="Torso" type="MeshInstance3D" parent="BodyMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
-mesh = SubResource("Mesh_Torso")
+[node name="GunAttach" type="BoneAttachment3D" parent="Model/Rig/Skeleton3D"]
+bone_name = "DEF-hand.R"
+bone_idx = 29
 
-[node name="ChestLight" type="MeshInstance3D" parent="BodyMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.48, -0.2)
-mesh = SubResource("Mesh_ChestLight")
-
-[node name="Head" type="MeshInstance3D" parent="BodyMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.84, 0)
-mesh = SubResource("Mesh_Head")
-
-[node name="Visor" type="MeshInstance3D" parent="BodyMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.86, -0.165)
-mesh = SubResource("Mesh_Visor")
-
-[node name="ShoulderL" type="MeshInstance3D" parent="BodyMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42, 0.6, 0)
-mesh = SubResource("Mesh_Shoulder")
-
-[node name="ShoulderR" type="MeshInstance3D" parent="BodyMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 0.6, 0)
-mesh = SubResource("Mesh_Shoulder")
-
-[node name="ArmL" type="MeshInstance3D" parent="BodyMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42, 0.28, 0)
-mesh = SubResource("Mesh_Arm")
-
-[node name="ArmR" type="MeshInstance3D" parent="BodyMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 0.28, 0)
-mesh = SubResource("Mesh_Arm")
-
-[node name="LegL" type="MeshInstance3D" parent="BodyMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.13, -0.45, 0)
-mesh = SubResource("Mesh_Leg")
-
-[node name="LegR" type="MeshInstance3D" parent="BodyMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.13, -0.45, 0)
-mesh = SubResource("Mesh_Leg")
-
-[node name="Backpack" type="MeshInstance3D" parent="BodyMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.42, 0.26)
-mesh = SubResource("Mesh_Backpack")
-
-[node name="BackStrip" type="MeshInstance3D" parent="BodyMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.42, 0.345)
-mesh = SubResource("Mesh_BackStrip")
-
-[node name="GunMesh" type="MeshInstance3D" parent="BodyMesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 0.05, -0.3)
+[node name="GunMesh" type="MeshInstance3D" parent="Model/Rig/Skeleton3D/GunAttach"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, 0.05)
 mesh = SubResource("Mesh_BotGun")
 
 [node name="Muzzle" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 0.95, -0.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 1.42, -0.7)
 
 [node name="MuzzleFlash" type="OmniLight3D" parent="Muzzle"]
 visible = false

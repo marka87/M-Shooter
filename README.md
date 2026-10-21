@@ -76,6 +76,8 @@ Die Bots besitzen eine 4-stufige Zustandsmaschine:
 - **ATTACK (Angriff)**: Fixiert den Spieler, strafet seitlich und feuert mit menschlicher Streuung (ca. 4°), um faire Ausweichmanöver zu ermöglichen.
 - **DEAD (Tot)**: Schaltet Kollision ab, kippt um, schreibt dem Spieler einen Frag gut und respawnt nach 4 Sekunden an einem zufälligen Spawnpunkt.
 
+Die Bots sind animierte Figuren (Mannequin aus der **Quaternius Universal Animation Library**, CC0, `assets/characters/ual/`): Idle, Gehen, Joggen und Sprinten je nach Tempo, Sprung-Pose in der Luft, Pistolen-Zielhaltung im Kampf und Zucken bei Treffern. Beim Tod fallen sie als **Ragdoll** um; große Treffer (Explosion aus der Nähe, ab 120 Schaden) lassen sie in Würfel zerplatzen.
+
 Über den Köpfen der Bots schwebt ein 3D-Namensschild (`Label3D`) mit Live-Status und Lebenspunkten.
 
 ---
@@ -107,7 +109,7 @@ Booter/
 ├── levels/
 │   └── test_arena.tscn     # 3D-Arena mit Rampen, Podesten, Säulen, Items & Bots
 ├── scenes/
-│   ├── bot.tscn            # Gegner-Bot mit visueller Rüstung & NavAgent
+│   ├── bot.tscn            # Gegner-Bot: animiertes Mannequin, Waffe an der Hand, NavAgent
 │   ├── player.tscn         # Spieler mit First-Person-Kamera & HUD
 │   ├── effects/
 │   │   └── floating_number.tscn # Schwebende 3D-Schadenszahlen
@@ -186,7 +188,7 @@ Landungen lassen die Kamera einknicken, Treffer und Rückstoß rucken sie, Explo
 
 Dunkle Low-Poly-Körper mit leuchtenden Wireframe-Kanten. Der Nachbearbeitungs-Shader `assets/shaders/neon_edges.gdshader` findet Kanten über Tiefen- und Normalensprünge und färbt sie im Farbton der jeweiligen Fläche: orange Plattformen bekommen orange Kanten, Bots die Kanten in ihrer eigenen Farbe. Dazu:
 - CRT-Look (`crt_overlay.gdshader`): Farbsaum, Vignette, feine Scanlines, roter Puls bei Treffern
-- Bots zerplatzen beim Tod in leuchtende Würfel (`scenes/effects/voxel_burst.tscn`)
+- Bots fallen beim Tod als Ragdoll um oder zerplatzen bei großen Treffern in leuchtende Würfel (`scenes/effects/voxel_burst.tscn`)
 - Leuchtspuren für MG, Shotgun und Bot-Schüsse (`scenes/effects/tracer.tscn`)
 - HUD als Panel-Leiste unten: HP und Rüstung mit Balken, Spielerbild, Munition mit Balken, Waffe und Slots 1–4
 
