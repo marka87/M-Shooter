@@ -48,9 +48,9 @@ func _ready() -> void:
 	
 	_setup_viewmodel_lighting()
 
-	# Erste Waffe (Maschinengewehr) ausruesten
+	# Erste Waffe ausruesten (Maschinengewehr, im Instagib die Railgun)
 	if not weapons.is_empty():
-		switch_to_weapon(0)
+		switch_to_weapon(_first_owned())
 	
 	GameManager.game_paused.connect(_on_game_paused)
 
@@ -217,15 +217,23 @@ func give_weapon(weapon_id: StringName, ammo: int) -> bool:
 	return weapon.add_ammo(ammo)
 
 
-## Nach dem Respawn: Start-Ausruestung laut WeaponData, zurueck zum MG
+## Nach dem Respawn: Start-Ausruestung laut WeaponData, zurueck zur ersten Waffe
 func reset_loadout() -> void:
 	for weapon in weapons:
 		weapon.reset_loadout()
 	weapons[current_weapon_index].unequip()
-	current_weapon_index = 0
-	weapons[0].equip()
+	current_weapon_index = _first_owned()
+	var first: WeaponBase = weapons[current_weapon_index]
+	first.equip()
 	loadout_changed.emit()
-	weapon_switched.emit(weapons[0].weapon_name, weapons[0].current_ammo, weapons[0].max_ammo)
+	weapon_switched.emit(first.weapon_name, first.current_ammo, first.max_ammo)
+
+
+func _first_owned() -> int:
+	for i in weapons.size():
+		if weapons[i].owned:
+			return i
+	return 0
 
 
 ## Munitionskiste: jede Waffe bekommt ihre ammo_box_amount. True, wenn irgendetwas aufgefuellt wurde.

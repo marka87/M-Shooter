@@ -319,6 +319,10 @@ text = "Zeit-Limit:"
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 
+[node name="InstagibCheck" type="CheckButton" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Instagib (nur Railgun, ein Treffer tötet)"
+
 [node name="Spacer" type="Control" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 6)
 layout_mode = 2

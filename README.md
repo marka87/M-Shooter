@@ -58,7 +58,7 @@ Alle Tasten laufen über die InputMap (Projekt → Projekteinstellungen → Eing
 
 ## 🏁 Match-Ablauf
 
-Im Match-Fenster wählst du neben Arena, Bots und Schwierigkeit auch **Frag-Limit** (5, 10, 15, 20, 30 oder keins) und **Zeit-Limit** (5, 10, 15, 20 Minuten oder keins).
+Im Match-Fenster wählst du neben Arena, Bots und Schwierigkeit auch **Frag-Limit** (5, 10, 15, 20, 30 oder keins) und **Zeit-Limit** (5, 10, 15, 20 Minuten oder keins). Mit **Instagib** gibt es nur die Railgun mit unendlicher Munition, jeder Treffer tötet, und alle Items sind weg.
 - Start mit Countdown **3 – 2 – 1 – FIGHT!**, solange ist alles eingefroren.
 - Oben in der Mitte läuft die Restzeit (letzte 30 s rot), oben rechts stehen die Frags mit Limit.
 - Ansagen: **DOUBLE / MULTI / MEGA / MONSTER KILL** (Kills innerhalb von 3 s) und **KILLING SPREE / RAMPAGE / DOMINATING / UNSTOPPABLE / GODLIKE** (5/10/15/20/25 Kills ohne Tod).

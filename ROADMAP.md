@@ -81,7 +81,7 @@ Der aktuelle Stand sind einfache Meshes und prozedurale Effekte. Für einen mode
 | 3.1 | ✅ Erste Map „Neon Foundry“ per Generator + func_godot. **Maps mit TrenchBroom + [func_godot](https://github.com/func-godot/func_godot_plugin)** bauen. Das ist der klassische Quake-Workflow: Brushes, Rampen, Jump-Pads als Entities, schnelle Iteration | M (Setup) |
 | 3.2 | ✅ AgX, Bloom, SSAO, Volumetric Fog, Neon-Raster-Shader, Sternenhimmel-Shader (SSR bewusst weggelassen). `WorldEnvironment`: Tonemapping (AgX), Glow/Bloom, SSAO, SSR, leichter Volumetric Fog, eigener Skybox-Shader | S |
 | 3.3 | Licht: **LightmapGI** backen (beste Qualität bei statischer Arena) oder SDFGI für schnelle Iteration | M |
-| 3.4 | Stilrichtung festlegen. Empfehlung: **Sci-Fi-Industrial mit Neon-Akzenten** (UT99/UT4-Anmutung), das kaschiert einfache Geometrie und ist gut lesbar | – |
+| 3.4 | ✅ Neon-Brutalism (dunkle Low-Poly-Körper, Neonkanten). Stilrichtung festlegen. Empfehlung: **Sci-Fi-Industrial mit Neon-Akzenten** (UT99/UT4-Anmutung), das kaschiert einfache Geometrie und ist gut lesbar | – |
 | 3.5 | ✅ Bots: animiertes Quaternius-Mannequin mit Ragdoll (Waffenmodelle offen). Modelle: Waffen und Bots aus Blender oder CC0-Paketen (z. B. Kenney, Quaternius), Bots mit Lauf-/Schuss-/Todes-Animation und Ragdoll | L |
 | 3.6 | Shader: leuchtende Pickups mit Fresnel-Rand, Schild-Effekt bei Rüstung, Teleporter-Portal, Hologramm-Respawn | M |
 | 3.7 | GPUParticles statt CPUParticles für Explosionen, Funken, Rauch | S |
@@ -126,7 +126,7 @@ Heute können Bots nur patrouillieren, verfolgen und mit einer Waffe schießen.
 | 6.1 | ✅ Frag- und Zeitlimit, Countdown, Siegerbildschirm mit Statistik (Warmup fehlt). **Deathmatch** mit Frag-Limit und Zeitlimit, Warmup, Countdown, Endbildschirm mit Statistik | M |
 | 6.2 | ✅ Scoreboard, Killfeed, Multi-Kill- und Serien-Ansagen. **Scoreboard** (Tab), **Killfeed** oben rechts, Multi-Kill-/Spree-System | M |
 | 6.3 | ✅ teilweise: Quad Damage und Mega Health. **Power-ups**: Quad Damage / UDamage, Mega Health, Red Armor, Shield Belt, Invisibility. Große Items erzeugen die typische Map-Kontrolle | M |
-| 6.4 | **Instagib** (nur Railgun, ein Treffer tötet), ideal als schneller Zusatzmodus | S |
+| 6.4 | ✅ **Instagib** (nur Railgun, ein Treffer tötet), ideal als schneller Zusatzmodus | S |
 | 6.5 | **Team Deathmatch**, danach **Capture the Flag** | L |
 | 6.6 | Duel-Modus (1 gegen 1, Item-Timing entscheidet) | S |
 
@@ -140,7 +140,7 @@ Heute können Bots nur patrouillieren, verfolgen und mit einer Waffe schießen.
 | 7.2 | **Trefferrichtungs-Anzeige** (rote Markierung, aus welcher Richtung der Schaden kam) | S |
 | 7.3 | Fadenkreuz-Editor (Form, Farbe, Größe), Hitmarker-Optionen | S |
 | 7.4 | ✅ teilweise: FOV-Regler. Einstellungen: **FOV**, Grafik-Presets, Auflösungsskalierung (FSR), V-Sync/FPS-Limit, **Tastenbelegung**, Gamepad | M |
-| 7.5 | Hauptmenü mit 3D-Hintergrund (Kamerafahrt durch die Arena), Map- und Modusauswahl, Bot-Anzahl und -Stärke | M |
+| 7.5 | ✅ teilweise: Map-, Bot- und Regelauswahl, 3D-Hintergrund fehlt. Hauptmenü mit 3D-Hintergrund (Kamerafahrt durch die Arena), Map- und Modusauswahl, Bot-Anzahl und -Stärke | M |
 
 ---
 

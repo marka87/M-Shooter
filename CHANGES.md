@@ -1,3 +1,13 @@
+# Änderungen (Runde 20: Instagib)
+
+- **Instagib-Modus** (Schalter im Match-Fenster, wird gespeichert): Alle starten nur mit der Railgun, die Munition ist unendlich, jeder Treffer macht 1000 Schaden (ein Treffer tötet, Bots zerplatzen). Alle Items sind ausgeblendet.
+- Bots schießen im Instagib mit der Railgun: Railgun-Sound, dickere Leuchtspur, höchstens alle 1,25 s ein Schuss, Killfeed zeigt „Railgun“.
+- `WeaponManager` startet und respawnt mit der ersten Waffe, die man besitzt (bisher fest das MG).
+- Match-Test um 5 Instagib-Prüfungen erweitert. Alle vier Tests grün.
+- ROADMAP: 6.4 erledigt, 3.4 abgehakt (Neon-Stil), 7.5 teilweise.
+
+---
+
 # Änderungen (Runde 19: Waffenmodelle)
 
 - **Neue Waffenmodelle** für alle 7 Waffen im Neon-Low-Poly-Stil: dunkler Grafit-Körper, metallische Zierteile, Leuchtteile in der Waffenfarbe. Facettierte Formen (Sechs- und Achtecke), damit der Kanten-Shader klare Kanten zeichnet. Jede Waffe hat eine eigene Silhouette: MG mit Magazin und Laufmantel, Doppelflinte mit Pumpe, Plasma mit drei Spulen und Energiezelle, sechseckiges Raketenrohr mit Munitionsbox, Lightning Gun mit drei Zinken, Railgun mit Schienen, Zielfernrohr und Ringen, Shock Rifle mit Finnen und Zelle.

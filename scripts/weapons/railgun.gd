@@ -48,7 +48,8 @@ func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
 		
 		# Hoher Schaden am Ziel
 		if collider and collider.has_method("take_damage"):
-			collider.take_damage(DamageInfo.create(damage, shooter, hit_pos, forward, weapon_name))
+			var amount: float = GameManager.INSTAGIB_DAMAGE if GameManager.instagib else damage
+			collider.take_damage(DamageInfo.create(amount, shooter, hit_pos, forward, weapon_name))
 			if shooter and shooter.has_method("on_enemy_hit"):
 				shooter.on_enemy_hit()
 	

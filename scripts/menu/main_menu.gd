@@ -14,6 +14,7 @@ extends Control
 @onready var frag_limit_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/FragBox/FragLimitOption
 @onready var time_limit_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/TimeBox/TimeLimitOption
 @onready var skill_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/SkillContainer/SkillOption
+@onready var instagib_check: CheckButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/InstagibCheck
 @onready var fight_button: Button = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/FightButton
 @onready var match_back_button: Button = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/MatchBackButton
 
@@ -82,6 +83,8 @@ func _ready() -> void:
 	for skill_name in Bot.SKILL_NAMES:
 		skill_option.add_item(skill_name)
 	skill_option.selected = GameManager.bot_skill
+	instagib_check.button_pressed = GameManager.instagib
+	instagib_check.toggled.connect(func(on: bool): GameManager.instagib = on)
 
 	# Signale verbinden
 	bot_slider.value_changed.connect(_on_bot_count_changed)

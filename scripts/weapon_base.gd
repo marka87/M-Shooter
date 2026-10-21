@@ -52,6 +52,9 @@ func _ready() -> void:
 func reset_loadout() -> void:
 	owned = data.start_owned
 	current_ammo = data.start_ammo
+	if GameManager.instagib:
+		owned = weapon_id == &"railgun"
+		current_ammo = max_ammo
 	cooldown_timer = 0.0
 
 
@@ -85,8 +88,9 @@ func try_fire(shooter: Node3D, camera: Camera3D) -> bool:
 			audio_player.play()
 		return false
 	
-	# Munition abziehen und Abklingzeit setzen
-	current_ammo -= 1
+	# Munition abziehen (Instagib: unendlich) und Abklingzeit setzen
+	if not GameManager.instagib:
+		current_ammo -= 1
 	# Addieren statt Setzen: Der Rest des letzten Frames wird mitgenommen,
 	# so ist die Feuerrate unabhaengig von der Framerate (MG: 11 statt 10 Schuss/s bei 60 FPS)
 	cooldown_timer += cooldown

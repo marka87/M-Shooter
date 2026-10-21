@@ -1,7 +1,7 @@
 extends SceneTree
 
 # Match-Ablauf: Countdown, Einfrieren, Fraglimit, Multi-Kill-Ansage, Siegerbildschirm,
-# Neustart, Zeitlimit, zurueck ins Hauptmenue.
+# Neustart, Zeitlimit, Instagib, zurueck ins Hauptmenue.
 # Start (aus dem Projektordner):
 #   Godot_v4.7.2-stable_win64_console.exe --headless --path . -s res://tests/match_test.gd
 # Exit-Code 0 = alles bestanden.
@@ -97,6 +97,37 @@ func run() -> void:
 	check(gm.current_state == gm.GameState.GAME_OVER, "Zeitlimit beendet das Match")
 	screen = gm._match_end_layer
 	check(is_instance_valid(screen) and "Zeitlimit" in screen.subtitle_label.text, "Grund: Zeitlimit")
+
+	# --- Instagib: nur Railgun, unendliche Munition, ein Treffer toetet, keine Items ---
+	# Das Zeitlimit hat das Spiel angehalten; im Spiel geht es danach ueber das Menue weiter
+	paused = false
+	gm.instagib = true
+	gm.time_limit_minutes = 0.0
+	gm.reset_game()
+	change_scene_to_file("res://levels/test_arena.tscn")
+	await create_timer(0.5).timeout
+	player = gm.current_player
+	bot = get_nodes_in_group("enemies")[0]
+	bot.set_physics_process(false)
+	var wm = player.weapon_manager
+	var owned_ids: Array = wm.weapons.filter(func(w): return w.owned).map(func(w): return w.weapon_id)
+	check(owned_ids == [&"railgun"] and wm.get_current_weapon().weapon_id == &"railgun", "Instagib: nur Railgun (%s)" % [owned_ids])
+	var items: Array = current_scene.find_children("*", "Area3D", true, false).filter(func(a): return a.has_method("is_useful_for"))
+	check(items.all(func(i): return not i.visible and not i.is_active), "Instagib: keine Items (%d versteckt)" % items.size())
+	check(bot.damage_per_shot == gm.INSTAGIB_DAMAGE and bot.shoot_interval >= 1.25, "Instagib: Bots mit Railgun")
+	player.rotation = Vector3.ZERO
+	player.head.rotation = Vector3.ZERO
+	# 3 m vor dem Spieler (in 5 m steht in der Testarena eine Rampe)
+	bot.global_position = player.global_position + Vector3(0, 0, -3)
+	# Zwei Frames: Nach dem Entpausieren uebernimmt die Physik die neue Position erst einen Frame spaeter
+	await physics_frame
+	await physics_frame
+	var rail_ammo: int = wm.get_current_weapon().current_ammo
+	wm.fire_current_weapon()
+	await physics_frame
+	check(bot.current_state == bot.State.DEAD, "Instagib: ein Treffer toetet")
+	check(wm.get_current_weapon().current_ammo == rail_ammo, "Instagib: unendliche Munition")
+	gm.instagib = false
 
 	# --- Hauptmenue ---
 	gm.return_to_menu()

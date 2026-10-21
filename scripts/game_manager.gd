@@ -30,6 +30,9 @@ const FRAG_LIMITS: Array[int] = [5, 10, 15, 20, 30, 0]
 const TIME_LIMITS: Array[int] = [5, 10, 15, 20, 0]
 var frag_limit: int = 15
 var time_limit_minutes: float = 10.0
+## Instagib: nur Railgun mit unendlicher Munition, jeder Treffer toetet, keine Items
+var instagib: bool = false
+const INSTAGIB_DAMAGE: float = 1000.0
 ## Sekunden Countdown vor dem Start (Tests setzen 0)
 var match_countdown: float = 3.0
 var match_time_left: float = 0.0
@@ -464,6 +467,7 @@ func load_settings() -> void:
 		selected_map = clampi(cfg.get_value("match", "map", selected_map), 0, MAPS.size() - 1)
 		frag_limit = cfg.get_value("match", "frag_limit", frag_limit)
 		time_limit_minutes = cfg.get_value("match", "time_limit", time_limit_minutes)
+		instagib = cfg.get_value("match", "instagib", instagib)
 	apply_master_volume()
 
 
@@ -480,6 +484,7 @@ func save_settings() -> void:
 	cfg.set_value("match", "map", selected_map)
 	cfg.set_value("match", "frag_limit", frag_limit)
 	cfg.set_value("match", "time_limit", time_limit_minutes)
+	cfg.set_value("match", "instagib", instagib)
 	cfg.save(SETTINGS_PATH)
 
 

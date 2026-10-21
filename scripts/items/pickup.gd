@@ -37,6 +37,12 @@ var is_active: bool = true
 
 
 func _ready() -> void:
+	# Instagib: keine Items in der Arena
+	if GameManager.instagib:
+		is_active = false
+		visible = false
+		process_mode = Node.PROCESS_MODE_DISABLED
+		return
 	initial_y = position.y
 	
 	# Pickup-Audio vorbereiten

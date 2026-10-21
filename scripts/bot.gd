@@ -134,7 +134,7 @@ func _ready() -> void:
 	_setup_animation()
 	_setup_ragdoll()
 
-	snd_shot = SoundGenerator.create_machinegun_sound()
+	snd_shot = SoundGenerator.create_railgun_sound() if GameManager.instagib else SoundGenerator.create_machinegun_sound()
 	snd_hurt = SoundGenerator.create_bot_hurt_sound()
 	snd_death = SoundGenerator.create_bot_death_sound()
 
@@ -516,6 +516,10 @@ func apply_skill(level: int) -> void:
 	combat_speed = preset.combat_speed
 	sight_range = preset.sight
 	dodge_chance = preset.dodge
+	# Instagib: Railgun-Takt wie beim Spieler, jeder Treffer toetet
+	if GameManager.instagib:
+		shoot_interval = maxf(shoot_interval, 1.25)
+		damage_per_shot = GameManager.INSTAGIB_DAMAGE
 
 
 ## Bot schiesst mit Streuung auf sein Ziel (trifft auch, wer im Weg steht)
@@ -550,7 +554,7 @@ func _bot_fire(fire_target: CharacterBody3D) -> void:
 
 	var hit := space_state.intersect_ray(query)
 	# Leuchtspur in der Farbe des Bots (zeigt, woher geschossen wird)
-	Tracer.spawn(get_parent(), from, hit.position if hit else to, skin_color, 0.035)
+	Tracer.spawn(get_parent(), from, hit.position if hit else to, skin_color, 0.08 if GameManager.instagib else 0.035)
 	if hit:
 		var hit_collider: Object = hit.collider
 		var hit_pos: Vector3 = hit.position
@@ -567,7 +571,7 @@ func _bot_fire(fire_target: CharacterBody3D) -> void:
 
 		# Schaden am Getroffenen anrichten
 		if hit_collider and hit_collider.has_method("take_damage"):
-			hit_collider.take_damage(DamageInfo.create(damage_per_shot, self, hit_pos, shoot_dir, "Maschinengewehr"))
+			hit_collider.take_damage(DamageInfo.create(damage_per_shot, self, hit_pos, shoot_dir, "Railgun" if GameManager.instagib else "Maschinengewehr"))
 
 
 func _flash_muzzle() -> void:
