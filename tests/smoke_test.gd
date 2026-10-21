@@ -151,6 +151,9 @@ func run() -> void:
 	b1.set_physics_process(false)
 	b1.take_damage(DamageInfo.create(100.0, player, b1.global_position + Vector3(0, 1.0, 0), Vector3.FORWARD, "Test"))
 	check(b1.model.visible and b1.ragdoll.is_simulating_physics(), "Bot faellt als Ragdoll um")
+	var hit_speed: float = b1.ragdoll.get_node("Rag_DEF-hips").linear_velocity.length()
+	var foot_speed: float = b1.ragdoll.get_node("Rag_DEF-shin_L").linear_velocity.length()
+	check(hit_speed > foot_speed + 1.0, "Getroffener Knochen fliegt staerker weg (%.1f vs. %.1f m/s)" % [hit_speed, foot_speed])
 	await wait(2.0)
 	# Die Waffe haengt am Handknochen und zeigt so, dass das sichtbare Modell dem Ragdoll folgt
 	var head_y: float = b1.ragdoll.get_node("Rag_DEF-head").global_position.y - b1.global_position.y

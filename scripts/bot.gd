@@ -130,19 +130,19 @@ var _los_target: Node3D = null
 ## Ab diesem Schaden zerplatzt der Bot in Wuerfel statt als Ragdoll umzufallen
 const GIB_DAMAGE: float = 120.0
 const GIB_SPLASH_DAMAGE: float = 50.0
-## Ragdoll-Knochen: Knochen, Endknochen (oder Versatz) fuer die Laenge, Radius, Gelenkspielraum in Grad
+## Ragdoll-Knochen: Knochen, Endknochen (oder Versatz) fuer die Laenge, Radius, Gelenkspielraum und Verdrehung in Grad
 const RAGDOLL_BONES: Array = [
-	["DEF-hips", "DEF-spine.002", 0.14, 0.0],
-	["DEF-spine.002", "DEF-neck", 0.15, 25.0],
-	["DEF-head", Vector3(0, 0.25, 0), 0.11, 35.0],
-	["DEF-upper_arm.L", "DEF-forearm.L", 0.05, 70.0],
-	["DEF-forearm.L", "DEF-hand.L", 0.045, 60.0],
-	["DEF-upper_arm.R", "DEF-forearm.R", 0.05, 70.0],
-	["DEF-forearm.R", "DEF-hand.R", 0.045, 60.0],
-	["DEF-thigh.L", "DEF-shin.L", 0.07, 45.0],
-	["DEF-shin.L", "DEF-foot.L", 0.055, 50.0],
-	["DEF-thigh.R", "DEF-shin.R", 0.07, 45.0],
-	["DEF-shin.R", "DEF-foot.R", 0.055, 50.0],
+	["DEF-hips", "DEF-spine.002", 0.14, 0.0, 0.0],
+	["DEF-spine.002", "DEF-neck", 0.15, 25.0, 15.0],
+	["DEF-head", Vector3(0, 0.25, 0), 0.11, 35.0, 30.0],
+	["DEF-upper_arm.L", "DEF-forearm.L", 0.05, 70.0, 20.0],
+	["DEF-forearm.L", "DEF-hand.L", 0.045, 60.0, 5.0],
+	["DEF-upper_arm.R", "DEF-forearm.R", 0.05, 70.0, 20.0],
+	["DEF-forearm.R", "DEF-hand.R", 0.045, 60.0, 5.0],
+	["DEF-thigh.L", "DEF-shin.L", 0.07, 45.0, 10.0],
+	["DEF-shin.L", "DEF-foot.L", 0.055, 50.0, 5.0],
+	["DEF-thigh.R", "DEF-shin.R", 0.07, 45.0, 10.0],
+	["DEF-shin.R", "DEF-foot.R", 0.055, 50.0, 5.0],
 ]
 var floating_number_scene: PackedScene = preload("res://scenes/effects/floating_number.tscn")
 var voxel_burst_scene: PackedScene = preload("res://scenes/effects/voxel_burst.tscn")
@@ -472,11 +472,12 @@ func _setup_ragdoll() -> void:
 		bone.collision_layer = 0
 		bone.collision_mask = Layers.WORLD
 		bone.angular_damp = 3.0
+		bone.linear_damp = 0.3
 		bone.gravity_scale = 2.0
 		if entry[3] > 0.0:
 			bone.joint_type = PhysicalBone3D.JOINT_TYPE_CONE
 			bone.set("joint_constraints/swing_span", entry[3])
-			bone.set("joint_constraints/twist_span", 20.0)
+			bone.set("joint_constraints/twist_span", entry[4])
 		bone.add_child(collision)
 		ragdoll.add_child(bone)
 
@@ -490,10 +491,18 @@ func _start_ragdoll(info: DamageInfo) -> void:
 	var push: Vector3 = info.direction
 	if push.length_squared() < 0.01:
 		push = global_position + Vector3.UP - info.position
-	# Nur ein Teil des Rueckstosses aus take_damage, sonst fliegt der Koerper meterweit
-	var fling: Vector3 = velocity * 0.4 + push.normalized() * clampf(info.amount * 0.03, 1.0, 3.0) + Vector3.UP
+	push = push.normalized()
+	# Ganzer Koerper: Schwung des Bots und ein Teil des Rueckstosses, sonst fliegt er meterweit
+	var fling: Vector3 = velocity * 0.4 + push * clampf(info.amount * 0.012, 0.4, 1.2) + Vector3.UP * 0.5
+	var hit_bone: PhysicalBone3D = null
 	for bone: PhysicalBone3D in ragdoll.get_children():
 		bone.linear_velocity = fling
+		if hit_bone == null or bone.global_position.distance_squared_to(info.position) < hit_bone.global_position.distance_squared_to(info.position):
+			hit_bone = bone
+	# Der getroffene Knochen bekommt den Treffer am Einschlagpunkt: Kopftreffer reissen den Kopf zurueck,
+	# Beintreffer ziehen die Beine weg (bei Explosionen liegt der Punkt am Koerper, wirkt also ganz)
+	hit_bone.linear_velocity += push * clampf(info.amount * 0.05, 2.0, 6.0)
+	hit_bone.angular_velocity += (info.position - hit_bone.global_position).cross(push) * 20.0
 
 
 func _stop_ragdoll() -> void:
