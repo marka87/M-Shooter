@@ -98,7 +98,7 @@ func run() -> void:
 	player.movement._dodge_cooldown_left = 0.0
 	check(not player.movement.try_dodge("move_forward"), "Nur ein Wall-Dodge pro Sprung")
 
-	# Strafe-Jumping: Sprung gehalten (Bunnyhop), Eingabe fast quer zur Flugrichtung -> Tempo steigt
+	# Strafe-Jumping: Sprung gehalten (Bunnyhop), W+D fast quer zur Flugrichtung -> Tempo steigt
 	# ueber das Sprint-Tempo. Der MovementController bekommt die Eingaben direkt.
 	await place(player, Vector3(-30, 0.1, 30))
 	player.set_physics_process(false)
@@ -106,7 +106,10 @@ func run() -> void:
 	player.velocity = Vector3(0, 0, -8)
 	for i in 150:
 		var flat := Vector3(player.velocity.x, 0, player.velocity.z).normalized()
-		mv.step(flat.rotated(Vector3.UP, deg_to_rad(-80.0)), false, true, false, 1.0 / 120.0)
+		var wish := flat.rotated(Vector3.UP, deg_to_rad(-80.0))
+		# W+D gedrueckt (lokal 45 Grad rechts vorn), die Maus dreht mit
+		player.rotation.y = atan2(-wish.z, wish.x) - PI / 4.0
+		mv.step(wish, false, true, false, 1.0 / 120.0)
 		await physics_frame
 	var strafe_speed := Vector2(player.velocity.x, player.velocity.z).length()
 	player.set_physics_process(true)
@@ -150,6 +153,28 @@ func run() -> void:
 	await drive(mv, Vector3.ZERO, false, 2)
 	await drive(mv, Vector3.ZERO, true, 1)
 	check(player.velocity.y > mv.jump_velocity + 3.0, "Ramp-Jump hangauf springt hoeher (vy = %.1f m/s)" % player.velocity.y)
+	player.set_physics_process(true)
+
+	# CPMA nur A/D: mit mitdrehender Maus enge Kurve ohne viel Tempo zu gewinnen
+	await place(player, Vector3(0, 60.0, 0))
+	player.set_physics_process(false)
+	player.velocity = Vector3(0, 0, -10)
+	for i in 60:
+		var wish := Vector3(player.velocity.x, 0, player.velocity.z).normalized().rotated(Vector3.UP, -PI / 2.0)
+		player.rotation.y = atan2(-wish.z, wish.x)  # lokale +X-Achse (Taste D) zeigt in wish
+		mv.step(wish, false, false, false, 1.0 / 120.0)
+		await physics_frame
+	var turned := rad_to_deg(Vector2(0, -1).angle_to(Vector2(player.velocity.x, player.velocity.z)))
+	var turn_speed := Vector2(player.velocity.x, player.velocity.z).length()
+	check(absf(turned) > 45.0 and turn_speed < 11.5, "CPMA Strafe-Turn: %.0f Grad in 0,5 s bei %.1f m/s" % [turned, turn_speed])
+	# CPMA gegen die Flugrichtung: in der Luft abbremsen
+	await place(player, Vector3(0, 60.0, 0))
+	player.velocity = Vector3(0, 0, -10)
+	for i in 60:
+		mv.step(Vector3(0, 0, 1), false, false, false, 1.0 / 120.0)
+		await physics_frame
+	var brake_speed := Vector2(player.velocity.x, player.velocity.z).length()
+	check(brake_speed < 4.0, "CPMA Bremsen in der Luft (10 -> %.1f m/s)" % brake_speed)
 	player.set_physics_process(true)
 
 	# In der Luft ohne Wand -> kein Dodge

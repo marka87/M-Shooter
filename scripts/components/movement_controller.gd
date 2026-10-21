@@ -31,13 +31,18 @@ signal landed(fall_speed: float)
 const STEP_PROBE: float = 0.45
 
 @export_group("Quake-Luftbewegung & Strafe-Jumping")
-## Beschleunigungsfaktor in der Luft bei seitlicher Eingabe (Strafe-Jump-Mechanik)
+## Beschleunigung in der Luft bei Vorwaerts + Seitwaerts (W+A / W+D): klassisches Strafe-Jumping
 @export var air_accel: float = 10.0
 ## Quake-Wunschgeschwindigkeit fuer die Luftprojektion (niedriger Wert erlaubt Strafe-Beschleunigung)
 @export var air_wish_speed: float = 2.5
+## CPMA: nur A oder D in der Luft -> starke Beschleunigung mit kleiner Wunschgeschwindigkeit (enge Kurven per Maus)
+@export var air_strafe_accel: float = 70.0
+@export var air_strafe_wish_speed: float = 0.75
+## CPMA: Eingabe gegen die Flugrichtung -> kontrolliert abbremsen
+@export var air_stop_accel: float = 2.5
 ## Maximale horizontale Geschwindigkeit durch Strafe-Jumping
 @export var air_max_speed: float = 28.0
-## Zusaetzliche CPM-Luftlenkung (geschmeidige Kurven in der Luft)
+## CPM-Luftlenkung, nur bei reinem Vorwaerts (W ohne A/D): Schwung praezise umlenken
 @export var air_control: float = 0.35
 
 @export_group("Sprung und Schwerkraft")
@@ -297,12 +302,22 @@ func _air_move(wish_dir: Vector3, jump_pressed: bool, delta: float) -> void:
 	# Strafe-Jumping: wish_dir steht fast senkrecht zur Geschwindigkeit, die Projektion ist klein,
 	# add_speed bleibt hoch und das Gesamttempo steigt
 	if wish_dir.length_squared() > 0.001:
-		var add_speed: float = air_wish_speed - body.velocity.dot(wish_dir)
+		# Welche Tasten? Lokal: x = seitlich (A/D), z = vor/zurueck (W/S)
+		var local: Vector3 = body.global_basis.orthonormalized().inverse() * wish_dir
+		var accel := air_accel
+		var wish_speed := air_wish_speed
+		if body.velocity.dot(wish_dir) < 0.0:
+			accel = air_stop_accel
+			wish_speed = walk_speed
+		elif absf(local.z) < 0.1:
+			accel = air_strafe_accel
+			wish_speed = air_strafe_wish_speed
+		var add_speed: float = wish_speed - body.velocity.dot(wish_dir)
 		if add_speed > 0.0:
-			var accel_speed: float = minf(air_accel * delta * air_wish_speed, add_speed)
+			var accel_speed: float = minf(accel * delta * wish_speed, add_speed)
 			body.velocity.x += wish_dir.x * accel_speed
 			body.velocity.z += wish_dir.z * accel_speed
-		if air_control > 0.0:
+		if air_control > 0.0 and absf(local.x) < 0.1:
 			_apply_air_control(wish_dir, delta)
 
 	var horizontal := Vector2(body.velocity.x, body.velocity.z)

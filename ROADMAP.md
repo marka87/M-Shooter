@@ -32,7 +32,7 @@ Das Herz eines Arena-Shooters. Hier entscheidet sich, ob es sich „wie Quake“
 
 | # | Aufgabe | Aufwand |
 |---|---|---|
-| 1.1 | Luftbewegung an Quake 3 / CPMA angleichen (getrennte Werte für Strafe- und Vorwärts-Beschleunigung, Werte im Inspector zum Feintuning) | M |
+| 1.1 | ✅ CPMA: W+A/D Strafe-Jump, nur A/D enge Kurven, Bremsen gegen die Flugrichtung, Luftkontrolle nur bei W. Luftbewegung an Quake 3 / CPMA angleichen (getrennte Werte für Strafe- und Vorwärts-Beschleunigung, Werte im Inspector zum Feintuning) | M |
 | 1.2 | ✅ **UT-Dodge**: Doppeltipp auf A/D/W/S für seitlichen Sprung, plus **Wall-Dodge** (Dodge von Wänden ab) | M |
 | 1.3 | ✅ Jump-Pads und Teleporter (mit Telefrag), beide mit NavigationLink3D für Bots. **Jump-Pads** und **Teleporter** (Area3D mit Ziel-Marker, Bots brauchen dafür NavigationLink3D) | M |
 | 1.4 | ✅ Rampen-Sliding und sauberes Treppensteigen (Step-Up), Landung ohne Geschwindigkeitsverlust beim Bunnyhop | M |
