@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://explosion_scene_001"]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/weapons/explosion.gd" id="1_expl"]
 
@@ -15,6 +15,13 @@ material = SubResource("Mat_BlastSphere")
 radius = 1.0
 height = 2.0
 
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_nmdyk"]
+spread = 180.0
+initial_velocity_min = 6.0
+initial_velocity_max = 16.0
+scale_min = 0.8
+scale_max = 2.0
+
 [sub_resource type="StandardMaterial3D" id="Mat_Debris"]
 albedo_color = Color(1, 0.7, 0.2, 1)
 emission_enabled = true
@@ -25,30 +32,27 @@ emission_energy_multiplier = 4.0
 material = SubResource("Mat_Debris")
 size = Vector3(0.12, 0.12, 0.12)
 
-[node name="Explosion" type="Node3D"]
+[node name="Explosion" type="Node3D" unique_id=2011037970]
+physics_interpolation_mode = 2
 script = ExtResource("1_expl")
 
-[node name="OmniLight3D" type="OmniLight3D" parent="."]
+[node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=1025063706]
 light_color = Color(1, 0.65, 0.2, 1)
 light_energy = 5.0
 omni_range = 12.0
 
-[node name="BlastSphere" type="MeshInstance3D" parent="."]
+[node name="BlastSphere" type="MeshInstance3D" parent="." unique_id=909558789]
 mesh = SubResource("Mesh_BlastSphere")
 
-[node name="CPUParticles3D" type="CPUParticles3D" parent="."]
+[node name="Debris" type="GPUParticles3D" parent="." unique_id=2014008395]
 emitting = false
 amount = 25
 lifetime = 0.5
 one_shot = true
 explosiveness = 0.95
-mesh = SubResource("Mesh_Debris")
-spread = 180.0
-initial_velocity_min = 6.0
-initial_velocity_max = 16.0
-scale_amount_min = 0.8
-scale_amount_max = 2.0
+fixed_fps = 0
+process_material = SubResource("ParticleProcessMaterial_nmdyk")
+draw_pass_1 = SubResource("Mesh_Debris")
 
-[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
-unit_size = 10.0
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="." unique_id=189723795]
 max_distance = 80.0

@@ -53,6 +53,7 @@ func teleport(body: CharacterBody3D) -> void:
 	_flash(body.global_position)
 
 	body.global_position = exit_pos
+	body.reset_physics_interpolation()
 	# Blickrichtung des Ziels uebernehmen (nur Drehung um die Hochachse)
 	body.look_at(exit_pos + forward, Vector3.UP)
 	body.velocity = forward * exit_speed

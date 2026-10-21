@@ -19,6 +19,7 @@ height = 1.0
 radial_segments = 12
 
 [node name="RailBeam" type="Node3D"]
+physics_interpolation_mode = 2
 script = ExtResource("1_beam")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]

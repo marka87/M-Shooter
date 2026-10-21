@@ -1,7 +1,8 @@
 extends SceneTree
 
 # Bewegung und Kamera: Dodge, Wall-Dodge, Abklingzeit, Kamera-Feedback (Landung, Tempo-Sichtfeld,
-# Treffer, Explosion), Abschalten der Kamera-Effekte.
+# Treffer, Explosion), Abschalten der Kamera-Effekte, Waffe bei Fall und Landung, Kopf mit
+# Physik-Interpolation, Hochziehen beim Waffenwechsel.
 # Start (aus dem Projektordner):
 #   Godot_v4.7.2-stable_win64_console.exe --headless --path . -s res://tests/movement_test.gd
 # Exit-Code 0 = alles bestanden.
@@ -88,6 +89,36 @@ func run() -> void:
 		await physics_frame
 		min_y = minf(min_y, player.camera.position.y)
 	check(min_y < -0.08, "Kamera knickt bei der Landung ein (%.2f m)" % min_y)
+
+	# Waffe: haengt beim Fallen nach oben, knickt bei der Landung ein
+	var wm = player.weapon_manager
+	await place(player, Vector3(-20, 9.0, 30))
+	var weapon_max := -1.0
+	var weapon_min := 1.0
+	for i in 150:
+		await process_frame
+		weapon_max = maxf(weapon_max, wm.position.y - wm.default_pos.y)
+		weapon_min = minf(weapon_min, wm.position.y - wm.default_pos.y)
+	check(weapon_max > 0.015 and weapon_min < -0.03, "Waffe hebt sich im Fall und knickt bei der Landung ein (%.3f / %.3f m)" % [weapon_max, weapon_min])
+
+	# Physik-Interpolation: Kopf folgt dem Koerper (eigene Ebene), Blick kommt von der Maus
+	await place(player, Vector3(-20, 0.1, 30))
+	player.camera_pitch = 0.3
+	# process_frame kommt vor den _process-Aufrufen, deshalb zwei Frames
+	await process_frame
+	await process_frame
+	var head_gap: float = player.head.global_position.distance_to(player.global_position + player._head_offset)
+	check(ProjectSettings.get_setting("physics/common/physics_interpolation") and head_gap < 0.05 and is_equal_approx(player.head.global_rotation.x, 0.3), "Interpolation: Kopf folgt Koerper (%.3f m) und Mausblick" % head_gap)
+	player.camera_pitch = 0.0
+
+	# Waffenwechsel: neue Waffe kommt von unten und feuert erst, wenn sie oben ist
+	wm.give_weapon(&"shotgun", 10)
+	wm.switch_to_weapon_id(&"shotgun")
+	await process_frame
+	var shotgun = wm.get_current_weapon()
+	check(shotgun.position.y < shotgun.initial_position.y - 0.1 and not shotgun.can_fire(), "Waffenwechsel: Waffe unten, noch nicht feuerbereit")
+	await create_timer(0.25).timeout
+	check(shotgun.position.is_equal_approx(shotgun.initial_position) and shotgun.can_fire(), "Waffenwechsel: nach 0,15 s oben und feuerbereit")
 
 	# Tempo-Sichtfeld: schnell in der Luft -> groesseres FOV
 	await place(player, Vector3(-20, 6.0, 30))

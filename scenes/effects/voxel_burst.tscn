@@ -40,6 +40,7 @@ collision_friction = 0.4
 collision_bounce = 0.35
 
 [node name="VoxelBurst" type="Node3D"]
+physics_interpolation_mode = 2
 script = ExtResource("1_burst")
 
 [node name="Cubes" type="GPUParticles3D" parent="."]

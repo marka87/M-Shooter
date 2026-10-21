@@ -14,6 +14,7 @@ material = SubResource("Mat_Tracer")
 size = Vector3(1, 1, 1)
 
 [node name="Tracer" type="MeshInstance3D"]
+physics_interpolation_mode = 2
 cast_shadow = 0
 mesh = SubResource("Mesh_Tracer")
 script = ExtResource("1_tracer")

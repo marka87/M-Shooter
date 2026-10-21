@@ -6,7 +6,6 @@ extends WeaponBase
 @export var max_range: float = 24.0
 @export var beam_color: Color = Color(0.7, 0.9, 1.0)
 
-var spark_scene: PackedScene = preload("res://scenes/weapons/hit_spark.tscn")
 var _tick: int = 0
 
 
@@ -39,11 +38,7 @@ func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
 			if shooter.has_method("on_enemy_hit") and _tick % 3 == 0:
 				shooter.on_enemy_hit()
 		elif _tick % 3 == 0:
-			var spark := spark_scene.instantiate() as Node3D
-			shooter.get_parent().add_child(spark)
-			spark.global_position = end + hit.normal * 0.05
-			if hit.normal.length_squared() > 0.001:
-				spark.look_at(spark.global_position + hit.normal, Vector3.UP if absf(hit.normal.y) < 0.98 else Vector3.FORWARD)
+			HitSpark.spawn(shooter.get_parent(), end, hit.normal)
 
 
 ## Zickzack-Blitz: seitlich versetzte Knickpunkte plus duenne weisse Kernlinie.

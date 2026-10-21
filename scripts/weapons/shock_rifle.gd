@@ -10,8 +10,6 @@ const BALL_SCENE: PackedScene = preload("res://scenes/weapons/shock_ball.tscn")
 ## Wie nah der Strahl an einer Kugel vorbei muss, um sie zu zuenden (m)
 @export var combo_hit_radius: float = 0.9
 
-var spark_scene: PackedScene = preload("res://scenes/weapons/hit_spark.tscn")
-
 
 func _ready() -> void:
 	super._ready()
@@ -43,14 +41,13 @@ func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
 	if hit:
 		var collider: Object = hit.collider
 		if collider and collider.has_method("take_damage"):
-			collider.take_damage(DamageInfo.create(damage, shooter, end, forward, weapon_name))
+			var headshot := DamageInfo.is_head_hit(collider, end)
+			var info := DamageInfo.create(damage * (DamageInfo.HEADSHOT_MULTIPLIER if headshot else 1.0), shooter, end, forward, weapon_name)
+			info.is_headshot = headshot
+			collider.take_damage(info)
 			if shooter.has_method("on_enemy_hit"):
-				shooter.on_enemy_hit()
-		var spark := spark_scene.instantiate() as Node3D
-		shooter.get_parent().add_child(spark)
-		spark.global_position = end + hit.normal * 0.05
-		if hit.normal.length_squared() > 0.001:
-			spark.look_at(spark.global_position + hit.normal, Vector3.UP if absf(hit.normal.y) < 0.98 else Vector3.FORWARD)
+				shooter.on_enemy_hit(headshot)
+		HitSpark.spawn(shooter.get_parent(), end, hit.normal)
 
 
 func _on_fire_alt(shooter: Node3D, camera: Camera3D) -> void:
@@ -64,6 +61,7 @@ func _on_fire_alt(shooter: Node3D, camera: Camera3D) -> void:
 	# Kugel fliegt genau in Blickrichtung, damit man sie mit dem Strahl leicht nachzielen kann
 	var forward: Vector3 = -camera.global_transform.basis.z
 	ball.look_at(ball.global_position + forward, Vector3.UP if absf(forward.y) < 0.98 else Vector3.FORWARD)
+	ball.reset_physics_interpolation()
 
 
 ## Naechste Shock-Kugel nahe der Strecke from -> to (die erste vom Schuetzen aus gesehen)

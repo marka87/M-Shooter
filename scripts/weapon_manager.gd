@@ -19,6 +19,11 @@ var weapons: Array[WeaponBase] = []
 var current_weapon_index: int = 0
 var mouse_input: Vector2 = Vector2.ZERO
 var bob_time: float = 0.0
+# Sprung und Landung: Waffe haengt in der Luft nach und knickt beim Aufkommen ein
+var _air_offset: float = 0.0
+var _land_dip: float = 0.0
+var _air_velocity_y: float = 0.0
+var _was_on_floor: bool = true
 # Nach dem Fortsetzen per Mausklick erst wieder schiessen, wenn die Taste losgelassen wurde
 var _wait_for_shoot_release: bool = false
 
@@ -110,6 +115,8 @@ func _process(delta: float) -> void:
 		elif not Input.is_action_pressed("shoot") and not Input.is_action_pressed("shoot_alt"):
 			_wait_for_shoot_release = false
 	
+	_process_weapon_jump(delta)
+
 	# Visuelles Waffen-Swaying (Traegheit beim Umschauen)
 	_process_weapon_sway(delta)
 	
@@ -270,8 +277,26 @@ func _process_weapon_sway(delta: float) -> void:
 	var target_y: float = clampf(mouse_input.y * sway_amount, -max_sway, max_sway)
 	var target_offset := Vector3(target_x, target_y, 0.0)
 	
+	target_offset.y += _air_offset + _land_dip
 	position = position.lerp(default_pos + target_offset, delta * sway_smooth)
 	mouse_input = mouse_input.lerp(Vector2.ZERO, delta * sway_smooth)
+
+
+## In der Luft: Waffe bleibt beim Steigen etwas zurueck (tiefer) und hebt sich beim Fallen.
+## Beim Aufkommen knickt sie ein, staerker nach hohem Fall, und federt zurueck.
+func _process_weapon_jump(delta: float) -> void:
+	if not player:
+		return
+	var on_floor: bool = player.is_on_floor()
+	if on_floor and not _was_on_floor:
+		_land_dip = -0.1 * clampf((-_air_velocity_y - 2.0) / 18.0, 0.15, 1.0)
+		_air_offset = 0.0
+	if not on_floor:
+		_air_velocity_y = player.velocity.y
+	_was_on_floor = on_floor
+	var air_target: float = 0.0 if on_floor else clampf(-player.velocity.y * 0.004, -0.04, 0.04)
+	_air_offset = lerpf(_air_offset, air_target, clampf(delta * 8.0, 0.0, 1.0))
+	_land_dip = move_toward(_land_dip, 0.0, delta * 0.35)
 
 
 ## Simuliert das Schrittwippen beim Bewegen auf dem Boden

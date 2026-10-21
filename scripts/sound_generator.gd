@@ -20,6 +20,8 @@ static func create_bot_death_sound() -> AudioStream: return _cached("bot_death",
 static func create_pickup_sound() -> AudioStream: return _cached("pickup", _build_pickup_sound)
 static func create_empty_click_sound() -> AudioStream: return _cached("empty_click", _build_empty_click_sound)
 static func create_hitsound() -> AudioStream: return _cached("hitsound", _build_hitsound)
+## Fallback ohne WAV: normaler Hitsound
+static func create_headshot_sound() -> AudioStream: return _cached("headshot", _build_hitsound)
 static func create_double_jump_sound() -> AudioStream: return _cached("double_jump", _build_double_jump_sound)
 static func create_jump_pad_sound() -> AudioStream: return _cached("jump_pad", _build_jump_pad_sound)
 static func create_shotgun_sound() -> AudioStream: return _cached("shotgun", _build_shotgun_sound)

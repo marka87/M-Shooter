@@ -16,6 +16,18 @@ var direction: Vector3 = Vector3.ZERO
 var weapon_name: String = ""
 ## Flaechenschaden einer Explosion statt direkter Treffer
 var is_splash: bool = false
+## Kopftreffer (Railgun, Shock Rifle)
+var is_headshot: bool = false
+
+## Ab dieser Hoehe ueber den Fuessen zaehlt ein Treffer als Kopftreffer (Spieler und Bots sind 1,8 m gross)
+const HEAD_HEIGHT: float = 1.5
+## Schadens-Bonus bei Kopftreffern
+const HEADSHOT_MULTIPLIER: float = 1.5
+
+
+## Trifft ein Hitscan-Strahl bei hit_pos den Kopf eines Kaempfers?
+static func is_head_hit(target: Object, hit_pos: Vector3) -> bool:
+	return target is CharacterBody3D and hit_pos.y - (target as CharacterBody3D).global_position.y >= HEAD_HEIGHT
 
 
 static func create(p_amount: float, p_attacker: Node, p_position: Vector3, p_direction: Vector3, p_weapon_name: String = "", p_is_splash: bool = false) -> DamageInfo:

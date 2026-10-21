@@ -116,7 +116,6 @@ const RAGDOLL_BONES: Array = [
 	["DEF-thigh.R", "DEF-shin.R", 0.07, 45.0],
 	["DEF-shin.R", "DEF-foot.R", 0.055, 50.0],
 ]
-var hit_spark_scene: PackedScene = preload("res://scenes/weapons/hit_spark.tscn")
 var floating_number_scene: PackedScene = preload("res://scenes/effects/floating_number.tscn")
 var voxel_burst_scene: PackedScene = preload("res://scenes/effects/voxel_burst.tscn")
 # Vorgenerierte Sounds und Trefferfarbe (einmal pro Bot statt bei jedem Schuss)
@@ -124,7 +123,6 @@ var snd_shot: AudioStream
 var snd_hurt: AudioStream
 var snd_death: AudioStream
 var flash_mat: StandardMaterial3D
-
 
 
 func _ready() -> void:
@@ -561,13 +559,7 @@ func _bot_fire(fire_target: CharacterBody3D) -> void:
 		var hit_normal: Vector3 = hit.normal
 
 		# Funken am Treffpunkt
-		if hit_spark_scene:
-			var spark := hit_spark_scene.instantiate() as Node3D
-			get_parent().add_child(spark)
-			spark.global_position = hit_pos + hit_normal * 0.05
-			# Zur Oberflaeche ausrichten, damit das Einschussloch richtig auf der Wand liegt
-			if hit_normal.length_squared() > 0.001:
-				spark.look_at(spark.global_position + hit_normal, Vector3.UP if absf(hit_normal.y) < 0.98 else Vector3.FORWARD)
+		HitSpark.spawn(get_parent(), hit_pos, hit_normal)
 
 		# Schaden am Getroffenen anrichten
 		if hit_collider and hit_collider.has_method("take_damage"):
@@ -695,7 +687,7 @@ func _die(info: DamageInfo) -> void:
 		audio_player.play()
 
 	# Abschuss melden (Frag fuer den Schuetzen, Killfeed)
-	GameManager.register_kill(info.attacker, self, info.weapon_name)
+	GameManager.register_kill(info.attacker, self, info.weapon_name, info.is_headshot)
 
 	# Kollision temporaer deaktivieren
 	if collision_shape:
@@ -723,6 +715,7 @@ func _respawn() -> void:
 
 	# Am Spawnpunkt mit dem groessten Abstand zu anderen Kaempfern
 	global_transform = GameManager.get_spawn_transform(self)
+	reset_physics_interpolation()
 	target = null
 
 	# Ragdoll beenden, Modell und Kollision zuruecksetzen

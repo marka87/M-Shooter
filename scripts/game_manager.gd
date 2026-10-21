@@ -332,7 +332,7 @@ func register_shot() -> void:
 
 
 ## Wertet einen Abschuss aus. killer == victim oder null = Selbstmord (-1 Frag wie in Quake)
-func register_kill(killer: Node, victim: Node, weapon_name: String) -> void:
+func register_kill(killer: Node, victim: Node, weapon_name: String, headshot: bool = false) -> void:
 	var victim_name := _name_of(victim)
 	var suicide := killer == null or killer == victim or not is_instance_valid(killer)
 	var killer_name := victim_name if suicide else _name_of(killer)
@@ -355,6 +355,9 @@ func register_kill(killer: Node, victim: Node, weapon_name: String) -> void:
 			play_announcer("first_blood")
 		elif killer is Player and weapon_name == "Shock-Combo":
 			play_announcer("combo")
+		elif killer is Player and headshot:
+			player_announcement.emit("HEADSHOT", Color(1.0, 0.85, 0.2))
+			play_announcer("headshot")
 		if killer is Player:
 			_announce_player_kill(killer_score.spree)
 

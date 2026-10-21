@@ -1,7 +1,7 @@
 extends SceneTree
 
 # Match-Ablauf: Countdown, Einfrieren, Fraglimit, Multi-Kill-Ansage, Siegerbildschirm,
-# Neustart, Zeitlimit, Instagib, zurueck ins Hauptmenue.
+# Neustart, Zeitlimit, Instagib, Kopftreffer, zurueck ins Hauptmenue.
 # Start (aus dem Projektordner):
 #   Godot_v4.7.2-stable_win64_console.exe --headless --path . -s res://tests/match_test.gd
 # Exit-Code 0 = alles bestanden.
@@ -128,6 +128,29 @@ func run() -> void:
 	check(bot.current_state == bot.State.DEAD, "Instagib: ein Treffer toetet")
 	check(wm.get_current_weapon().current_ammo == rail_ammo, "Instagib: unendliche Munition")
 	gm.instagib = false
+
+	# --- Kopftreffer: Railgun auf Augenhoehe trifft den Kopf (1,5x Schaden, Ansage), tiefer den Koerper ---
+	announcements.clear()
+	var hits: Array = []
+	var on_hit := func(info: DamageInfo, _lost: float): hits.append([info.amount, info.is_headshot])
+	for pitch_deg in [-11.0, 0.0]:
+		await create_timer(1.3).timeout  # Railgun-Abklingzeit
+		bot._respawn()
+		bot.set_physics_process(false)
+		bot.global_position = player.global_position + Vector3(0, 0, -3)
+		bot.health.damaged.connect(on_hit)
+		player.camera_pitch = deg_to_rad(pitch_deg)
+		player.head.rotation.x = player.camera_pitch
+		await physics_frame
+		await physics_frame
+		wm.fire_current_weapon()
+		await physics_frame
+		bot.health.damaged.disconnect(on_hit)
+	print("Treffer [Schaden, Kopf]: ", hits)
+	check(hits.size() == 2 and hits[0] == [100.0, false], "Koerpertreffer: 100 Schaden")
+	check(hits.size() == 2 and hits[1] == [150.0, true], "Kopftreffer: 150 Schaden")
+	check("HEADSHOT" in announcements, "Kopftreffer-Kill wird angesagt (%s)" % [announcements])
+	player.camera_pitch = 0.0
 
 	# --- Hauptmenue ---
 	gm.return_to_menu()

@@ -3,6 +3,7 @@
 Aufruf aus dem Projektordner:
     python tools/make_sounds.py [Ordner mit Ansager-Rohaufnahmen]
     python tools/make_sounds.py --only dodge,teleport     (nur einzelne Effekte)
+    python tools/make_sounds.py --announcer <Ordner>      (nur Ansager-Rohaufnahmen verarbeiten)
 
 - Waffen, Explosionen, Treffer, Pickups, Schritte: geschichtete Synthese (Anschlag + Koerper + Rauschen + Hall)
 - Musik: Synthwave-Loop, 120 BPM, 32 Takte (64 s), A-Moll (Am - F - C - G)
@@ -280,6 +281,14 @@ def hitsound():
     return mix(tone(d, 1046.5) * env(d, 0.001, 0.07), tone(d, 2093) * env(d, 0.001, 0.04) * 0.35)
 
 
+def headshot():
+    # Hellerer Doppel-Ton als der normale Hitsound, damit Kopftreffer sofort hoerbar sind
+    d = 0.35
+    first = mix(tone(d, 1568) * env(d, 0.001, 0.06), tone(d, 3136) * env(d, 0.001, 0.03) * 0.3)
+    second = np.pad(mix(tone(d, 2093) * env(d, 0.001, 0.12), tone(d, 4186) * env(d, 0.001, 0.05) * 0.3), (n_of(0.06), 0))[:n_of(d)]
+    return reverb(mix(first, second, click(0.004) * 0.5), 0.4, 0.3, 0.15)
+
+
 def bot_hurt():
     d = 0.3
     clank = metal_ring(d, 340, decay=0.12)
@@ -532,7 +541,7 @@ SFX = {
     'machinegun': machinegun, 'shotgun': shotgun, 'rocket_fire': rocket_fire, 'explosion': explosion,
     'railgun': railgun, 'plasma': plasma, 'lightning': lightning, 'shock_beam': shock_beam,
     'shock_ball': shock_ball, 'combo': combo, 'switch': switch, 'empty_click': empty_click,
-    'hitsound': hitsound, 'bot_hurt': bot_hurt, 'bot_death': bot_death, 'pickup': pickup,
+    'hitsound': hitsound, 'headshot': headshot, 'bot_hurt': bot_hurt, 'bot_death': bot_death, 'pickup': pickup,
     'weapon_pickup': weapon_pickup, 'quad_pickup': quad_pickup, 'mega_pickup': mega_pickup,
     'double_jump': double_jump, 'jump': jump, 'jump_pad': jump_pad, 'land': land,
     'dodge': dodge, 'teleport': teleport,
@@ -543,6 +552,12 @@ if __name__ == '__main__':
     if len(sys.argv) > 2 and sys.argv[1] == '--only':
         for name in sys.argv[2].split(','):
             write(name, SFX[name]())
+        sys.exit(0)
+    # Nur Ansager-Rohaufnahmen aus einem Ordner verarbeiten: python tools/make_sounds.py --announcer <Ordner>
+    if len(sys.argv) > 2 and sys.argv[1] == '--announcer':
+        for file in sorted(os.listdir(sys.argv[2])):
+            if file.endswith('.wav'):
+                write('announcer/' + file[:-4], announcer(read_wav(os.path.join(sys.argv[2], file))))
         sys.exit(0)
     for name, fn in SFX.items():
         write(name, fn())

@@ -13,6 +13,8 @@ signal ammo_changed(current: int, max_val: int)
 @export var data: WeaponData
 ## Wie schnell die Waffe nach dem Rueckstoss zurueckkehrt
 @export var recoil_recovery_speed: float = 12.0
+## Dauer des Hochziehens beim Waffenwechsel (s, kurz wie in Quake 3); so lange feuert die Waffe nicht
+const RAISE_TIME: float = 0.15
 
 # Bequemer Zugriff auf die Resource-Werte
 var weapon_id: StringName:
@@ -40,11 +42,15 @@ var owned: bool = true
 var cooldown_timer: float = 0.0
 var initial_position: Vector3 = Vector3.ZERO
 var current_recoil: float = 0.0
+var initial_rotation: Vector3 = Vector3.ZERO
+# Fortschritt beim Hochziehen: 1 = ganz unten, 0 = in Position
+var _raise: float = 0.0
 
 
 func _ready() -> void:
 	assert(data != null, "%s: WeaponData fehlt" % name)
 	initial_position = position
+	initial_rotation = rotation
 	reset_loadout()
 
 
@@ -63,10 +69,13 @@ func _process(delta: float) -> void:
 	if cooldown_timer > 0.0:
 		cooldown_timer -= delta
 	
-	# Rueckstoss-Animation weich zurueckfedern
-	if current_recoil > 0.0:
-		current_recoil = max(current_recoil - delta * recoil_recovery_speed, 0.0)
-		position = initial_position + Vector3(0.0, 0.0, current_recoil)
+	# Rueckstoss weich zurueckfedern, beim Waffenwechsel von unten hochschwenken
+	if current_recoil > 0.0 or _raise > 0.0:
+		current_recoil = maxf(current_recoil - delta * recoil_recovery_speed, 0.0)
+		_raise = maxf(_raise - delta / RAISE_TIME, 0.0)
+		var drop: float = _raise * _raise
+		position = initial_position + Vector3(0.0, -0.3 * drop, current_recoil)
+		rotation = initial_rotation + Vector3(-0.7 * drop, 0.0, 0.0)
 
 
 ## Prueft, ob die Waffe feuerbereit ist
@@ -134,6 +143,8 @@ func _on_fire_alt(_shooter: Node3D, _camera: Camera3D) -> void:
 ## Waffe ausruesten
 func equip() -> void:
 	show()
+	_raise = 1.0
+	cooldown_timer = maxf(cooldown_timer, RAISE_TIME)
 	ammo_changed.emit(current_ammo, max_ammo)
 
 

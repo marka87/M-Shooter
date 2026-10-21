@@ -1,3 +1,24 @@
+# Änderungen (Runde 22: Waffenwechsel, Sprung-Bewegung, GPU-Partikel, Pools, Interpolation)
+
+- **Waffenwechsel-Animation:** Die neue Waffe schwenkt in 0,15 s von unten hoch (schnell wie in Quake 3) und feuert erst, wenn sie oben ist.
+- **Waffe bei Sprung und Landung:** Beim Steigen hängt sie etwas nach unten, beim Fallen hebt sie sich, beim Aufkommen knickt sie ein (stärker nach hohem Fall) und federt zurück.
+- **GPU-Partikel:** Explosion, Treffer-Funke und Energie-Einschlag nutzen jetzt `GPUParticles3D` (umgewandelt mit Godots `convert_from_particles`). Es gibt keine CPU-Partikel mehr.
+- **Pools:** Treffer-Funken mit Einschussloch (`HitSpark.spawn()`, bisher an 7 Stellen kopierter Code) und Leuchtspuren (`Tracer.spawn()`) werden wiederverwendet statt bei jedem Schuss neu erzeugt.
+- **Physik-Interpolation** eingeschaltet: Spieler, Bots, Ragdolls und Projektile bewegen sich zwischen den 120 Physik-Ticks flüssig. Kopf und Kamera folgen der interpolierten Position, die Mausdrehung wirkt sofort. Respawn, Teleporter und Projektilstart setzen die Interpolation zurück; kurzlebige Effekte sind davon ausgenommen. Abschalten: `physics/common/physics_interpolation` in `project.godot`.
+- Tests: Bewegungstest um Waffe bei Fall/Landung, Interpolation und Waffenwechsel erweitert, Smoke-Test um beide Pools. Alle vier Tests grün.
+
+---
+
+# Änderungen (Runde 21: Kopftreffer)
+
+- **Headshots** für Railgun und Shock-Strahl: Trifft der Strahl einen Spieler oder Bot ab 1,5 m über den Füßen, zählt das als Kopftreffer mit 1,5-fachem Schaden (Railgun 150 statt 100, Shock 67 statt 45). `DamageInfo` hat dafür `is_headshot` und `is_head_hit()`.
+- Eigener heller **Kopftreffer-Ton** (`assets/sounds/headshot.wav`) statt des normalen Hitsounds.
+- **Ansage „Headshot!“** und Einblendung HEADSHOT beim Kill durch einen Kopftreffer (First Blood und Combo haben Vorrang). Die Stimme ist wie die anderen Ansagen erzeugt (Windows-Sprachausgabe „Zira“ + Nachbearbeitung).
+- `tools/make_sounds.py --announcer <Ordner>` verarbeitet nur Ansager-Rohaufnahmen, ohne Musik und Effekte neu zu rechnen.
+- Match-Test: Körpertreffer 100, Kopftreffer 150, Ansage beim Kill. Alle vier Tests grün.
+
+---
+
 # Änderungen (Runde 20: Instagib)
 
 - **Instagib-Modus** (Schalter im Match-Fenster, wird gespeichert): Alle starten nur mit der Railgun, die Munition ist unendlich, jeder Treffer macht 1000 Schaden (ein Treffer tötet, Bots zerplatzen). Alle Items sind ausgeblendet.

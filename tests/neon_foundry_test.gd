@@ -177,7 +177,8 @@ func run() -> void:
 	await create_timer(1.0).timeout
 	wm.fire_current_weapon()
 	await physics_frame
-	check(is_equal_approx(target_bot.health.health, 55.0), "Shock-Strahl trifft (%.0f HP)" % target_bot.health.health)
+	# Auf Augenhoehe von vorn: Kopftreffer mit 1,5-fachem Schaden (45 * 1,5)
+	check(is_equal_approx(target_bot.health.health, 100.0 - 45.0 * 1.5), "Shock-Strahl trifft den Kopf (%.1f HP)" % target_bot.health.health)
 
 	await stand.call()
 	await create_timer(1.0).timeout

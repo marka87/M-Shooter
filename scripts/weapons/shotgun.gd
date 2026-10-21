@@ -11,8 +11,6 @@ extends WeaponBase
 @onready var muzzle_flash: OmniLight3D = $Muzzle/MuzzleFlash
 @onready var muzzle_mesh: MeshInstance3D = $Muzzle/MuzzleMesh
 
-var spark_scene: PackedScene = preload("res://scenes/weapons/hit_spark.tscn")
-
 
 func _ready() -> void:
 	super._ready()
@@ -52,7 +50,7 @@ func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
 
 		var hit_pos: Vector3 = result.position
 		var collider: Object = result.collider
-		_spawn_spark(shooter, hit_pos, result.normal)
+		HitSpark.spawn(shooter.get_parent(), hit_pos, result.normal)
 
 		if collider and collider.has_method("take_damage"):
 			damage_per_target[collider] = damage_per_target.get(collider, 0.0) + damage
@@ -64,14 +62,6 @@ func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
 		target.take_damage(DamageInfo.create(damage_per_target[target], shooter, hit_pos_per_target[target], forward, weapon_name))
 		if shooter.has_method("on_enemy_hit"):
 			shooter.on_enemy_hit()
-
-
-func _spawn_spark(shooter: Node3D, hit_pos: Vector3, hit_normal: Vector3) -> void:
-	var spark := spark_scene.instantiate() as Node3D
-	shooter.get_parent().add_child(spark)
-	spark.global_position = hit_pos + hit_normal * 0.05
-	if hit_normal.length_squared() > 0.001:
-		spark.look_at(spark.global_position + hit_normal, Vector3.UP if absf(hit_normal.y) < 0.98 else Vector3.FORWARD)
 
 
 func _flash_muzzle() -> void:

@@ -35,3 +35,4 @@ static func aim_projectile(projectile: Node3D, camera: Camera3D, shooter: Node3D
 		target = hit.position
 	var dir: Vector3 = (target - projectile.global_position).normalized()
 	projectile.look_at(projectile.global_position + dir, Vector3.UP if absf(dir.y) < 0.98 else Vector3.FORWARD)
+	projectile.reset_physics_interpolation()

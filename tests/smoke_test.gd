@@ -134,7 +134,11 @@ func run() -> void:
 	var board: Array = gm.get_scoreboard()
 	check(board.size() == 3 and board[0].name == player.display_name, "Scoreboard: 3 Eintraege, Spieler vorn")
 
-	# Railgun (100 Schaden) -> Ragdoll faellt um; Kopf landet nahe am Boden
+	# Koerpertreffer mit 100 Schaden -> Ragdoll faellt um; Kopf landet nahe am Boden.
+	# (Der Railgun-Schuss oben war auf Augenhoehe ein Kopftreffer mit 150 Schaden -> Gib.)
+	b1._respawn()
+	b1.set_physics_process(false)
+	b1.take_damage(DamageInfo.create(100.0, player, b1.global_position + Vector3(0, 1.0, 0), Vector3.FORWARD, "Test"))
 	check(b1.model.visible and b1.ragdoll.is_simulating_physics(), "Bot faellt als Ragdoll um")
 	await wait(2.0)
 	# Die Waffe haengt am Handknochen und zeigt so, dass das sichtbare Modell dem Ragdoll folgt
@@ -278,6 +282,20 @@ func run() -> void:
 	# Sound-Daten signed: Stille nahe 0
 	var snd: AudioStream = SoundGenerator.create_hitsound()
 	check(snd == SoundGenerator.create_hitsound(), "Sound-Cache liefert dieselbe Instanz")
+
+	# Pools: Funken bleiben bei Dauerfeuer begrenzt, abgelaufene Leuchtspuren werden wiederverwendet
+	var count_sparks := func() -> int: return current_scene.find_children("*", "HitSpark", false, false).size()
+	var sparks_before: int = count_sparks.call()
+	for i in 80:
+		HitSpark.spawn(current_scene, Vector3(i * 0.1, 0.0, 40.0), Vector3.UP)
+	check(count_sparks.call() <= HitSpark.MAX_DECALS, "Funken-Pool begrenzt (%d -> %d)" % [sparks_before, count_sparks.call()])
+	await wait(0.5)
+	var count_tracers := func() -> int: return current_scene.find_children("*", "Tracer", false, false).size()
+	var tracers_before: int = count_tracers.call()
+	for i in 5:
+		Tracer.spawn(current_scene, Vector3(0, 2, 0), Vector3(0, 2, -10), Color.WHITE)
+		await wait(0.2)
+	check(count_tracers.call() <= tracers_before + 1, "Leuchtspuren werden wiederverwendet (%d -> %d)" % [tracers_before, count_tracers.call()])
 
 	print("FEHLER: ", fails)
 	quit(1 if fails > 0 else 0)

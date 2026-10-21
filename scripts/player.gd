@@ -106,6 +106,8 @@ var is_dead: bool:
 
 # Aktueller Nickwinkel der Kamera (Rauf/Runter in Radiant)
 var camera_pitch: float = 0.0
+# Abstand Kopf ueber den Fuessen (aus der Szene)
+var _head_offset: Vector3
 # Puffer-Timer fuer Sprungeingabe kurz vor dem Bodenkontakt
 var jump_buffer_timer: float = 0.0
 # Ob der Spieler gerade rennt
@@ -133,6 +135,12 @@ var _wall_dodge_used: bool = false
 func _ready() -> void:
 	# Mauszeiger fangen fuer First-Person-Steuerung
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+	# Physik-Interpolation: Der Kopf (Kamera, Waffen) folgt in _process der interpolierten
+	# Koerperposition, die Blickrichtung kommt direkt von der Maus (keine Verzoegerung)
+	_head_offset = head.position
+	head.top_level = true
+	head.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 
 	# Empfindlichkeit aus den gespeicherten Einstellungen uebernehmen
 	if GameManager.mouse_sensitivity > 0.0:
@@ -462,12 +470,17 @@ func take_damage(info: DamageInfo) -> void:
 	hurt_audio.play()
 
 
+func _process(_delta: float) -> void:
+	head.global_position = get_global_transform_interpolated().origin + _head_offset
+	head.global_rotation = Vector3(camera_pitch, global_rotation.y, 0.0)
+
+
 ## Spieler stirbt: Tod zaehlen, Respawn laeuft ueber death_timer in _physics_process
 func _on_died(info: DamageInfo) -> void:
 	death_timer = respawn_delay
 	powerups.clear()
 	# Selbsttreffer (Rocket-Jump) zaehlt als Selbstmord
-	GameManager.register_kill(info.attacker, self, info.weapon_name)
+	GameManager.register_kill(info.attacker, self, info.weapon_name, info.is_headshot)
 
 
 ## Respawn des Spielers an einem Spawnpunkt
@@ -475,6 +488,7 @@ func _respawn() -> void:
 	health.reset()
 	weapon_manager.reset_loadout()
 	global_transform = GameManager.get_spawn_transform(self)
+	reset_physics_interpolation()
 
 	# Blick wieder geradeaus richten
 	camera_pitch = 0.0
@@ -501,8 +515,9 @@ func on_item_picked(pickup_type: int, item_name: String = "") -> void:
 			GameManager.play_announcer("mega_health")
 
 
-## Treffer-Feedback: Quake-Trefferton, Hitmarker zeigt das HUD
-func on_enemy_hit() -> void:
-	hitsound_audio.pitch_scale = randf_range(0.98, 1.05)
+## Treffer-Feedback: Quake-Trefferton (Kopftreffer mit eigenem Ton), Hitmarker zeigt das HUD
+func on_enemy_hit(headshot: bool = false) -> void:
+	hitsound_audio.stream = SoundGenerator.create_headshot_sound() if headshot else SoundGenerator.create_hitsound()
+	hitsound_audio.pitch_scale = 1.0 if headshot else randf_range(0.98, 1.05)
 	hitsound_audio.play()
 	enemy_hit.emit()

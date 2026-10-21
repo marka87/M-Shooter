@@ -8,8 +8,6 @@ extends WeaponBase
 @onready var muzzle_flash: OmniLight3D = $Muzzle/MuzzleFlash
 @onready var muzzle_mesh: MeshInstance3D = $Muzzle/MuzzleMesh
 
-var spark_scene: PackedScene = preload("res://scenes/weapons/hit_spark.tscn")
-
 
 func _ready() -> void:
 	super._ready()
@@ -60,12 +58,7 @@ func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
 		var collider: Object = result.collider
 		
 		# Funken-Effekt am Einschlagpunkt erzeugen
-		if spark_scene:
-			var spark := spark_scene.instantiate() as Node3D
-			shooter.get_parent().add_child(spark)
-			spark.global_position = hit_pos + hit_normal * 0.05
-			if hit_normal.length_squared() > 0.001:
-				spark.look_at(spark.global_position + hit_normal, Vector3.UP if absf(hit_normal.y) < 0.98 else Vector3.FORWARD)
+		HitSpark.spawn(shooter.get_parent(), hit_pos, hit_normal)
 		
 		# Schaden am Ziel anrichten (fuer Bots und Ziele in spaeteren Schritten)
 		if collider and collider.has_method("take_damage"):

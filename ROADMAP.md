@@ -16,7 +16,7 @@ Ohne diese Schritte wird jede spätere Phase teurer.
 |---|---|---|---|
 | 0.1 | ✅ `git init`, erster Commit, danach kleine Commits pro Feature | Jede Änderung lässt sich zurückdrehen | S |
 | 0.2 | ✅ Projekt einmal in Godot starten und Fehler aus Runde 1 und 2 beseitigen | Bisher ist nichts in der Engine getestet | S |
-| 0.3 | ✅ teilweise: 120 Hz gesetzt, Interpolation folgt nach Test in der Engine. **Physik-Takt auf 120 Hz** (`physics/common/physics_ticks_per_second`) plus **Physik-Interpolation** einschalten | Quake-Bewegung fühlt sich erst bei hohem Takt präzise an. Strafe-Jumping hängt direkt davon ab | S |
+| 0.3 | ✅ 120 Hz und Physik-Interpolation (Kopf folgt interpoliert, Mausblick direkt). **Physik-Takt auf 120 Hz** (`physics/common/physics_ticks_per_second`) plus **Physik-Interpolation** einschalten | Quake-Bewegung fühlt sich erst bei hohem Takt präzise an. Strafe-Jumping hängt direkt davon ab | S |
 | 0.4 | ✅ **Jolt Physics** als 3D-Physik-Engine wählen | Stabiler und schneller als GodotPhysics, vor allem bei CharacterBody3D an Kanten und Rampen | S |
 | 0.5 | ✅ Kollisions-Layer in den Projekteinstellungen benennen (World, Player, Bot, Pickup, Projectile) und überall statt `0xFFFFFFFF` nutzen | Heute stehen Zahlen wie `collision_mask = 5` im Code, das ist schwer zu lesen | S |
 | 0.6 | ✅ **Waffen als Daten:** `WeaponData`-Resource (`.tres`) mit Schaden, Feuerrate, Munition, Sounds, Modell | `add_all_ammo(mg, rkt, rail)` und Index 0/1/2 in Pickups brechen bei jeder neuen Waffe | M |
@@ -62,12 +62,12 @@ Dazu:
 |---|---|---|
 | 2.1 | ✅ teilweise: Plasma, Lightning Gun und Shock Rifle als Pickups, beim Respawn wieder weg. Waffen als Pickups in der Map, nicht alle von Anfang an (Start nur MG + Nahkampf) | M |
 | 2.2 | ✅ Alt-Feuer (rechte Maustaste) im `WeaponBase` vorsehen | S |
-| 2.3 | Waffenwechsel mit Ab-/Aufzieh-Animation und schnellem „Weapon Switch“ wie in Q3 | S |
-| 2.4 | Object-Pooling für Projektile, Funken, Einschläge | S |
-| 2.5 | Headshots für Hitscan (Railgun/Shock) mit eigenem Hitsound | S |
+| 2.3 | ✅ Hochziehen in 0,15 s (Wegstecken sofort). Waffenwechsel mit Ab-/Aufzieh-Animation und schnellem „Weapon Switch“ wie in Q3 | S |
+| 2.4 | ✅ Pool für Funken/Einschusslöcher und Leuchtspuren (Projektile nicht, zu selten). Object-Pooling für Projektile, Funken, Einschläge | S |
+| 2.5 | ✅ Headshots für Hitscan (Railgun/Shock) mit eigenem Hitsound | S |
 | 2.6 | ✅ teilweise: glühende Einschusslöcher. Einschusslöcher als Decals, Rauchspuren hinter Raketen, Hülsen beim MG | M |
 | 2.7 | ✅ **Waffenmodelle** im Neon-Low-Poly-Stil: eigene Silhouette pro Waffe, leuchtende Teile in der Waffenfarbe | M |
-| 2.8 | **Viewmodel-Bewegung**: Wippen beim Laufen, Nachziehen beim Umsehen, Absenken beim Springen, Einknicken beim Landen, Rückstoß beim Schuss (evtl. schon zu Hause gebaut, erst mergen) | S |
+| 2.8 | ✅ **Viewmodel-Bewegung**: Wippen beim Laufen, Nachziehen beim Umsehen, Absenken beim Springen, Einknicken beim Landen, Rückstoß beim Schuss (evtl. schon zu Hause gebaut, erst mergen) | S |
 | 2.9 | Eigene Effekte pro Waffe: Plasma-Spritzer, Railgun-Spiralspur, Mündungsfeuer je Waffe | S |
 
 ---
@@ -84,7 +84,7 @@ Der aktuelle Stand sind einfache Meshes und prozedurale Effekte. Für einen mode
 | 3.4 | ✅ Neon-Brutalism (dunkle Low-Poly-Körper, Neonkanten). Stilrichtung festlegen. Empfehlung: **Sci-Fi-Industrial mit Neon-Akzenten** (UT99/UT4-Anmutung), das kaschiert einfache Geometrie und ist gut lesbar | – |
 | 3.5 | ✅ Bots: animiertes Quaternius-Mannequin mit Ragdoll (Waffenmodelle offen). Modelle: Waffen und Bots aus Blender oder CC0-Paketen (z. B. Kenney, Quaternius), Bots mit Lauf-/Schuss-/Todes-Animation und Ragdoll | L |
 | 3.6 | Shader: leuchtende Pickups mit Fresnel-Rand, Schild-Effekt bei Rüstung, Teleporter-Portal, Hologramm-Respawn | M |
-| 3.7 | GPUParticles statt CPUParticles für Explosionen, Funken, Rauch | S |
+| 3.7 | ✅ GPUParticles statt CPUParticles für Explosionen, Funken, Rauch | S |
 | 3.8 | ✅ **Lesbarkeit vor Schönheit**: Gegner in Team-/Hervorhebungsfarbe (Brightskins wie in Q3), optional abschaltbar | S |
 | 3.9 | Level von zu Hause mergen (nur lokal committet, noch nicht gepusht) | S |
 | 3.10 | **Map-Baukasten**: Generator mit Modulen (Turm, Steg, Treppe, Jump-Pad, Teleporter), damit eine neue Map in Stunden statt Tagen steht | M |

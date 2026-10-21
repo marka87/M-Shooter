@@ -5,7 +5,6 @@ extends WeaponBase
 @export var max_range: float = 300.0
 
 var beam_scene: PackedScene = preload("res://scenes/weapons/beam.tscn")
-var spark_scene: PackedScene = preload("res://scenes/weapons/hit_spark.tscn")
 
 
 func _ready() -> void:
@@ -39,19 +38,19 @@ func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
 		var collider: Object = result.collider
 		
 		# Funken am Treffpunkt
-		if spark_scene:
-			var spark := spark_scene.instantiate() as Node3D
-			shooter.get_parent().add_child(spark)
-			spark.global_position = hit_pos + hit_normal * 0.05
-			if hit_normal.length_squared() > 0.001:
-				spark.look_at(spark.global_position + hit_normal, Vector3.UP if absf(hit_normal.y) < 0.98 else Vector3.FORWARD)
+		HitSpark.spawn(shooter.get_parent(), hit_pos, hit_normal)
 		
 		# Hoher Schaden am Ziel
 		if collider and collider.has_method("take_damage"):
+			var headshot := DamageInfo.is_head_hit(collider, hit_pos)
 			var amount: float = GameManager.INSTAGIB_DAMAGE if GameManager.instagib else damage
-			collider.take_damage(DamageInfo.create(amount, shooter, hit_pos, forward, weapon_name))
+			if headshot:
+				amount *= DamageInfo.HEADSHOT_MULTIPLIER
+			var info := DamageInfo.create(amount, shooter, hit_pos, forward, weapon_name)
+			info.is_headshot = headshot
+			collider.take_damage(info)
 			if shooter and shooter.has_method("on_enemy_hit"):
-				shooter.on_enemy_hit()
+				shooter.on_enemy_hit(headshot)
 	
 	# Sichtbaren Railgun-Lichtstrahl zwischen Muendung und Treffpunkt erzeugen
 	if beam_scene:

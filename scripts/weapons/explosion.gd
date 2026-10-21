@@ -8,7 +8,7 @@ extends Node3D
 
 @onready var light: OmniLight3D = $OmniLight3D
 @onready var blast_sphere: MeshInstance3D = $BlastSphere
-@onready var particles: CPUParticles3D = $CPUParticles3D
+@onready var particles: GPUParticles3D = $Debris
 @onready var audio_player: AudioStreamPlayer3D = $AudioStreamPlayer3D
 
 var shooter_node: Node = null
@@ -63,7 +63,7 @@ func _apply_tint() -> void:
 	sphere_mat.albedo_color = Color(tint.r, tint.g, tint.b, 0.75)
 	sphere_mat.emission = tint
 	blast_sphere.material_override = sphere_mat
-	var debris_mat := (particles.mesh.surface_get_material(0) as StandardMaterial3D).duplicate() as StandardMaterial3D
+	var debris_mat := (particles.draw_pass_1.surface_get_material(0) as StandardMaterial3D).duplicate() as StandardMaterial3D
 	debris_mat.albedo_color = tint.lightened(0.3)
 	debris_mat.emission = tint
 	particles.material_override = debris_mat

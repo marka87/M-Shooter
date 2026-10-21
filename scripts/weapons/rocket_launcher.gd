@@ -46,3 +46,4 @@ func _on_fire(shooter: Node3D, camera: Camera3D) -> void:
 	var aim_dir: Vector3 = (target_point - spawn_pos).normalized()
 	if aim_dir.length_squared() > 0.001:
 		rocket.look_at(spawn_pos + aim_dir, Vector3.UP)
+	rocket.reset_physics_interpolation()

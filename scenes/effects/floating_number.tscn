@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/effects/floating_number.gd" id="1_fn"]
 
 [node name="FloatingNumber" type="Node3D"]
+physics_interpolation_mode = 2
 script = ExtResource("1_fn")
 
 [node name="Label3D" type="Label3D" parent="."]

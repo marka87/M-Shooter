@@ -3,7 +3,7 @@ extends Node3D
 ## Farbiger Einschlag von Energie-Projektilen: kurzer Lichtblitz, Funken, kleine Leuchtscheibe.
 
 @onready var light: OmniLight3D = $Light
-@onready var sparks: CPUParticles3D = $Sparks
+@onready var sparks: GPUParticles3D = $Sparks
 @onready var flash: MeshInstance3D = $Flash
 
 
@@ -15,7 +15,10 @@ func setup(color: Color, normal: Vector3, size: float = 1.0) -> void:
 	flash.material_override = mat
 	sparks.material_override = mat
 	if normal.length_squared() > 0.001:
-		sparks.direction = normal
+		# Eigene Kopie, das Prozess-Material teilen sich sonst alle Einschlaege
+		var process := sparks.process_material.duplicate() as ParticleProcessMaterial
+		process.direction = normal
+		sparks.process_material = process
 	scale = Vector3.ONE * size
 	sparks.emitting = true
 
