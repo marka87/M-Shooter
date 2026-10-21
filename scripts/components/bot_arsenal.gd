@@ -29,6 +29,9 @@ const PROJECTILE_SPEED := { &"rocket_launcher": 38.0, &"plasma": 42.0 }
 
 var weapons: Array[WeaponBase] = []
 var current: WeaponBase
+## Mindestzeit (s) zwischen zwei Waffenwechseln nach Entfernung, damit Bots nicht wie ein PC hin- und herschalten
+var switch_hold: float = 0.0
+var _next_switch_msec: int = 0
 
 
 func _ready() -> void:
@@ -51,8 +54,10 @@ func choose_for(distance: float) -> WeaponBase:
 			best_rank = r[2]
 	if best == null:
 		best = _first_with_ammo()
-	if best != current:
+	var now := Time.get_ticks_msec()
+	if best != current and (current.current_ammo <= 0 or now >= _next_switch_msec):
 		_equip(best)
+		_next_switch_msec = now + int(switch_hold * 1000.0)
 	return current
 
 

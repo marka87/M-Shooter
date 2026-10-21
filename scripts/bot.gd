@@ -42,16 +42,18 @@ var current_state: State = State.PATROL
 const SKILL_NAMES: Array[String] = ["Anfänger", "Normal", "Erfahren", "Profi", "Gott"]
 ## Werte je Stufe: Streuung (Grad), Reaktionszeit (s), Zeit zwischen Schuessen (s),
 ## Ausweichtempo im Kampf (m/s), Sichtweite (m)
-## Dodge-Chance bei jedem Richtungswechsel im Kampf
+## Dodge-Chance bei jedem Richtungswechsel im Kampf, Mindestzeit zwischen Waffenwechseln (s)
 const SKILL_PRESETS: Array[Dictionary] = [
-	{ "inaccuracy": 9.0, "reaction": 0.9, "interval": 0.45, "combat_speed": 2.0, "sight": 25.0, "dodge": 0.0 },
-	{ "inaccuracy": 6.0, "reaction": 0.6, "interval": 0.35, "combat_speed": 3.0, "sight": 30.0, "dodge": 0.1 },
-	{ "inaccuracy": 4.0, "reaction": 0.4, "interval": 0.28, "combat_speed": 3.5, "sight": 35.0, "dodge": 0.25 },
-	{ "inaccuracy": 2.5, "reaction": 0.25, "interval": 0.22, "combat_speed": 4.5, "sight": 45.0, "dodge": 0.4 },
-	{ "inaccuracy": 1.2, "reaction": 0.12, "interval": 0.18, "combat_speed": 5.5, "sight": 60.0, "dodge": 0.55 },
+	{ "inaccuracy": 9.0, "reaction": 0.9, "interval": 0.45, "combat_speed": 2.0, "sight": 25.0, "dodge": 0.0, "switch": 2.0 },
+	{ "inaccuracy": 6.0, "reaction": 0.6, "interval": 0.35, "combat_speed": 3.0, "sight": 30.0, "dodge": 0.1, "switch": 1.5 },
+	{ "inaccuracy": 4.0, "reaction": 0.4, "interval": 0.28, "combat_speed": 3.5, "sight": 35.0, "dodge": 0.25, "switch": 1.0 },
+	{ "inaccuracy": 2.5, "reaction": 0.25, "interval": 0.22, "combat_speed": 4.5, "sight": 45.0, "dodge": 0.4, "switch": 0.7 },
+	{ "inaccuracy": 1.2, "reaction": 0.12, "interval": 0.18, "combat_speed": 5.5, "sight": 60.0, "dodge": 0.55, "switch": 0.4 },
 ]
 ## Wahrscheinlichkeit, beim Richtungswechsel im Kampf seitlich zu dodgen (aus der Schwierigkeit)
 @export var dodge_chance: float = 0.25
+## Mindestzeit zwischen Waffenwechseln (s, aus der Schwierigkeit)
+@export var switch_hold: float = 1.0
 
 # ==============================================================================
 # PERSOENLICHKEIT
@@ -154,6 +156,7 @@ func _ready() -> void:
 	if display_name.is_empty():
 		display_name = name
 	GameManager.register_participant(display_name, false)
+	weapon_manager.switch_hold = switch_hold
 	_setup_animation()
 	# Zielknoten fuer die Waffen: Schuss vom Auge entlang -Z (wie die Kamera beim Spieler)
 	_aim = Node3D.new()
@@ -559,6 +562,9 @@ func apply_skill(level: int) -> void:
 	combat_speed = preset.combat_speed
 	sight_range = preset.sight
 	dodge_chance = preset.dodge
+	switch_hold = preset.switch
+	if weapon_manager:
+		weapon_manager.switch_hold = switch_hold
 
 
 ## Passende Waffe fuer die Entfernung waehlen und mit Streuung auf das Ziel feuern. Projektile

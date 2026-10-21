@@ -403,6 +403,7 @@ func register_kill(killer: Node, victim: Node, weapon_name: String, headshot: bo
 			player_announcement.emit("HEADSHOT", Color(1.0, 0.85, 0.2))
 			play_announcer("headshot")
 		if killer is Player:
+			killer.on_enemy_killed()
 			_announce_player_kill(killer_score.spree)
 
 	# Kurzwerte fuer HUD und Tests
@@ -635,12 +636,16 @@ func available_resolutions() -> Array[Vector2i]:
 	return fitting if not fitting.is_empty() else [RESOLUTIONS[0]]
 
 
-## Neue Taste fuer eine Aktion (ersetzt die bisherige Belegung)
-func set_binding(action: StringName, event: InputEvent) -> void:
+## Neue Taste fuer eine Aktion (ersetzt die bisherige Belegung). false, wenn eine andere Aktion die Taste schon nutzt
+func set_binding(action: StringName, event: InputEvent) -> bool:
+	for other in BINDABLE_ACTIONS:
+		if other != action and InputMap.event_is_action(event, other, true):
+			return false
 	var stored := event.duplicate() as InputEvent
 	stored.set("pressed", false)
 	InputMap.action_erase_events(action)
 	InputMap.action_add_event(action, stored)
+	return true
 
 
 ## Lesbarer Name der ersten Taste einer Aktion

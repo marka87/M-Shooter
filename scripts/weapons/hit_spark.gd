@@ -19,10 +19,13 @@ const MAX_DECALS: int = 60
 
 ## Alle Funken der aktuellen Szene, zuletzt benutzter hinten
 static var _pool: Array[HitSpark] = []
+## Schrot und Blitz erzeugen viele Funken pro Frame: hoechstens ein Einschlag-Sound alle 50 ms
+static var _last_sound_msec: int = -1000
 
 var _light_energy: float
 var _decal_emission: float
 var _tween: Tween
+var _audio: AudioStreamPlayer3D
 
 
 ## Funke mit Einschussloch an hit_pos, ausgerichtet an der Oberflaechennormale
@@ -47,6 +50,11 @@ static func spawn(parent: Node, hit_pos: Vector3, normal: Vector3) -> void:
 func _ready() -> void:
 	_light_energy = light.light_energy
 	_decal_emission = decal.emission_energy
+	_audio = AudioStreamPlayer3D.new()
+	_audio.stream = SoundGenerator.create_impact_sound()
+	_audio.volume_db = -8.0
+	_audio.max_distance = 40.0
+	add_child(_audio)
 
 
 func _start() -> void:
@@ -56,6 +64,11 @@ func _start() -> void:
 	decal.modulate.a = 1.0
 	particles.restart()
 	particles.emitting = true
+	var now := Time.get_ticks_msec()
+	if now - _last_sound_msec >= 50:
+		_last_sound_msec = now
+		_audio.pitch_scale = randf_range(0.85, 1.15)
+		_audio.play()
 	if _tween:
 		_tween.kill()
 	_tween = create_tween()

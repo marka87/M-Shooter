@@ -235,7 +235,9 @@ func _input(event: InputEvent) -> void:
 	if is_key and (event as InputEventKey).keycode == KEY_ESCAPE:
 		_cancel_rebind()
 		return
-	GameManager.set_binding(_rebind_action, event)
+	if not GameManager.set_binding(_rebind_action, event):
+		_rebind_button.text = "Belegt – andere Taste"
+		return
 	_cancel_rebind()
 
 

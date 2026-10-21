@@ -289,6 +289,23 @@ def headshot():
     return reverb(mix(first, second, click(0.004) * 0.5), 0.4, 0.3, 0.15)
 
 
+def impact():
+    # Kugel trifft Wand: kurzer Knack plus heller Splitter-Rauschschweif
+    d = 0.18
+    crack = filt(noise(d), lo=1500, hi=9000) * env(d, 0.0005, 0.025)
+    ring = metal_ring(d, 1900, decay=0.04) * 0.35
+    return reverb(drive(mix(crack, ring, click(0.003)), 1.3), 0.3, 0.1, 0.15)
+
+
+def kill():
+    # Kill bestaetigt: tiefer Schlag unter einem fallenden Zweiklang, klar anders als der Hitsound
+    d = 0.5
+    thump = filt(sweep(d, 160, 45), hi=900) * env(d, 0.001, 0.12)
+    high = tone(d, 1318.5) * env(d, 0.001, 0.08) * 0.5
+    low = np.pad(tone(d, 880) * env(d, 0.001, 0.18) * 0.55, (n_of(0.07), 0))[:n_of(d)]
+    return reverb(mix(thump, high, low, click(0.004) * 0.4), 0.5, 0.25, 0.18)
+
+
 def bot_hurt():
     d = 0.3
     clank = metal_ring(d, 340, decay=0.12)
@@ -544,7 +561,7 @@ SFX = {
     'hitsound': hitsound, 'headshot': headshot, 'bot_hurt': bot_hurt, 'bot_death': bot_death, 'pickup': pickup,
     'weapon_pickup': weapon_pickup, 'quad_pickup': quad_pickup, 'mega_pickup': mega_pickup,
     'double_jump': double_jump, 'jump': jump, 'jump_pad': jump_pad, 'land': land,
-    'dodge': dodge, 'teleport': teleport,
+    'dodge': dodge, 'teleport': teleport, 'impact': impact, 'kill': kill,
 }
 
 if __name__ == '__main__':

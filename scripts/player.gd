@@ -29,6 +29,7 @@ class_name Player
 @onready var hud: HUD = $HUD
 @onready var hurt_audio: AudioStreamPlayer = $HurtAudioPlayer
 @onready var hitsound_audio: AudioStreamPlayer = $HitsoundAudioPlayer
+var _kill_audio: AudioStreamPlayer
 @onready var jump_audio: AudioStreamPlayer = $JumpAudioPlayer
 @onready var camera_feedback: CameraFeedback = $CameraFeedback
 @onready var movement: MovementController = $Movement
@@ -101,6 +102,9 @@ func _ready() -> void:
 	hurt_audio.stream = SoundGenerator.create_bot_hurt_sound()
 	hitsound_audio.stream = SoundGenerator.create_hitsound()
 	jump_audio.stream = SoundGenerator.create_double_jump_sound()
+	_kill_audio = AudioStreamPlayer.new()
+	_kill_audio.stream = SoundGenerator.create_kill_sound()
+	add_child(_kill_audio)
 
 	health.died.connect(_on_died)
 	hud.bind(self)
@@ -276,3 +280,8 @@ func on_enemy_hit(headshot: bool = false) -> void:
 	hitsound_audio.pitch_scale = 1.0 if headshot else randf_range(0.98, 1.05)
 	hitsound_audio.play()
 	enemy_hit.emit()
+
+
+## Eigener Ton, wenn ein Treffer einen Gegner erledigt (ruft der GameManager)
+func on_enemy_killed() -> void:
+	_kill_audio.play()

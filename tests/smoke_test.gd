@@ -293,6 +293,12 @@ func run() -> void:
 	for w in arsenal.weapons:
 		w.owned = true
 		w.current_ammo = w.max_ammo
+	arsenal.switch_hold = 5.0
+	arsenal._next_switch_msec = 0
+	var held: Array = [5.0, 30.0].map(func(d): return arsenal.choose_for(d).weapon_id)
+	check(held == [&"shotgun", &"shotgun"], "Bot haelt Waffe nach Wechsel eine Weile (%s)" % [held])
+	arsenal.switch_hold = 0.0
+	arsenal._next_switch_msec = 0
 	var picks: Array = [5.0, 15.0, 30.0].map(func(d): return arsenal.choose_for(d).weapon_id)
 	check(picks == [&"shotgun", &"rocket_launcher", &"railgun"], "Bot-Waffe nach Entfernung (%s)" % [picks])
 	# Ziel 15 m vor dem Bot, laeuft mit 8 m/s nach rechts: Rakete muss vorgehalten werden
@@ -332,6 +338,9 @@ func run() -> void:
 	q_key.physical_keycode = KEY_Q
 	gm.set_binding(&"jump", q_key)
 	check(InputMap.action_get_events("jump").size() == 1 and gm.binding_text(&"jump") == "Q", "Tastenbelegung: Springen auf Q")
+	var fire_click := InputEventMouseButton.new()
+	fire_click.button_index = MOUSE_BUTTON_LEFT
+	check(not gm.set_binding(&"jump", fire_click) and gm.binding_text(&"jump") == "Q", "Tastenbelegung: schon belegte Taste (Schiessen) wird abgelehnt")
 	InputMap.action_erase_events("jump")
 	for ev in jump_events:
 		InputMap.action_add_event("jump", ev)
