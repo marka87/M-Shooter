@@ -58,7 +58,7 @@ Alle Tasten laufen über die InputMap (Projekt → Projekteinstellungen → Eing
 
 ## 🏁 Match-Ablauf
 
-Im Match-Fenster wählst du neben Arena, Bots und Schwierigkeit auch **Frag-Limit** (5, 10, 15, 20, 30 oder keins) und **Zeit-Limit** (5, 10, 15, 20 Minuten oder keins). **Kopftreffer** mit Railgun und Shock Rifle (Strahl über 1,5 m Höhe) machen 1,5-fachen Schaden, klingen heller und werden beim Kill angesagt. Mit **Instagib** gibt es nur die Railgun mit unendlicher Munition, jeder Treffer tötet, und alle Items sind weg.
+Im Match-Fenster wählst du neben Arena, Bots und Schwierigkeit auch **Frag-Limit** (5, 10, 15, 20, 30 oder keins) und **Zeit-Limit** (5, 10, 15, 20 Minuten oder keins). **Kopftreffer** mit Railgun und Shock Rifle (Strahl über 1,5 m Höhe) machen 1,5-fachen Schaden, klingen heller und werden beim Kill angesagt. **Duell** stellt genau einen Bot gegen dich. Mit **Instagib** gibt es nur die Railgun mit unendlicher Munition, jeder Treffer tötet, und alle Items sind weg.
 - Start mit Countdown **3 – 2 – 1 – FIGHT!**, solange ist alles eingefroren.
 - Oben in der Mitte läuft die Restzeit (letzte 30 s rot), oben rechts stehen die Frags mit Limit.
 - Ansagen: **DOUBLE / MULTI / MEGA / MONSTER KILL** (Kills innerhalb von 3 s) und **KILLING SPREE / RAMPAGE / DOMINATING / UNSTOPPABLE / GODLIKE** (5/10/15/20/25 Kills ohne Tod).
@@ -78,7 +78,7 @@ Die Bots besitzen eine 4-stufige Zustandsmaschine:
 
 Die Bots sind animierte Figuren (Mannequin aus der **Quaternius Universal Animation Library**, CC0, `assets/characters/ual/`): Idle, Gehen, Joggen und Sprinten je nach Tempo, Sprung-Pose in der Luft, Pistolen-Zielhaltung im Kampf und Zucken bei Treffern. Beim Tod fallen sie als **Ragdoll** um; große Treffer (Explosion aus der Nähe, ab 120 Schaden) lassen sie in Würfel zerplatzen.
 
-Bots benutzen **dieselben Waffen wie der Spieler** (sichtbar in der Hand, mit Munition) und wählen sie nach Entfernung: Shotgun und Lightning Gun nah, Raketen und Plasma mittel, Railgun weit. Raketen und Plasma werden **vorgehalten**, Raketen auf die Füße gezielt. Sie sammeln Waffen und Munition ein und kennen die **Respawn-Zeiten** von Quad, Mega Health und Rüstung: Kurz vorher laufen sie hin und warten.
+Bots benutzen **dieselben Waffen wie der Spieler** (sichtbar in der Hand, mit Munition) und wählen sie nach Entfernung: Shotgun und Lightning Gun nah, Raketen und Plasma mittel, Railgun weit. Raketen und Plasma werden **vorgehalten**, Raketen auf die Füße gezielt. Sie sammeln Waffen und Munition ein und kennen die **Respawn-Zeiten** von Quad, Mega Health und Rüstung: Kurz vorher laufen sie hin und warten. Jeder Bot hat eine **Persönlichkeit** (aggressiv, vorsichtig, Camper, ausgeglichen) und lässt nach Kills, beim eigenen Tod oder mit Quad Sprüche im Chat links unten los.
 
 Über den Köpfen der Bots schwebt ein 3D-Namensschild (`Label3D`) mit Live-Status und Lebenspunkten.
 
@@ -86,7 +86,7 @@ Bots benutzen **dieselben Waffen wie der Spieler** (sichtbar in der Hand, mit Mu
 
 ## 🛡️ Schadens- & Pickup-System
 
-- **Einstellungen**: Mausempfindlichkeit, Lautstärke, Sichtfeld, Kamera-Effekte, **Grafik-Stufe** (Niedrig/Mittel mit FSR-Hochskalierung und ohne SSAO/Nebel, Ultra mit 4x MSAA), **V-Sync** und **Tastenbelegung** (Taste anklicken, neue Taste oder Maustaste drücken) werden in `user://settings.cfg` gespeichert.
+- **Einstellungen**: Mausempfindlichkeit, Lautstärke, Sichtfeld, Kamera-Effekte, **Grafik-Stufe** (Niedrig/Mittel mit FSR-Hochskalierung und ohne SSAO/Nebel, Ultra mit 4x MSAA), **V-Sync** und **Tastenbelegung** (Taste anklicken, neue Taste oder Maustaste drücken) werden in `user://settings.cfg` gespeichert. Dazu Effekt-Lautstärke, Fadenkreuz (Form, Farbe, Größe) und Hitmarker an/aus.
 - **Lebenspunkte (HP)**: 100 Basis-HP. Sinkt HP auf 0, erscheint das Todes-Overlay mit 3-Sekunden-Respawn-Countdown.
 - **Rüstung**: Startet bei 50 (bis max. 100). Fängt **66 %** allen Schadens ab, während nur 34 % die Lebenspunkte schwächen.
 - **Treffer-Feedback**: 
@@ -176,7 +176,7 @@ Alle Sounds liegen als WAV in `assets/sounds/` und werden von `python tools/make
 - **Schritte** (vier Varianten) für Spieler und Bots (Bots als 3D-Sound, damit man sie kommen hört), Sprung und Landung
 - **Ansager:** „3, 2, 1, Fight!“, First Blood, Double/Multi/Mega/Monster Kill, Killing Spree … Godlike, Quad Damage, Mega Health, Combo, Zeitansagen, You have won/lost. Gesprochen von der Windows-Sprachausgabe (Stimme „Zira“), dann tiefer gestimmt, gedoppelt, verzerrt und mit Hall versehen.
 
-Audio-Busse (`default_bus_layout.tres`): Master, Music (eigener Lautstärkeregler in den Einstellungen, Tiefpass für den gedämpften Zustand), Announcer (mit Kompressor). Fehlt eine WAV-Datei, erzeugt `SoundGenerator` wie früher einen prozeduralen Ersatz.
+Audio-Busse (`default_bus_layout.tres`): Master, SFX (alle Effekte, leichter Hall der Arena, eigener Regler), Music (eigener Lautstärkeregler in den Einstellungen, Tiefpass für den gedämpften Zustand), Announcer (mit Kompressor). Fehlt eine WAV-Datei, erzeugt `SoundGenerator` wie früher einen prozeduralen Ersatz.
 
 ---
 

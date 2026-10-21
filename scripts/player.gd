@@ -290,6 +290,9 @@ func _update_step_sounds(delta: float) -> void:
 	var on_floor := is_on_floor()
 	if on_floor and not _was_on_floor:
 		camera_feedback.land(_fall_speed)
+		var fall_damage := fall_damage_for(_fall_speed)
+		if fall_damage > 0.0:
+			take_damage(DamageInfo.create(fall_damage, null, global_position, Vector3.ZERO, "Sturz"))
 		if _fall_speed < -7.0:
 			_play_step(SoundGenerator.create_land_sound(), 0.0)
 			_step_distance = 0.0
@@ -300,8 +303,20 @@ func _update_step_sounds(delta: float) -> void:
 			_step_distance += speed * delta
 			if _step_distance >= STEP_DISTANCE:
 				_step_distance = 0.0
-				_play_step(SoundGenerator.create_footstep_sound(randi_range(1, 4)), -9.0)
+				# Leise beim Gehen, laut bei Sprint und Strafe-Jump-Tempo
+				_play_step(SoundGenerator.create_footstep_sound(randi_range(1, 4)), lerpf(-14.0, -6.0, clampf((speed - 4.0) / 8.0, 0.0, 1.0)))
 	_was_on_floor = on_floor
+
+
+## Fallschaden wie in Quake: ab 12 m Fallhoehe 5, ab 20 m 10, darueber mehr (Jump-Pads und
+## normale Rocket-Jumps bleiben darunter)
+func fall_damage_for(fall_speed: float) -> float:
+	var height: float = fall_speed * fall_speed / (2.0 * gravity)
+	if height < 12.0:
+		return 0.0
+	if height < 20.0:
+		return 5.0
+	return 10.0 + floorf(height - 20.0)
 
 
 func _play_step(stream: AudioStream, volume_db: float) -> void:

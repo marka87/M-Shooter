@@ -19,6 +19,8 @@ signal match_started()
 signal match_ended(results: Dictionary)
 ## Ansage fuer den Spieler (Multi-Kill, Serie)
 signal player_announcement(text: String, color: Color)
+## Chat-Zeile eines Bots (Spruch nach Kill, Tod oder Quad)
+signal bot_chat(sender: String, text: String, color: Color)
 
 # Spielzustand
 enum GameState { MENU, PLAYING, PAUSED, GAME_OVER, COUNTDOWN }
@@ -32,6 +34,8 @@ var frag_limit: int = 15
 var time_limit_minutes: float = 10.0
 ## Instagib: nur Railgun mit unendlicher Munition, jeder Treffer toetet, keine Items
 var instagib: bool = false
+## Duell: genau ein Bot, eins gegen eins (Item-Timing entscheidet)
+var duel: bool = false
 const INSTAGIB_DAMAGE: float = 1000.0
 ## Sekunden Countdown vor dem Start (Tests setzen 0)
 var match_countdown: float = 3.0
@@ -73,6 +77,13 @@ var scores: Dictionary = {}
 var mouse_sensitivity: float = 0.002
 var master_volume: float = 1.0
 var music_volume: float = 0.7
+## Lautstaerke aller Effekte (Waffen, Schritte, Treffer) auf dem Bus SFX (mit leichtem Hall der Arena)
+var sfx_volume: float = 1.0
+## Fadenkreuz (Index in Crosshair.SHAPES / Crosshair.COLORS), Groesse in Pixeln, Hitmarker an/aus
+var crosshair_shape: int = 2
+var crosshair_color: int = 0
+var crosshair_size: float = 7.0
+var hitmarker_enabled: bool = true
 ## Horizontales Sichtfeld in Grad (Quake-Spieler nutzen oft 100-110)
 var fov: float = 100.0
 ## Kamera-Feedback (Wackeln, Einknicken, Tempo-Sichtfeld) an/aus
@@ -122,6 +133,8 @@ var spawn_points: Array[Node3D] = []
 func _ready() -> void:
 	# Prozess laeuft auch waehrend das Spiel pausiert ist
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Alle Sounds, die auf Master landen wuerden, laufen ueber den Effekt-Bus (Lautstaerke, Hall)
+	get_tree().node_added.connect(_route_to_sfx)
 	load_settings()
 	_build_pause_overlay()
 	_setup_audio()
@@ -144,6 +157,18 @@ func _setup_audio() -> void:
 		_music.stream = stream
 		_music.play()
 	apply_music_volume()
+
+
+func _route_to_sfx(node: Node) -> void:
+	if (node is AudioStreamPlayer or node is AudioStreamPlayer3D) and node.bus == &"Master":
+		node.bus = &"SFX"
+
+
+func apply_sfx_volume() -> void:
+	var bus := AudioServer.get_bus_index("SFX")
+	if bus >= 0:
+		AudioServer.set_bus_mute(bus, sfx_volume <= 0.01)
+		AudioServer.set_bus_volume_db(bus, linear_to_db(maxf(sfx_volume, 0.01)))
 
 
 func apply_music_volume() -> void:
@@ -475,6 +500,11 @@ func load_settings() -> void:
 		mouse_sensitivity = cfg.get_value("input", "mouse_sensitivity", mouse_sensitivity)
 		master_volume = cfg.get_value("audio", "master_volume", master_volume)
 		music_volume = cfg.get_value("audio", "music_volume", music_volume)
+		sfx_volume = cfg.get_value("audio", "sfx_volume", sfx_volume)
+		crosshair_shape = cfg.get_value("hud", "crosshair_shape", crosshair_shape)
+		crosshair_color = cfg.get_value("hud", "crosshair_color", crosshair_color)
+		crosshair_size = cfg.get_value("hud", "crosshair_size", crosshair_size)
+		hitmarker_enabled = cfg.get_value("hud", "hitmarker", hitmarker_enabled)
 		fov = cfg.get_value("video", "fov", fov)
 		camera_effects = cfg.get_value("video", "camera_effects", camera_effects)
 		bot_count = clampi(cfg.get_value("match", "bot_count", bot_count), 1, MAX_BOTS)
@@ -483,6 +513,7 @@ func load_settings() -> void:
 		frag_limit = cfg.get_value("match", "frag_limit", frag_limit)
 		time_limit_minutes = cfg.get_value("match", "time_limit", time_limit_minutes)
 		instagib = cfg.get_value("match", "instagib", instagib)
+		duel = cfg.get_value("match", "duel", duel)
 		graphics_preset = clampi(cfg.get_value("video", "graphics_preset", graphics_preset), 0, GRAPHICS_PRESETS.size() - 1)
 		vsync = cfg.get_value("video", "vsync", vsync)
 		for action in BINDABLE_ACTIONS:
@@ -494,6 +525,7 @@ func load_settings() -> void:
 						InputMap.action_add_event(action, ev)
 	apply_graphics()
 	apply_master_volume()
+	apply_sfx_volume()
 
 
 ## Speichert die aktuellen Einstellungen
@@ -502,6 +534,11 @@ func save_settings() -> void:
 	cfg.set_value("input", "mouse_sensitivity", mouse_sensitivity)
 	cfg.set_value("audio", "master_volume", master_volume)
 	cfg.set_value("audio", "music_volume", music_volume)
+	cfg.set_value("audio", "sfx_volume", sfx_volume)
+	cfg.set_value("hud", "crosshair_shape", crosshair_shape)
+	cfg.set_value("hud", "crosshair_color", crosshair_color)
+	cfg.set_value("hud", "crosshair_size", crosshair_size)
+	cfg.set_value("hud", "hitmarker", hitmarker_enabled)
 	cfg.set_value("video", "fov", fov)
 	cfg.set_value("video", "camera_effects", camera_effects)
 	cfg.set_value("match", "bot_count", bot_count)
@@ -510,6 +547,7 @@ func save_settings() -> void:
 	cfg.set_value("match", "frag_limit", frag_limit)
 	cfg.set_value("match", "time_limit", time_limit_minutes)
 	cfg.set_value("match", "instagib", instagib)
+	cfg.set_value("match", "duel", duel)
 	cfg.set_value("video", "graphics_preset", graphics_preset)
 	cfg.set_value("video", "vsync", vsync)
 	for action in BINDABLE_ACTIONS:

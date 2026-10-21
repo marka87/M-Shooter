@@ -14,6 +14,7 @@ extends Control
 @onready var frag_limit_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/FragBox/FragLimitOption
 @onready var time_limit_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/TimeBox/TimeLimitOption
 @onready var skill_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/SkillContainer/SkillOption
+@onready var duel_check: CheckButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/DuelCheck
 @onready var instagib_check: CheckButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/InstagibCheck
 @onready var fight_button: Button = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/FightButton
 @onready var match_back_button: Button = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/MatchBackButton
@@ -32,6 +33,12 @@ extends Control
 @onready var graphics_option: OptionButton = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/GraphicsOption
 @onready var vsync_check: CheckButton = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/VsyncCheck
 @onready var keys_grid: GridContainer = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/KeysGrid
+@onready var sfx_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/SfxContainer/HBox/SfxSlider
+@onready var sfx_value_label: Label = $CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/SfxContainer/HBox/SfxValueLabel
+@onready var shape_option: OptionButton = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/CrosshairRow/ShapeOption
+@onready var color_option: OptionButton = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/CrosshairRow/ColorOption
+@onready var size_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/SizeSlider
+@onready var hitmarker_check: CheckButton = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/HitmarkerCheck
 
 # Aktion, die gerade neu belegt wird (leer = keine), und ihr Button
 var _rebind_action: StringName = &""
@@ -80,6 +87,24 @@ func _ready() -> void:
 		GameManager.vsync = on
 		GameManager.apply_graphics())
 	_build_key_rows()
+	sfx_slider.value = GameManager.sfx_volume
+	sfx_value_label.text = "%d%%" % int(GameManager.sfx_volume * 100)
+	sfx_slider.value_changed.connect(func(v: float):
+		GameManager.sfx_volume = v
+		GameManager.apply_sfx_volume()
+		sfx_value_label.text = "%d%%" % int(v * 100))
+	for shape_name in Crosshair.SHAPES:
+		shape_option.add_item(shape_name)
+	shape_option.selected = GameManager.crosshair_shape
+	shape_option.item_selected.connect(func(i: int): GameManager.crosshair_shape = i)
+	for color_name in Crosshair.COLOR_NAMES:
+		color_option.add_item(color_name)
+	color_option.selected = GameManager.crosshair_color
+	color_option.item_selected.connect(func(i: int): GameManager.crosshair_color = i)
+	size_slider.value = GameManager.crosshair_size
+	size_slider.value_changed.connect(func(v: float): GameManager.crosshair_size = v)
+	hitmarker_check.button_pressed = GameManager.hitmarker_enabled
+	hitmarker_check.toggled.connect(func(on: bool): GameManager.hitmarker_enabled = on)
 
 	# Match-Einstellungen
 	bot_slider.max_value = GameManager.MAX_BOTS
@@ -102,6 +127,11 @@ func _ready() -> void:
 		skill_option.add_item(skill_name)
 	skill_option.selected = GameManager.bot_skill
 	instagib_check.button_pressed = GameManager.instagib
+	duel_check.button_pressed = GameManager.duel
+	bot_slider.editable = not GameManager.duel
+	duel_check.toggled.connect(func(on: bool):
+		GameManager.duel = on
+		bot_slider.editable = not on)
 	instagib_check.toggled.connect(func(on: bool): GameManager.instagib = on)
 
 	# Signale verbinden
@@ -158,7 +188,7 @@ func _build_key_rows() -> void:
 		label.text = GameManager.BINDABLE_ACTIONS[action]
 		keys_grid.add_child(label)
 		var button := Button.new()
-		button.custom_minimum_size = Vector2(150, 30)
+		button.custom_minimum_size = Vector2(96, 30)
 		button.text = GameManager.binding_text(action)
 		button.pressed.connect(func():
 			_cancel_rebind()

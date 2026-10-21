@@ -37,8 +37,8 @@ Das Herz eines Arena-Shooters. Hier entscheidet sich, ob es sich „wie Quake“
 | 1.3 | ✅ Jump-Pads und Teleporter (mit Telefrag), beide mit NavigationLink3D für Bots. **Jump-Pads** und **Teleporter** (Area3D mit Ziel-Marker, Bots brauchen dafür NavigationLink3D) | M |
 | 1.4 | Rampen-Sliding und sauberes Treppensteigen (Step-Up), Landung ohne Geschwindigkeitsverlust beim Bunnyhop | M |
 | 1.5 | ✅ Kamera-Feedback: Landungs-Dip, View-Punch bei Treffern, leichtes FOV-Weiten bei hoher Geschwindigkeit (abschaltbar) | S |
-| 1.6 | Fallschaden ab großer Höhe, Schrittgeräusche abhängig vom Tempo | S |
-| 1.7 | Speedometer/Debug-Overlay für Movement-Tuning (Geschwindigkeit, Wunschrichtung, Luftzeit) | S |
+| 1.6 | ✅ Fallschaden ab großer Höhe, Schrittgeräusche abhängig vom Tempo | S |
+| 1.7 | ✅ Debug-Anzeige auf F3. Speedometer/Debug-Overlay für Movement-Tuning (Geschwindigkeit, Wunschrichtung, Luftzeit) | S |
 
 ---
 
@@ -68,7 +68,7 @@ Dazu:
 | 2.6 | ✅ Glühende Einschusslöcher, Rauchspur hinter Raketen, Hülsen beim MG. Einschusslöcher als Decals, Rauchspuren hinter Raketen, Hülsen beim MG | M |
 | 2.7 | ✅ **Waffenmodelle** im Neon-Low-Poly-Stil: eigene Silhouette pro Waffe, leuchtende Teile in der Waffenfarbe | M |
 | 2.8 | ✅ **Viewmodel-Bewegung**: Wippen beim Laufen, Nachziehen beim Umsehen, Absenken beim Springen, Einknicken beim Landen, Rückstoß beim Schuss (evtl. schon zu Hause gebaut, erst mergen) | S |
-| 2.9 | Eigene Effekte pro Waffe: Plasma-Spritzer, Railgun-Spiralspur, Mündungsfeuer je Waffe | S |
+| 2.9 | ✅ Railgun-Spirale, Mündungslicht je Waffe (Plasma-Spritzer gab es schon). Eigene Effekte pro Waffe: Plasma-Spritzer, Railgun-Spiralspur, Mündungsfeuer je Waffe | S |
 
 ---
 
@@ -98,7 +98,7 @@ Der aktuelle Stand sind einfache Meshes und prozedurale Effekte. Für einen mode
 |---|---|---|
 | 4.1 | ✅ Hochwertige Sounds per Generator (`tools/make_sounds.py`). Prozedurale 8-Bit-Sounds durch echte Samples ersetzen (eigene Aufnahmen, sfxr/jsfxr, CC0 von freesound.org). `SoundGenerator` kann als Fallback bleiben | M |
 | 4.2 | ✅ **Ansager**: „Double Kill“, „Killing Spree“, „Headshot“, „Flag taken“, Countdown „3, 2, 1, Fight!“ | M |
-| 4.3 | ✅ teilweise: Busse Music und Announcer, Musik-Regler. Audio-Busse (SFX, Musik, Ansager, UI) mit eigenem Lautstärke-Regler und Hall in großen Räumen | S |
+| 4.3 | ✅ Busse Music, Announcer und SFX (mit Hall), Regler für Musik und Effekte; kein UI-Bus, weil es keine UI-Sounds gibt. Audio-Busse (SFX, Musik, Ansager, UI) mit eigenem Lautstärke-Regler und Hall in großen Räumen | S |
 | 4.4 | ✅ teilweise: ein Synthwave-Loop für alles. Musik: treibender Industrial/Electro-Track pro Map, Menü-Musik | M |
 | 4.5 | ✅ Positionelles Audio verbessern: Schritte von Gegnern hörbar (wichtig für Arena-Taktik) | S |
 
@@ -115,7 +115,7 @@ Heute können Bots nur patrouillieren, verfolgen und mit einer Waffe schießen.
 | 5.3 | ✅ Bots holen Items und Waffen und kennen die Respawn-Zeit von Quad, Mega Health und Rüstung. **Item-Bewusstsein**: Bots holen Health/Armor bei wenig Leben und kennen die Respawn-Zeiten großer Items | M |
 | 5.4 | Ausweichen: Dodge, Strafe-Jumping, Rocket-Jump auf hohe Plattformen | L |
 | 5.5 | Entscheidungslogik als **Utility-AI** statt fester Zustandsmaschine (jede Aktion bekommt eine Punktzahl, der Bot wählt die beste) | M |
-| 5.6 | Namen, Persönlichkeiten (aggressiv, vorsichtig, Camper), Sprüche im Chat | S |
+| 5.6 | ✅ Persönlichkeiten und Chat-Sprüche. Namen, Persönlichkeiten (aggressiv, vorsichtig, Camper), Sprüche im Chat | S |
 
 ---
 
@@ -128,7 +128,7 @@ Heute können Bots nur patrouillieren, verfolgen und mit einer Waffe schießen.
 | 6.3 | ✅ teilweise: Quad Damage und Mega Health. **Power-ups**: Quad Damage / UDamage, Mega Health, Red Armor, Shield Belt, Invisibility. Große Items erzeugen die typische Map-Kontrolle | M |
 | 6.4 | ✅ **Instagib** (nur Railgun, ein Treffer tötet), ideal als schneller Zusatzmodus | S |
 | 6.5 | **Team Deathmatch**, danach **Capture the Flag** | L |
-| 6.6 | Duel-Modus (1 gegen 1, Item-Timing entscheidet) | S |
+| 6.6 | ✅ Duel-Modus (1 gegen 1, Item-Timing entscheidet) | S |
 
 ---
 
@@ -137,8 +137,8 @@ Heute können Bots nur patrouillieren, verfolgen und mit einer Waffe schießen.
 | # | Aufgabe | Aufwand |
 |---|---|---|
 | 7.1 | ✅ Modernes HUD: große Zahlen für HP/Rüstung unten links, Munition unten rechts, Waffenleiste, Power-up-Timer | M |
-| 7.2 | **Trefferrichtungs-Anzeige** (rote Markierung, aus welcher Richtung der Schaden kam) | S |
-| 7.3 | Fadenkreuz-Editor (Form, Farbe, Größe), Hitmarker-Optionen | S |
+| 7.2 | ✅ **Trefferrichtungs-Anzeige** (rote Markierung, aus welcher Richtung der Schaden kam) | S |
+| 7.3 | ✅ Fadenkreuz-Editor (Form, Farbe, Größe), Hitmarker-Optionen | S |
 | 7.4 | ✅ teilweise: FOV, Grafik-Presets (FSR, SSAO, Nebel, Schatten, MSAA), V-Sync, Tastenbelegung; Gamepad und FPS-Limit fehlen. Einstellungen: **FOV**, Grafik-Presets, Auflösungsskalierung (FSR), V-Sync/FPS-Limit, **Tastenbelegung**, Gamepad | M |
 | 7.5 | ✅ teilweise: Map-, Bot- und Regelauswahl, 3D-Hintergrund fehlt. Hauptmenü mit 3D-Hintergrund (Kamerafahrt durch die Arena), Map- und Modusauswahl, Bot-Anzahl und -Stärke | M |
 

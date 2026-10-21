@@ -183,6 +183,30 @@ custom_minimum_size = Vector2(60, 0)
 layout_mode = 2
 text = "70%"
 
+[node name="SfxContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/SfxContainer"]
+layout_mode = 2
+text = "Effekte:"
+
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/SfxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SfxSlider" type="HSlider" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/SfxContainer/HBox"]
+custom_minimum_size = Vector2(240, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="SfxValueLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/SfxContainer/HBox"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+text = "100%"
+
 [node name="FovContainer" type="VBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer"]
 layout_mode = 2
 
@@ -248,9 +272,40 @@ autowrap_mode = 3
 
 [node name="KeysGrid" type="GridContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn"]
 layout_mode = 2
-theme_override_constants/h_separation = 12
+theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 4
-columns = 2
+columns = 4
+
+[node name="CrosshairLabel" type="Label" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn"]
+layout_mode = 2
+text = "Fadenkreuz:"
+
+[node name="CrosshairRow" type="HBoxContainer" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ShapeOption" type="OptionButton" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/CrosshairRow"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ColorOption" type="OptionButton" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/CrosshairRow"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SizeSlider" type="HSlider" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+min_value = 3.0
+max_value = 14.0
+step = 1.0
+value = 7.0
+
+[node name="HitmarkerCheck" type="CheckButton" parent="CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn"]
+layout_mode = 2
+button_pressed = true
+text = "Hitmarker anzeigen"
 
 [node name="MatchPanel" type="PanelContainer" parent="CenterContainer"]
 visible = false
@@ -352,6 +407,10 @@ text = "Zeit-Limit:"
 [node name="TimeLimitOption" type="OptionButton" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/TimeBox"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+
+[node name="DuelCheck" type="CheckButton" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Duell (1 gegen 1)"
 
 [node name="InstagibCheck" type="CheckButton" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2

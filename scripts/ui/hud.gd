@@ -36,6 +36,13 @@ const KILL_FEED_MAX: int = 5
 const KILL_FEED_SECONDS: float = 4.0
 
 var player: Player = null
+# Debug-Anzeige fuer Movement-Tuning (F3): Luftzeit und Spitzentempo des aktuellen Sprungs
+var debug_label: Label
+var chat_box: VBoxContainer
+const CHAT_MAX: int = 4
+const CHAT_SECONDS: float = 6.0
+var _air_time: float = 0.0
+var _peak_speed: float = 0.0
 
 
 ## Verbindet das HUD mit einem Spieler und zeigt sofort dessen aktuellen Stand
@@ -56,6 +63,26 @@ func bind(p: Player) -> void:
 	GameManager.player_announcement.connect(announce)
 	_refresh_scoreboard()
 
+	debug_label = Label.new()
+	debug_label.visible = false
+	debug_label.position = Vector2(20, 200)
+	debug_label.add_theme_font_size_override("font_size", 15)
+	debug_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	debug_label.add_theme_constant_override("outline_size", 5)
+	add_child(debug_label)
+
+	chat_box = VBoxContainer.new()
+	chat_box.name = "ChatBox"
+	chat_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	chat_box.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	chat_box.offset_left = 36.0
+	chat_box.offset_right = 520.0
+	chat_box.offset_top = -260.0
+	chat_box.offset_bottom = -140.0
+	chat_box.alignment = BoxContainer.ALIGNMENT_END
+	add_child(chat_box)
+	GameManager.bot_chat.connect(add_chat_line)
+
 	health_bar.max_value = player.health.max_health
 	armor_bar.max_value = player.health.max_armor
 	_on_health_changed(player.health.health, player.health.armor)
@@ -70,10 +97,11 @@ func bind(p: Player) -> void:
 		_on_weapon_switched(weapon.weapon_name, weapon.current_ammo, weapon.max_ammo)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if not player:
 		return
 	_update_speed()
+	_update_debug(delta)
 	_update_quad()
 	_update_timer()
 	# Scoreboard nur solange Tab gehalten wird
@@ -153,6 +181,29 @@ func _update_speed() -> void:
 		speed_label.modulate = Color(1.0, 1.0, 1.0)
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F3:
+		debug_label.visible = not debug_label.visible
+
+
+## Movement-Werte (F3): Tempo waagrecht/senkrecht, Spitzentempo und Luftzeit des Sprungs, Eingaberichtung
+func _update_debug(delta: float) -> void:
+	var h_speed := Vector2(player.velocity.x, player.velocity.z).length()
+	if player.is_on_floor():
+		if _air_time > 0.0:
+			_air_time = 0.0
+			_peak_speed = 0.0
+	else:
+		_air_time += delta
+	_peak_speed = maxf(_peak_speed, h_speed)
+	if not debug_label.visible:
+		return
+	var wish: Vector3 = player.get_input_direction()
+	debug_label.text = "Tempo  %5.1f m/s  (senkrecht %5.1f)\nSpitze %5.1f m/s im Sprung\nLuftzeit %4.2f s\nEingabe (%4.1f, %4.1f)  %s\n%d FPS" % [
+		h_speed, player.velocity.y, _peak_speed, _air_time, wish.x, wish.z,
+		"Boden" if player.is_on_floor() else "Luft", Engine.get_frames_per_second()]
+
+
 func _on_health_changed(health: float, armor: float) -> void:
 	# Nach dem Respawn (health.reset) das Todes-Overlay wieder ausblenden
 	if not player.is_dead:
@@ -173,7 +224,8 @@ func _on_health_changed(health: float, armor: float) -> void:
 
 ## Roter Bildschirmblitz bei Treffern, dazu ein kurzer Puls im CRT-Overlay (roter Rand, Farbsaum)
 ## und die Lebensanzeige zuckt rot
-func _on_damaged(_info: DamageInfo, health_lost: float) -> void:
+func _on_damaged(info: DamageInfo, health_lost: float) -> void:
+	_show_hit_direction(info)
 	health_label.self_modulate = Color(1.0, 0.3, 0.3)
 	create_tween().tween_property(health_label, "self_modulate", Color.WHITE, 0.3)
 	damage_flash.color = Color(0.9, 0.1, 0.1, 0.18)
@@ -191,8 +243,54 @@ func _on_damaged(_info: DamageInfo, health_lost: float) -> void:
 			shield.tween_method(func(v: float): mat.set_shader_parameter("shield_pulse", v), 0.8, 0.0, 0.45)
 
 
+## Bot-Spruch: "Name: Text" in der Bot-Farbe, verschwindet nach ein paar Sekunden
+func add_chat_line(sender: String, text: String, color: Color) -> void:
+	var line := RichTextLabel.new()
+	line.bbcode_enabled = true
+	line.fit_content = true
+	line.scroll_active = false
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	line.add_theme_font_size_override("normal_font_size", 16)
+	line.add_theme_color_override("font_outline_color", Color.BLACK)
+	line.add_theme_constant_override("outline_size", 5)
+	line.text = "[color=#%s]%s:[/color] %s" % [color.to_html(false), sender, text]
+	chat_box.add_child(line)
+	while chat_box.get_child_count() > CHAT_MAX:
+		chat_box.get_child(0).free()
+	var tween := line.create_tween()
+	tween.tween_interval(CHAT_SECONDS)
+	tween.tween_property(line, "modulate:a", 0.0, 0.6)
+	tween.tween_callback(line.queue_free)
+
+
+## Rote Markierung um das Fadenkreuz in Richtung des Schuetzen (bei Explosionen: Richtung der Explosion)
+func _show_hit_direction(info: DamageInfo) -> void:
+	var source: Vector3
+	if is_instance_valid(info.attacker) and info.attacker != player:
+		source = (info.attacker as Node3D).global_position
+	elif info.is_splash:
+		source = info.position
+	else:
+		return
+	var local: Vector3 = player.global_transform.basis.inverse() * (source - player.global_position)
+	if Vector2(local.x, local.z).length() < 0.5:
+		return
+	var angle: float = atan2(local.x, -local.z)  # 0 = vorn, positiv = rechts
+	var marker := Polygon2D.new()
+	marker.polygon = PackedVector2Array([Vector2(-26, 8), Vector2(26, 8), Vector2(0, -10)])
+	marker.color = Color(1.0, 0.15, 0.1, 0.85)
+	marker.position = get_viewport().get_visible_rect().size / 2.0 + Vector2(sin(angle), -cos(angle)) * 120.0
+	marker.rotation = angle
+	add_child(marker)
+	var tween := marker.create_tween()
+	tween.tween_property(marker, "modulate:a", 0.0, 0.9).set_delay(0.3)
+	tween.tween_callback(marker.queue_free)
+
+
 ## Roter Hitmarker am Fadenkreuz
 func show_hitmarker() -> void:
+	if not GameManager.hitmarker_enabled:
+		return
 	hitmarker.visible = true
 	hitmarker.modulate = Color(1.0, 0.25, 0.25, 1.0)
 	var tween := create_tween()

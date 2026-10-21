@@ -54,6 +54,27 @@ const SKILL_PRESETS: Array[Dictionary] = [
 @export var dodge_chance: float = 0.25
 
 # ==============================================================================
+# PERSOENLICHKEIT
+# ==============================================================================
+
+## Spielstil: Aggressiv (greift frueher an, verfolgt laenger, holt kaum Items), Vorsichtig (Leben und
+## Ruestung zaehlen doppelt, weicht bei wenig Leben zurueck), Camper (wartet lange an Item-Plaetzen),
+## Ausgeglichen (Standard). Die Arena verteilt sie reihum.
+enum Personality { AGGRESSIVE, CAUTIOUS, CAMPER, BALANCED }
+@export var personality: Personality = Personality.BALANCED
+const PERSONALITY_NAMES: Array[String] = ["aggressiv", "vorsichtig", "Camper", "ausgeglichen"]
+## Sprueche nach einem Kill (je Persoenlichkeit) und nach dem eigenen Tod
+const KILL_LINES: Array = [
+	["Zu langsam!", "Nächster!", "Das war einfach.", "Bleib liegen!"],
+	["Sorry, musste sein.", "Puh, knapp.", "Sauber getroffen."],
+	["Ich hab dich kommen hören.", "Mein Platz!", "Geduld zahlt sich aus."],
+	["gg", "Treffer!", "Weiter geht's."],
+]
+const DEATH_LINES: Array[String] = ["Glück gehabt.", "Das gibt Rache!", "Lag!", "Na warte ...", "Nicht schlecht."]
+# Hoechstens alle 5 s ein Spruch pro Bot
+var _chat_cooldown: float = 0.0
+
+# ==============================================================================
 # KNOTEN-REFERENZEN
 # ==============================================================================
 
@@ -159,6 +180,10 @@ func _ready() -> void:
 	nav_agent.path_desired_distance = 1.0
 	health.changed.connect(func(_h: float, _a: float): _update_nameplate())
 	health.died.connect(_die)
+	GameManager.kill_registered.connect(_on_kill_registered)
+	if personality == Personality.AGGRESSIVE:
+		attack_range += 4.0
+		dodge_chance = minf(dodge_chance + 0.1, 0.8)
 	_update_nameplate()
 
 	# Kurze Pause bis der Navigationsserver synchronisiert ist, erst dann gibt es Zufallspunkte
@@ -194,6 +219,7 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= gravity * delta
 
 	# Timer aktualisieren
+	_chat_cooldown -= delta
 	if shoot_timer > 0.0:
 		shoot_timer -= delta
 
@@ -270,7 +296,7 @@ func _process_patrol(delta: float, _target: CharacterBody3D, target_visible: boo
 	var arrive_dist: float = 0.5 if item_wanted else 2.0
 	var arrived: bool = to_target.length() < arrive_dist or (not item_wanted and nav_agent.is_navigation_finished())
 	if arrived or patrol_travel_timer > 12.0 or (patrol_item != null and not item_wanted):
-		patrol_wait_timer = randf_range(1.5, 3.5)
+		patrol_wait_timer = randf_range(4.0, 9.0) if personality == Personality.CAMPER else randf_range(1.5, 3.5)
 		_pick_new_patrol_point()
 		return
 
@@ -292,7 +318,7 @@ func _process_chase(delta: float, chase_target: CharacterBody3D, target_visible:
 	# Wenn das Ziel nicht mehr sichtbar ist, Timer starten
 	if not target_visible:
 		lose_target_timer += delta
-		if lose_target_timer > 5.0:
+		if lose_target_timer > (8.0 if personality == Personality.AGGRESSIVE else 5.0):
 			_switch_state(State.PATROL)
 			return
 	else:
@@ -335,7 +361,8 @@ func _process_attack(delta: float, attack_target: CharacterBody3D, target_visibl
 	var combat_velocity := right_vec * (strafe_direction * combat_speed)
 
 	# Zu nah am Ziel? Leicht zurueckweichen
-	if distance < 6.0:
+	# Vorsichtige Bots weichen auch bei wenig Leben zurueck
+	if distance < 6.0 or (personality == Personality.CAUTIOUS and health.health < 40.0):
 		combat_velocity -= transform.basis.z * (combat_speed * 0.8)
 
 	velocity.x = combat_velocity.x
@@ -571,6 +598,27 @@ func on_teleported() -> void:
 	nav_agent.target_position = patrol_target if current_state == State.PATROL else nav_agent.target_position
 
 
+## Spruch im Chat (HUD), hoechstens alle 5 s
+func _say(text: String) -> void:
+	if _chat_cooldown > 0.0:
+		return
+	_chat_cooldown = 5.0
+	GameManager.bot_chat.emit(display_name, text, skin_color)
+
+
+func _on_kill_registered(killer_name: String, victim_name: String, _weapon: String) -> void:
+	if killer_name == display_name and victim_name != display_name and randf() < 0.35:
+		_say(KILL_LINES[personality].pick_random())
+	elif victim_name == display_name and killer_name != display_name and randf() < 0.2:
+		_say(DEATH_LINES.pick_random())
+
+
+## Vom Pickup aufgerufen
+func on_item_picked(pickup_type: int, _item_name: String = "") -> void:
+	if pickup_type == ItemPickup.PickupType.QUAD_DAMAGE:
+		_say("QUAD! Lauft!")
+
+
 ## Wird von Jump-Pads aufgerufen
 func launch(launch_velocity: Vector3) -> void:
 	velocity = launch_velocity
@@ -797,12 +845,16 @@ func _best_item() -> Node3D:
 			continue
 		var dist: float = global_position.distance_to(item.global_position)
 		var score: float = item.value_for(self) / (1.0 + dist / 15.0)
+		if personality == Personality.CAUTIOUS and item.pickup_type in [ItemPickup.PickupType.HEALTH, ItemPickup.PickupType.ARMOR, ItemPickup.PickupType.MEGA_HEALTH]:
+			score *= 2.0
 		if score > best_score:
 			best_score = score
 			best = item
 	# Unwichtiges ignorieren; mittelwertige Items in 30 % der Faelle auslassen (Abwechslung),
 	# hochwertige (Power-ups in der Naehe) immer holen
-	if best_score < 12.0 or (best_score < 40.0 and randf() < 0.3):
+	# Aggressive holen nur Wertvolles, Camper fast alles (sie warten gern an Item-Plaetzen)
+	var threshold: float = {Personality.AGGRESSIVE: 30.0, Personality.CAMPER: 6.0}.get(personality, 12.0)
+	if best_score < threshold or (best_score < 40.0 and randf() < 0.3):
 		return null
 	return best
 

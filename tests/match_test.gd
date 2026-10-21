@@ -102,10 +102,15 @@ func run() -> void:
 	# Das Zeitlimit hat das Spiel angehalten; im Spiel geht es danach ueber das Menue weiter
 	paused = false
 	gm.instagib = true
+	gm.duel = true
+	gm.bot_count = 3
 	gm.time_limit_minutes = 0.0
 	gm.reset_game()
 	change_scene_to_file("res://levels/test_arena.tscn")
 	await create_timer(0.5).timeout
+	check(get_nodes_in_group("enemies").size() == 1, "Duell: genau ein Bot (trotz 3 eingestellt)")
+	gm.duel = false
+	gm.bot_count = 1
 	player = gm.current_player
 	bot = get_nodes_in_group("enemies")[0]
 	bot.set_physics_process(false)

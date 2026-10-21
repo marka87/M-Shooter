@@ -357,8 +357,20 @@ func run() -> void:
 	var snd: AudioStream = SoundGenerator.create_hitsound()
 	check(snd == SoundGenerator.create_hitsound(), "Sound-Cache liefert dieselbe Instanz")
 
-	# HUD-Layout: Hauptelemente ueberlappen sich nicht und liegen im Bild (1280x720 und 1152x648)
 	var hud = player.hud
+	# Fallschaden: 9 m nichts, 15 m 5, 25 m 15
+	var g: float = player.gravity
+	var falls: Array = [9.0, 15.0, 25.0].map(func(h): return player.fall_damage_for(-sqrt(2.0 * g * h)))
+	check(falls == [0.0, 5.0, 15.0], "Fallschaden nach Hoehe (%s)" % [falls])
+
+	# Trefferrichtung: Markierung am Fadenkreuz; Bot-Spruch erscheint im Chat
+	var markers_before: int = hud.find_children("*", "Polygon2D", false, false).size()
+	player.take_damage(DamageInfo.create(1.0, bots[1], player.global_position, Vector3.ZERO, "Test"))
+	check(hud.find_children("*", "Polygon2D", false, false).size() == markers_before + 1, "Trefferrichtung wird angezeigt")
+	gm.bot_chat.emit("Vex", "Test", Color.RED)
+	check(hud.chat_box.get_child_count() >= 1 and "Vex" in hud.chat_box.get_child(hud.chat_box.get_child_count() - 1).text, "Bot-Spruch im Chat")
+
+	# HUD-Layout: Hauptelemente ueberlappen sich nicht und liegen im Bild (1280x720 und 1152x648)
 	hud.quad_label.visible = true
 	var hud_ok := true
 	for screen in [Vector2i(1280, 720), Vector2i(1152, 648)]:

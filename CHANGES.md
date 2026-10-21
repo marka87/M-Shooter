@@ -1,3 +1,17 @@
+# Änderungen (Runde 24: Schnelle Punkte)
+
+- **Trefferrichtung (7.2):** Rote Markierung um das Fadenkreuz zeigt, woher ein Treffer kam (bei Explosionen: Richtung der Explosion).
+- **Fallschaden (1.6):** Ab 12 m Fallhöhe 5 Schaden, ab 20 m 10 und mehr (zählt als Selbstmord „Sturz“). Schritte sind beim Gehen leiser, beim Sprinten und Strafe-Jumping lauter.
+- **Debug-Anzeige (1.7):** F3 zeigt Tempo waagrecht/senkrecht, Spitzentempo im Sprung, Luftzeit, Eingaberichtung und FPS.
+- **Duell (6.6):** Schalter im Match-Fenster, genau ein Bot (der Bot-Regler ist dann gesperrt).
+- **Fadenkreuz-Editor (7.3):** Form (Punkt, Kreuz, Kreuz mit Punkt, Kreis), Farbe, Größe und Hitmarker an/aus in den Einstellungen; das Fadenkreuz wird gezeichnet (`scripts/ui/crosshair.gd`). Die Tastenbelegung steht dafür jetzt in zwei Spalten.
+- **Effekte pro Waffe (2.9):** Spiralspur um den Railgun-Strahl wie in Quake 3, jede Waffe ohne eigenes Mündungsfeuer blitzt beim Schuss in ihrer Farbe auf.
+- **Bot-Persönlichkeiten (5.6):** Aggressiv (greift früher an, verfolgt länger, holt kaum Items), vorsichtig (Leben/Rüstung zählen doppelt, weicht bei wenig Leben zurück), Camper (wartet lange an Item-Plätzen), ausgeglichen. Sprüche nach Kills, beim eigenen Tod und mit Quad erscheinen im Chat links unten.
+- **Audio (4.3):** Neuer Bus SFX mit leichtem Hall für alle Effekte (automatisch zugewiesen) und eigener Regler „Effekte“.
+- Tests für Fallschaden, Trefferrichtung, Chat und Duell. Alle vier Tests grün.
+
+---
+
 # Änderungen (Runde 23: Bot-Waffen, Item-Timing, HUD, Shader, Einstellungen, Leistung)
 
 - **Bots mit allen Waffen (5.2):** Jeder Bot trägt dieselben Waffenszenen wie der Spieler (`scripts/components/bot_arsenal.gd`), sichtbar an der rechten Hand, mit Munition, Abklingzeit, echten Raketen, Plasma und Shock-Kugeln. Waffenwahl nach Entfernung (Shotgun < 9 m, Raketen 4,5–25 m, Railgun ab 18 m usw.). Raketen und Plasma werden vorgehalten, Raketen auf die Füße gezielt. Die Waffen nehmen dafür statt einer Kamera einen beliebigen Zielknoten. Die alte Bot-eigene Schusslogik ist entfallen.

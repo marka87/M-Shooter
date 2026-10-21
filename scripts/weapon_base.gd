@@ -43,6 +43,9 @@ var cooldown_timer: float = 0.0
 var initial_position: Vector3 = Vector3.ZERO
 var current_recoil: float = 0.0
 var initial_rotation: Vector3 = Vector3.ZERO
+# Muendungslicht in der Waffenfarbe, blitzt bei jedem Schuss auf (MG und Shotgun haben eigenes Feuer)
+var _muzzle_light: OmniLight3D = null
+var _muzzle_light_base: float = 0.0
 # Fortschritt beim Hochziehen: 1 = ganz unten, 0 = in Position
 var _raise: float = 0.0
 
@@ -52,6 +55,15 @@ func _ready() -> void:
 	initial_position = position
 	initial_rotation = rotation
 	reset_loadout()
+	if muzzle and not muzzle.has_node("MuzzleFlash"):
+		_muzzle_light = muzzle.get_node_or_null("MuzzleLight") as OmniLight3D
+		if _muzzle_light == null:
+			_muzzle_light = OmniLight3D.new()
+			_muzzle_light.light_energy = 0.0
+			_muzzle_light.omni_range = 3.0
+			_muzzle_light.light_color = data.color
+			muzzle.add_child(_muzzle_light)
+		_muzzle_light_base = _muzzle_light.light_energy
 
 
 ## Zustand wie beim Spawn: Besitz und Start-Munition laut WeaponData
@@ -110,6 +122,7 @@ func try_fire(shooter: Node3D, camera: Node3D) -> bool:
 	
 	# Spezifische Schuss-Implementierung der Waffe ausfuehren
 	_on_fire(shooter, camera)
+	_pulse_muzzle()
 	
 	fired.emit()
 	return true
@@ -131,8 +144,16 @@ func try_fire_alt(shooter: Node3D, camera: Node3D) -> bool:
 	ammo_changed.emit(current_ammo, max_ammo)
 	current_recoil = recoil_distance
 	_on_fire_alt(shooter, camera)
+	_pulse_muzzle()
 	fired.emit()
 	return true
+
+
+func _pulse_muzzle() -> void:
+	if _muzzle_light == null:
+		return
+	_muzzle_light.light_energy = _muzzle_light_base + 2.5
+	create_tween().tween_property(_muzzle_light, "light_energy", _muzzle_light_base, 0.09)
 
 
 ## Virtuelle Methode fuer das Alt-Feuer

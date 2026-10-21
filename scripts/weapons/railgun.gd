@@ -58,3 +58,23 @@ func _on_fire(shooter: Node3D, camera: Node3D) -> void:
 		shooter.get_parent().add_child(beam)
 		var start_pos: Vector3 = muzzle.global_position if muzzle else from + forward * 0.5
 		beam.setup_beam(start_pos, hit_pos)
+		_spawn_spiral(shooter.get_parent(), start_pos, hit_pos)
+
+
+## Spiralspur um den Strahl wie in Quake 3 (aus gepoolten Leuchtspuren, langsam verblassend)
+func _spawn_spiral(parent: Node, start: Vector3, end: Vector3) -> void:
+	var axis := end - start
+	var length := axis.length()
+	if length < 1.0:
+		return
+	var dir := axis / length
+	var u := dir.cross(Vector3.UP if absf(dir.y) < 0.95 else Vector3.RIGHT).normalized()
+	var v := dir.cross(u)
+	var segments: int = mini(int(length / 0.3), 150)
+	var prev := start + u * 0.12
+	for i in range(1, segments + 1):
+		var t := float(i) / segments
+		var angle := t * length * 2.2  # etwa eine Windung pro 2,9 m
+		var point := start + axis * t + (u * cos(angle) + v * sin(angle)) * 0.12
+		Tracer.spawn(parent, prev, point, data.color, 0.025, 0.6)
+		prev = point
