@@ -32,10 +32,9 @@ var _wait_for_shoot_release: bool = false
 @onready var switch_audio: AudioStreamPlayer = $SwitchAudioPlayer
 
 # Standard-Position der Waffe vor der Kamera (rechts unten), nah und gross wie in modernen Arena-Shootern
-var default_pos: Vector3 = Vector3(0.2, -0.2, -0.3)
+var default_pos: Vector3 = Vector3(0.25, -0.22, -0.23)
 ## Vergroesserung der Ego-Waffe (Muzzle wandert mit, Schuesse kommen weiter aus dem Lauf)
-var view_scale: float = 1.35
-
+var view_scale: float = 1.6
 
 func _ready() -> void:
 	position = default_pos

@@ -20,6 +20,9 @@ const FINGERS := ["index", "middle", "ring", "pinky"]
 @export var thumb_curl: Vector3 = Vector3(20, 30, 25)
 ## Handflaechen-Mitte im Modell (Einheiten): dieser Punkt liegt am Griff
 @export var palm_center: Vector3 = Vector3(0, -0.4, -1.1)
+## Feinjustierung (Viewmodel-Editor, F4): Versatz in Metern und Zusatzdrehung in Grad, beides im System der Waffe
+@export var hand_offset: Vector3 = Vector3.ZERO
+@export var hand_rot: Vector3 = Vector3.ZERO
 
 var weapon_manager: Node3D
 var _hand: Node3D
@@ -38,12 +41,16 @@ func _ready() -> void:
 		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		# Gleiche Render-Ebene wie die Waffen (eigenes Viewmodel-Licht)
 		mesh.layers = WeaponManager.VIEWMODEL_LAYER
+	apply_curl()
+
+
+## Fingerglieder um die eigene X-Achse zur Handflaeche (-Y) kruemmen (curl / thumb_curl)
+func apply_curl() -> void:
 	for finger in FINGERS + ["thumb"]:
 		var angles: Vector3 = thumb_curl if finger == "thumb" else curl
 		for joint in 3:
 			var node := _hand.find_child("%s_%d" % [finger, joint], true, false) as Node3D
 			if node:
-				# Um die eigene X-Achse zur Handflaeche (-Y) kruemmen
 				node.rotation.x = -deg_to_rad(angles[joint])
 
 
@@ -57,5 +64,5 @@ func _process(_delta: float) -> void:
 	var z := -fingers.normalized()
 	var y := -palm
 	y = (y - z * y.dot(z)).normalized()
-	var basis := weapon.basis * Basis(y.cross(z), y, z).scaled(Vector3.ONE * hand_scale) * Basis.from_scale(Vector3(-1, 1, 1))
-	_hand.transform = Transform3D(basis, weapon.transform * model.grip_point() - basis * palm_center)
+	var basis := weapon.basis * Basis.from_euler(hand_rot * PI / 180.0) * Basis(y.cross(z), y, z).scaled(Vector3.ONE * hand_scale) * Basis.from_scale(Vector3(-1, 1, 1))
+	_hand.transform = Transform3D(basis, weapon.transform * (model.grip_point() + hand_offset) - basis * palm_center)

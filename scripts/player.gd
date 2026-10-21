@@ -112,6 +112,11 @@ func _ready() -> void:
 	hands.name = "ViewHands"
 	hands.weapon_manager = weapon_manager
 	weapon_manager.add_child(hands)
+	var tuner := ViewmodelTuner.new()
+	tuner.name = "ViewmodelTuner"
+	tuner.weapon_manager = weapon_manager
+	tuner.hands = hands
+	add_child(tuner)
 
 	_step_audio = AudioStreamPlayer.new()
 	_step_audio.volume_db = -9.0

@@ -397,6 +397,18 @@ func run() -> void:
 	var gripped: Node3D = player.weapon_manager.get_current_weapon()
 	var palm: Vector3 = hands._hand.transform * hands.palm_center
 	check(hands.visible and palm.distance_to(gripped.transform * gripped.get_node("Model").grip_point()) < 0.01, "Ego-Hand greift die aktuelle Waffe")
+	# Viewmodel-Editor: F4 an, Pfeil rechts schiebt die Waffe 1 cm nach rechts
+	var tuner = player.get_node("ViewmodelTuner")
+	var pos_before: Vector3 = player.weapon_manager.default_pos
+	for k in [KEY_F4, KEY_RIGHT]:
+		var ev := InputEventKey.new()
+		ev.keycode = k
+		ev.pressed = true
+		tuner._input(ev)
+	var moved: Vector3 = player.weapon_manager.default_pos - pos_before
+	check(tuner._active and moved.is_equal_approx(Vector3(0.01, 0, 0)), "Viewmodel-Editor: Pfeil verschiebt die Waffe (%s)" % moved)
+	player.weapon_manager.default_pos = pos_before
+	tuner._active = false
 
 	var hud = player.hud
 	# Fallschaden: 9 m nichts, 15 m 5, 25 m 15
