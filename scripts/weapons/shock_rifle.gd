@@ -57,7 +57,7 @@ func _on_fire_alt(shooter: Node3D, camera: Node3D) -> void:
 	var ball := BALL_SCENE.instantiate() as EnergyProjectile
 	ball.shooter = shooter
 	shooter.get_parent().add_child(ball)
-	ball.global_position = muzzle.global_position
+	ball.global_position = projectile_origin(camera)
 	# Kugel fliegt genau in Blickrichtung, damit man sie mit dem Strahl leicht nachzielen kann
 	var forward: Vector3 = -camera.global_transform.basis.z
 	ball.look_at(ball.global_position + forward, Vector3.UP if absf(forward.y) < 0.98 else Vector3.FORWARD)

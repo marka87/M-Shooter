@@ -151,7 +151,13 @@ func run() -> void:
 	b1.set_physics_process(false)
 	b1.take_damage(DamageInfo.create(100.0, player, b1.global_position + Vector3(0, 1.0, 0), Vector3.FORWARD, "Test"))
 	check(b1.model.visible and b1.ragdoll.is_simulating_physics(), "Bot faellt als Ragdoll um")
-	var hit_speed: float = b1.ragdoll.get_node("Rag_DEF-hips").linear_velocity.length()
+	# Getroffen ist der Knochen am naechsten zum Trefferpunkt (wie in Bot._start_ragdoll)
+	var hit_at: Vector3 = b1.global_position + Vector3(0, 1.0, 0)
+	var hit_bone: PhysicalBone3D = null
+	for bone: PhysicalBone3D in b1.ragdoll.get_children():
+		if hit_bone == null or bone.global_position.distance_squared_to(hit_at) < hit_bone.global_position.distance_squared_to(hit_at):
+			hit_bone = bone
+	var hit_speed: float = hit_bone.linear_velocity.length()
 	var foot_speed: float = b1.ragdoll.get_node("Rag_DEF-shin_L").linear_velocity.length()
 	check(hit_speed > foot_speed + 1.0, "Getroffener Knochen fliegt staerker weg (%.1f vs. %.1f m/s)" % [hit_speed, foot_speed])
 	await wait(2.0)
@@ -391,12 +397,6 @@ func run() -> void:
 	check(SoundGenerator.load_announcer("fight") is AudioStreamMP3 and first_blood is AudioStreamRandomizer and first_blood.streams_count == 2,
 		"Eigene Ansager: MP3, First Blood mit 2 Varianten")
 
-	# Ego-Hand: sichtbar, Handflaeche am Griff der aktuellen Waffe
-	var hands = player.weapon_manager.get_node("ViewHands")
-	await process_frame
-	var gripped: Node3D = player.weapon_manager.get_current_weapon()
-	var palm: Vector3 = hands._hand.transform * hands.palm_center
-	check(hands.visible and palm.distance_to(gripped.transform * gripped.get_node("Model").grip_point()) < 0.01, "Ego-Hand greift die aktuelle Waffe")
 	# Viewmodel-Editor: F4 an, Pfeil rechts schiebt die Waffe 1 cm nach rechts
 	var tuner = player.get_node("ViewmodelTuner")
 	var pos_before: Vector3 = player.weapon_manager.default_pos

@@ -39,7 +39,7 @@ func _on_fire(shooter: Node3D, camera: Node3D) -> void:
 	rocket.weapon_name = weapon_name
 	shooter.get_parent().add_child(rocket)
 	
-	var spawn_pos: Vector3 = muzzle.global_position if muzzle else cam_pos + cam_forward * 0.8
+	var spawn_pos: Vector3 = projectile_origin(camera) if muzzle else cam_pos + cam_forward * 0.8
 	rocket.global_position = spawn_pos
 	
 	# Rakete auf den Zielpunkt ausrichten

@@ -18,7 +18,7 @@ func _on_fire(shooter: Node3D, camera: Node3D) -> void:
 	bolt.shooter = shooter
 	bolt.weapon_name = weapon_name
 	shooter.get_parent().add_child(bolt)
-	bolt.global_position = muzzle.global_position
+	bolt.global_position = projectile_origin(camera)
 	aim_projectile(bolt, camera, shooter)
 
 

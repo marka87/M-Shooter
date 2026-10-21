@@ -35,6 +35,8 @@ var current_ammo: int = 0
 var owned: bool = true
 
 # Knoten-Referenzen
+## Projektile starten hoechstens so weit vor dem Auge (m), wie die Waffe ohne Vergroesserung reichte
+const PROJECTILE_REACH: float = 1.0
 @onready var muzzle: Node3D = $Muzzle
 @onready var audio_player: AudioStreamPlayer3D = $AudioStreamPlayer3D
 
@@ -154,6 +156,12 @@ func _pulse_muzzle() -> void:
 		return
 	_muzzle_light.light_energy = _muzzle_light_base + 2.5
 	create_tween().tween_property(_muzzle_light, "light_energy", _muzzle_light_base, 0.09)
+
+
+## Startpunkt fuer Projektile: Richtung Muzzle, aber hoechstens PROJECTILE_REACH vom Auge entfernt.
+## Die Ego-Waffe ist stark vergroessert; sonst starteten Raketen meterweit vor dem Spieler (kein Rocket-Jump).
+func projectile_origin(camera: Node3D) -> Vector3:
+	return camera.global_position + (muzzle.global_position - camera.global_position).limit_length(PROJECTILE_REACH)
 
 
 ## Virtuelle Methode fuer das Alt-Feuer
