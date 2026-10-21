@@ -52,7 +52,7 @@ fov = 85.0
 [node name="NeonEdges" parent="Head/Camera3D" instance=ExtResource("10_edges")]
 
 [node name="WeaponHolder" type="Node3D" parent="Head/Camera3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.24, -0.22, -0.45)
+transform = Transform3D(1.35, 0, 0, 0, 1.35, 0, 0, 0, 1.35, 0.2, -0.2, -0.3)
 script = ExtResource("2_wmgr")
 
 [node name="MachineGun" parent="Head/Camera3D/WeaponHolder" instance=ExtResource("3_mg")]

@@ -13,3 +13,6 @@ Thumbs.db
 
 # Godot-Editor im Projektordner (zu gross fuer GitHub)
 Godot_v*.exe
+
+# Roh-Modell (167 MB, ueber dem GitHub-Limit von 100 MB)
+assets/characters/Arm/arm_export.fbx*

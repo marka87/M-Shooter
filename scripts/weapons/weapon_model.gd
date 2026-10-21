@@ -11,8 +11,16 @@ class_name WeaponModel
 @export var length: float = 0.8
 @export var center_y: float = 0.0
 
+## Wo die Ego-Hand greift, als Anteil der Laenge von hinten
+@export var grip_ratio: float = 0.4
+
 ## Name des Akzent-Materials in den Quaternius-Modellen
 const ACCENT := "Main"
+
+
+## Griffpunkt der rechten Hand im Koordinatensystem der Waffe (Eltern-Knoten)
+func grip_point() -> Vector3:
+	return position + Vector3(0.0, center_y - 0.06, front_z + length * (1.0 - grip_ratio))
 
 
 func _ready() -> void:

@@ -391,6 +391,13 @@ func run() -> void:
 	check(SoundGenerator.load_announcer("fight") is AudioStreamMP3 and first_blood is AudioStreamRandomizer and first_blood.streams_count == 2,
 		"Eigene Ansager: MP3, First Blood mit 2 Varianten")
 
+	# Ego-Hand: sichtbar, Handflaeche am Griff der aktuellen Waffe
+	var hands = player.weapon_manager.get_node("ViewHands")
+	await process_frame
+	var gripped: Node3D = player.weapon_manager.get_current_weapon()
+	var palm: Vector3 = hands._hand.transform * hands.palm_center
+	check(hands.visible and palm.distance_to(gripped.transform * gripped.get_node("Model").grip_point()) < 0.01, "Ego-Hand greift die aktuelle Waffe")
+
 	var hud = player.hud
 	# Fallschaden: 9 m nichts, 15 m 5, 25 m 15
 	var g: float = player.movement.gravity

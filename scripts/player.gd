@@ -108,6 +108,10 @@ func _ready() -> void:
 
 	health.died.connect(_on_died)
 	hud.bind(self)
+	var hands := ViewHands.new()
+	hands.name = "ViewHands"
+	hands.weapon_manager = weapon_manager
+	weapon_manager.add_child(hands)
 
 	_step_audio = AudioStreamPlayer.new()
 	_step_audio.volume_db = -9.0
