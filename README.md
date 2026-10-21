@@ -136,6 +136,7 @@ Booter/
 │   └── weapons/            # WeaponData (.tres) je Waffe: Schaden, Feuerrate, Munition
 ├── scripts/
 │   ├── components/
+│   │   ├── movement_controller.gd # Quake/UT-Bewegung (Strafe-Jump, Bunnyhop, Dodge) aus Eingabewerten
 │   │   └── health_component.gd # Leben & Rüstung für Spieler und Bots
 │   ├── ui/
 │   │   ├── hud.gd
@@ -143,7 +144,7 @@ Booter/
 │   ├── damage_info.gd      # Daten eines Treffers
 │   ├── layers.gd           # Kollisions-Layer als Konstanten
 │   ├── game_manager.gd     # Autoload-Singleton (Punkte, Respawns, Pause-Menü)
-│   ├── player.gd           # Quake-Bewegung, Doppelsprung, HUD, Schaden
+│   ├── player.gd           # Mausblick, Eingaben, Schaden, Tod, Respawn, Schritte
 │   ├── bot.gd              # Bot-Zustandsmaschine & KI
 │   ├── weapon_base.gd      # Basisklasse für Waffen
 │   ├── weapon_manager.gd   # Waffenwechsel, Swaying, Bobbing

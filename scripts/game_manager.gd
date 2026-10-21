@@ -556,7 +556,8 @@ func save_settings() -> void:
 
 
 ## Grafik-Stufe anwenden. Niedrig/Mittel rendern mit FSR in geringerer Aufloesung, darunter fallen
-## SSAO, Nebel und Schatten weg, Ultra glaettet zusaetzlich mit 4x MSAA und feineren Schatten. Die Welt-Einstellungen gelten
+## SSAO, Nebel und Schatten weg, Ultra glaettet zusaetzlich mit 4x MSAA, feineren Schatten und
+## indirektem Licht (SDFGI). Die Welt-Einstellungen gelten
 ## fuer die geladene Arena (die Arena ruft das nach dem Laden auf).
 func apply_graphics(level: Node = null) -> void:
 	var p := graphics_preset
@@ -575,6 +576,14 @@ func apply_graphics(level: Node = null) -> void:
 			env.ssao_enabled = false
 		if p < 1:
 			env.volumetric_fog_enabled = false
+		# Ultra: indirektes Licht in Echtzeit (SDFGI), ohne Backen und fuer jede Map. Neonflaechen
+		# werfen ihr Licht auf Boden und Waende. Gebackene Lightmaps gehen nur im Editor.
+		env.sdfgi_enabled = p == 3
+		if p == 3:
+			env.sdfgi_use_occlusion = true
+			env.sdfgi_cascades = 4
+			env.sdfgi_min_cell_size = 0.2
+			env.sdfgi_bounce_feedback = 0.5
 	# Sonnenschatten nur so weit wie die Arena reicht, Filterqualitaet je Stufe
 	RenderingServer.directional_soft_shadow_filter_set_quality([RenderingServer.SHADOW_QUALITY_HARD,
 		RenderingServer.SHADOW_QUALITY_SOFT_LOW, RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, RenderingServer.SHADOW_QUALITY_SOFT_HIGH][p])

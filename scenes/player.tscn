@@ -1,5 +1,6 @@
-[gd_scene load_steps=19 format=3 uid="uid://bplayer_character_001"]
+[gd_scene format=3 uid="uid://bplayer_character_001"]
 
+[ext_resource type="Script" path="res://scripts/components/movement_controller.gd" id="30_movement"]
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://scripts/weapon_manager.gd" id="2_wmgr"]
 [ext_resource type="PackedScene" uid="uid://machine_gun_001" path="res://scenes/weapons/machine_gun.tscn" id="3_mg"]
@@ -87,6 +88,9 @@ start_armor = 50.0
 [node name="Powerups" type="Node" parent="."]
 script = ExtResource("12_pu")
 show_glow = false
+
+[node name="Movement" type="Node" parent="."]
+script = ExtResource("30_movement")
 
 [node name="CameraFeedback" type="Node" parent="."]
 script = ExtResource("16_camfx")

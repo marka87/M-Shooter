@@ -342,6 +342,9 @@ func run() -> void:
 	gm.apply_graphics(current_scene)
 	var env: Environment = current_scene.find_children("*", "WorldEnvironment", true, false)[0].environment
 	check(is_equal_approx(root.scaling_3d_scale, 0.67) and not env.ssao_enabled and not env.volumetric_fog_enabled, "Grafik-Preset Niedrig angewendet")
+	gm.graphics_preset = 3
+	gm.apply_graphics(current_scene)
+	check(env.sdfgi_enabled and root.msaa_3d == Viewport.MSAA_4X, "Grafik-Preset Ultra: SDFGI und MSAA")
 	gm.graphics_preset = orig_preset
 	gm.apply_graphics(current_scene)
 
@@ -359,8 +362,8 @@ func run() -> void:
 
 	var hud = player.hud
 	# Fallschaden: 9 m nichts, 15 m 5, 25 m 15
-	var g: float = player.gravity
-	var falls: Array = [9.0, 15.0, 25.0].map(func(h): return player.fall_damage_for(-sqrt(2.0 * g * h)))
+	var g: float = player.movement.gravity
+	var falls: Array = [9.0, 15.0, 25.0].map(func(h): return player.movement.fall_damage_for(-sqrt(2.0 * g * h)))
 	check(falls == [0.0, 5.0, 15.0], "Fallschaden nach Hoehe (%s)" % [falls])
 
 	# Trefferrichtung: Markierung am Fadenkreuz; Bot-Spruch erscheint im Chat

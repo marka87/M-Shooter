@@ -1,3 +1,12 @@
+# Änderungen (Runde 25: player.gd aufgeteilt, indirektes Licht)
+
+- **MovementController** (`scripts/components/movement_controller.gd`, Knoten „Movement“ unter dem Spieler): die komplette Bewegungsphysik (Boden mit Reibung, Bunnyhop, Strafe-Jumping, CPM-Luftkontrolle, Doppelsprung, Dodge, Wall-Dodge, Jump-Pad-Start, Fallhöhe) mit allen Tuning-Werten im Inspector. Er arbeitet nur mit übergebenen Eingabewerten (Richtung, Sprung gedrückt/gehalten, Sprint) und meldet Sprung, Doppelsprung, Dodge und Landung per Signal. Das bereitet LAN (8.1) und Bot-Bewegung (5.4) vor. `player.gd` schrumpft von 538 auf 279 Zeilen (Mausblick, Eingaben, Schaden, Tod, Respawn, Schritte, Pickups). Verhalten unverändert.
+- Neuer Test: Strafe-Jumping beschleunigt über das Sprint-Tempo (13,6 m/s nach 1,25 s).
+- **Indirektes Licht (3.3):** Grafik-Stufe Ultra schaltet SDFGI ein: Echtzeit-GI ohne Backen, für jede Map. Neonflächen beleuchten Boden und Wände. Gebackene Lightmaps (LightmapGI) gehen nur im Editor, VoxelGI braucht zum Backen ein echtes Fenster; beides ist ohne Fenster nicht machbar (getestet: die VoxelGI-Daten bleiben leer).
+- Alle vier Tests grün.
+
+---
+
 # Änderungen (Runde 24: Schnelle Punkte)
 
 - **Trefferrichtung (7.2):** Rote Markierung um das Fadenkreuz zeigt, woher ein Treffer kam (bei Explosionen: Richtung der Explosion).

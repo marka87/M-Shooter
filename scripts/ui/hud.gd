@@ -173,9 +173,9 @@ func _update_speed() -> void:
 	var horizontal_speed: float = Vector2(player.velocity.x, player.velocity.z).length()
 	var ground_state: String = "BODEN" if player.is_on_floor() else "LUFT"
 	speed_label.text = "Geschwindigkeit: %4.1f m/s [%s]   %d FPS" % [horizontal_speed, ground_state, Engine.get_frames_per_second()]
-	if horizontal_speed > player.sprint_speed + 1.0:
+	if horizontal_speed > player.movement.sprint_speed + 1.0:
 		speed_label.modulate = Color(0.2, 1.0, 0.4)
-	elif player.is_sprinting:
+	elif player.movement.is_sprinting:
 		speed_label.modulate = Color(1.0, 0.8, 0.2)
 	else:
 		speed_label.modulate = Color(1.0, 1.0, 1.0)

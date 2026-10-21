@@ -25,8 +25,8 @@ func place(player, pos: Vector3) -> void:
 	player.velocity = Vector3.ZERO
 	player.global_position = pos
 	player.rotation = Vector3.ZERO
-	player._dodge_cooldown_left = 0.0
-	player._last_tap.clear()
+	player.movement._dodge_cooldown_left = 0.0
+	player.movement._last_tap.clear()
 	for i in 6:
 		await physics_frame
 
@@ -50,37 +50,51 @@ func run() -> void:
 
 	# --- Dodge am Boden: zweimal rechts -> schnell nach rechts (+X) und etwas nach oben ---
 	await place(player, Vector3(-20, 0.1, 30))
-	player.handle_direction_tap("move_right")
+	player.movement.handle_direction_tap("move_right")
 	await create_timer(0.1).timeout
-	player.handle_direction_tap("move_right")
+	player.movement.handle_direction_tap("move_right")
 	check(player.velocity.x > 12.0 and player.velocity.y > 4.0, "Dodge rechts (v = %s)" % player.velocity)
 	await create_timer(0.6).timeout
 	check(player.global_position.x > -15.0, "Dodge bringt ca. 5 m+ (x = %.1f)" % player.global_position.x)
 
 	# Zu langsam getippt -> kein Dodge
 	await place(player, Vector3(-20, 0.1, 30))
-	player.handle_direction_tap("move_left")
+	player.movement.handle_direction_tap("move_left")
 	await create_timer(0.4).timeout
-	player.handle_direction_tap("move_left")
+	player.movement.handle_direction_tap("move_left")
 	check(absf(player.velocity.x) < 1.0, "Langsames Doppeltippen loest keinen Dodge aus")
 
 	# Abklingzeit: direkt nach einem Dodge kein zweiter
 	await place(player, Vector3(-20, 0.1, 30))
-	check(player.try_dodge("move_forward"), "Dodge vorwaerts")
-	check(not player.try_dodge("move_backward"), "Zweiter Dodge sofort danach gesperrt")
+	check(player.movement.try_dodge("move_forward"), "Dodge vorwaerts")
+	check(not player.movement.try_dodge("move_backward"), "Zweiter Dodge sofort danach gesperrt")
 
 	# --- Wall-Dodge: in der Luft mit dem Ruecken zur Nordwand (Innenseite z = -44) ---
 	await place(player, Vector3(0, 3.0, -43.2))
 	player.rotation = Vector3(0, PI, 0)  # Blick nach Sueden, Wand im Ruecken
 	await physics_frame
-	var ok_wall: bool = player.try_dodge("move_forward")
+	var ok_wall: bool = player.movement.try_dodge("move_forward")
 	check(ok_wall and player.velocity.z > 10.0, "Wall-Dodge von der Wand weg (v = %s)" % player.velocity)
-	player._dodge_cooldown_left = 0.0
-	check(not player.try_dodge("move_forward"), "Nur ein Wall-Dodge pro Sprung")
+	player.movement._dodge_cooldown_left = 0.0
+	check(not player.movement.try_dodge("move_forward"), "Nur ein Wall-Dodge pro Sprung")
+
+	# Strafe-Jumping: Sprung gehalten (Bunnyhop), Eingabe fast quer zur Flugrichtung -> Tempo steigt
+	# ueber das Sprint-Tempo. Der MovementController bekommt die Eingaben direkt.
+	await place(player, Vector3(-30, 0.1, 30))
+	player.set_physics_process(false)
+	var mv = player.movement
+	player.velocity = Vector3(0, 0, -8)
+	for i in 150:
+		var flat := Vector3(player.velocity.x, 0, player.velocity.z).normalized()
+		mv.step(flat.rotated(Vector3.UP, deg_to_rad(-80.0)), false, true, false, 1.0 / 120.0)
+		await physics_frame
+	var strafe_speed := Vector2(player.velocity.x, player.velocity.z).length()
+	player.set_physics_process(true)
+	check(strafe_speed > mv.sprint_speed, "Strafe-Jumping beschleunigt ueber Sprint-Tempo (%.1f m/s)" % strafe_speed)
 
 	# In der Luft ohne Wand -> kein Dodge
 	await place(player, Vector3(0, 6.0, 20))
-	check(not player.try_dodge("move_right"), "Kein Dodge mitten in der Luft ohne Wand")
+	check(not player.movement.try_dodge("move_right"), "Kein Dodge mitten in der Luft ohne Wand")
 
 	# --- Kamera: Landung aus der Hoehe knickt ein ---
 	await place(player, Vector3(-20, 9.0, 30))

@@ -20,7 +20,7 @@ Ohne diese Schritte wird jede spätere Phase teurer.
 | 0.4 | ✅ **Jolt Physics** als 3D-Physik-Engine wählen | Stabiler und schneller als GodotPhysics, vor allem bei CharacterBody3D an Kanten und Rampen | S |
 | 0.5 | ✅ Kollisions-Layer in den Projekteinstellungen benennen (World, Player, Bot, Pickup, Projectile) und überall statt `0xFFFFFFFF` nutzen | Heute stehen Zahlen wie `collision_mask = 5` im Code, das ist schwer zu lesen | S |
 | 0.6 | ✅ **Waffen als Daten:** `WeaponData`-Resource (`.tres`) mit Schaden, Feuerrate, Munition, Sounds, Modell | `add_all_ammo(mg, rkt, rail)` und Index 0/1/2 in Pickups brechen bei jeder neuen Waffe | M |
-| 0.7 | ✅ teilweise: HealthComponent und HUD-Szene; Bewegung bleibt in `player.gd`. **`player.gd` aufteilen** (500 Zeilen): `MovementController`, `HealthComponent` (auch für Bots), HUD als eigene Szene mit eigenem Skript | Bewegung, Schaden und HUD hängen heute in einer Datei | M |
+| 0.7 | ✅ HealthComponent, HUD-Szene und MovementController (Bewegung aus Eingabewerten, `player.gd` 538 → 279 Zeilen). **`player.gd` aufteilen** (500 Zeilen): `MovementController`, `HealthComponent` (auch für Bots), HUD als eigene Szene mit eigenem Skript | Bewegung, Schaden und HUD hängen heute in einer Datei | M |
 | 0.8 | ✅ `DamageInfo`-Klasse (Menge, Angreifer, Waffe, Position, Richtung, Headshot) statt vier loser Parameter | Killfeed, Ansager, Statistiken und Multiplayer brauchen das alle | S |
 | 0.9 | ✅ Pause-Menü aus `game_manager.gd` in eine eigene `.tscn` verschieben | UI im Editor gestalten statt per Code | S |
 
@@ -80,7 +80,7 @@ Der aktuelle Stand sind einfache Meshes und prozedurale Effekte. Für einen mode
 |---|---|---|
 | 3.1 | ✅ Erste Map „Neon Foundry“ per Generator + func_godot. **Maps mit TrenchBroom + [func_godot](https://github.com/func-godot/func_godot_plugin)** bauen. Das ist der klassische Quake-Workflow: Brushes, Rampen, Jump-Pads als Entities, schnelle Iteration | M (Setup) |
 | 3.2 | ✅ AgX, Bloom, SSAO, Volumetric Fog, Neon-Raster-Shader, Sternenhimmel-Shader (SSR bewusst weggelassen). `WorldEnvironment`: Tonemapping (AgX), Glow/Bloom, SSAO, SSR, leichter Volumetric Fog, eigener Skybox-Shader | S |
-| 3.3 | Licht: **LightmapGI** backen (beste Qualität bei statischer Arena) oder SDFGI für schnelle Iteration | M |
+| 3.3 | ✅ teilweise: SDFGI bei Grafik-Stufe Ultra (ohne Backen, jede Map). LightmapGI/VoxelGI backen geht nur mit Fenster bzw. im Editor. Licht: **LightmapGI** backen (beste Qualität bei statischer Arena) oder SDFGI für schnelle Iteration | M |
 | 3.4 | ✅ Neon-Brutalism (dunkle Low-Poly-Körper, Neonkanten). Stilrichtung festlegen. Empfehlung: **Sci-Fi-Industrial mit Neon-Akzenten** (UT99/UT4-Anmutung), das kaschiert einfache Geometrie und ist gut lesbar | – |
 | 3.5 | ✅ Bots: animiertes Quaternius-Mannequin mit Ragdoll (Waffenmodelle offen). Modelle: Waffen und Bots aus Blender oder CC0-Paketen (z. B. Kenney, Quaternius), Bots mit Lauf-/Schuss-/Todes-Animation und Ragdoll | L |
 | 3.6 | ✅ Fresnel-Rand und Hologramm-Respawn (Pickups, Bots), Teleporter-Portal, Schild-Puls am Bildrand (nur Spieler, Bot-Rüstung absorbiert nichts). Shader: leuchtende Pickups mit Fresnel-Rand, Schild-Effekt bei Rüstung, Teleporter-Portal, Hologramm-Respawn | M |
