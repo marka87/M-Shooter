@@ -1,127 +1,13 @@
 [gd_scene format=3]
 
-[sub_resource type="StandardMaterial3D" id="graphite"]
-albedo_color = Color(0.1, 0.11, 0.14, 1)
-metallic = 0.5
-roughness = 0.35
-
-[sub_resource type="StandardMaterial3D" id="trim"]
-albedo_color = Color(0.439, 0.402, 0.327, 1)
-metallic = 0.7
-roughness = 0.25
-
-[sub_resource type="StandardMaterial3D" id="glow"]
-albedo_color = Color(1, 0.75, 0.25, 1)
-emission_enabled = true
-emission = Color(1, 0.75, 0.25, 1)
-emission_energy_multiplier = 4.0
-
-[sub_resource type="BoxMesh" id="mesh_0"]
-material = SubResource("graphite")
-size = Vector3(0.1, 0.12, 0.34)
-
-[sub_resource type="BoxMesh" id="mesh_1"]
-material = SubResource("trim")
-size = Vector3(0.04, 0.025, 0.3)
-
-[sub_resource type="BoxMesh" id="mesh_2"]
-material = SubResource("glow")
-size = Vector3(0.006, 0.02, 0.24)
-
-[sub_resource type="BoxMesh" id="mesh_3"]
-material = SubResource("glow")
-size = Vector3(0.006, 0.02, 0.24)
-
-[sub_resource type="CylinderMesh" id="mesh_4"]
-material = SubResource("trim")
-top_radius = 0.036
-bottom_radius = 0.036
-height = 0.2
-radial_segments = 6
-rings = 1
-
-[sub_resource type="CylinderMesh" id="mesh_5"]
-material = SubResource("graphite")
-top_radius = 0.017
-bottom_radius = 0.017
-height = 0.14
-radial_segments = 8
-rings = 1
-
-[sub_resource type="TorusMesh" id="mesh_6"]
-material = SubResource("glow")
-inner_radius = 0.03
-outer_radius = 0.04
-rings = 8
-ring_segments = 4
-
-[sub_resource type="BoxMesh" id="mesh_7"]
-material = SubResource("graphite")
-size = Vector3(0.06, 0.16, 0.08)
-
-[sub_resource type="BoxMesh" id="mesh_8"]
-material = SubResource("glow")
-size = Vector3(0.064, 0.018, 0.084)
-
-[sub_resource type="PrismMesh" id="mesh_9"]
-material = SubResource("graphite")
-left_to_right = 0.0
-size = Vector3(0.14, 0.1, 0.06)
-
-[sub_resource type="BoxMesh" id="mesh_10"]
-material = SubResource("graphite")
-size = Vector3(0.06, 0.15, 0.075)
-
-[sub_resource type="BoxMesh" id="mesh_11"]
-material = SubResource("trim")
-size = Vector3(0.02, 0.012, 0.09)
+[ext_resource type="Script" path="res://scripts/weapons/weapon_model.gd" id="1_model"]
+[ext_resource type="PackedScene" path="res://assets/weapons/quaternius/scifi_smg.glb" id="2_mesh"]
 
 [node name="MachineGunModel" type="Node3D"]
+script = ExtResource("1_model")
+glow_color = Color(1, 0.75, 0.25, 1)
+front_z = -0.59
+length = 0.65
+center_y = -0.02
 
-[node name="Receiver" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.12)
-mesh = SubResource("mesh_0")
-
-[node name="TopRail" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.072, -0.12)
-mesh = SubResource("mesh_1")
-
-[node name="StripL" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.052, 0.01, -0.12)
-mesh = SubResource("mesh_2")
-
-[node name="StripR" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.052, 0.01, -0.12)
-mesh = SubResource("mesh_3")
-
-[node name="Shroud" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.02, -0.38)
-mesh = SubResource("mesh_4")
-
-[node name="Barrel" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.02, -0.53)
-mesh = SubResource("mesh_5")
-
-[node name="GlowRing" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.02, -0.47)
-mesh = SubResource("mesh_6")
-
-[node name="Magazine" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, -0.12, -0.2)
-mesh = SubResource("mesh_7")
-
-[node name="MagGlow" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, -0.1, -0.2)
-mesh = SubResource("mesh_8")
-
-[node name="Stock" type="MeshInstance3D" parent="."]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, -0.02, 0.1)
-mesh = SubResource("mesh_9")
-
-[node name="Grip" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.965926, -0.258819, 0, 0.258819, 0.965926, 0, -0.11, 0)
-mesh = SubResource("mesh_10")
-
-[node name="Guard" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.075, -0.07)
-mesh = SubResource("mesh_11")
+[node name="Mesh" parent="." instance=ExtResource("2_mesh")]

@@ -140,6 +140,9 @@ func _build_weapon_visual() -> void:
 
 
 func _strip_scripts(node: Node) -> void:
+	# Das Modell-Skript richtet nur das Mesh aus und faerbt es ein, keine Waffenlogik
+	if node is WeaponModel:
+		return
 	node.set_script(null)
 	for child in node.get_children():
 		if child is AudioStreamPlayer3D or child is Light3D:

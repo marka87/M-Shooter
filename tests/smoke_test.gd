@@ -377,6 +377,16 @@ func run() -> void:
 	check(impact is AudioStreamRandomizer and impact.streams_count == 4 and first_impact and first_impact.resource_path.contains("/custom/"),
 		"Eigene Sounds: Einschlag aus custom/ mit 4 Varianten")
 	check(SoundGenerator.create_machinegun_sound() != null, "Fehlender eigener Sound faellt zurueck (MG)")
+	# Waffenmodell (Quaternius): Laufspitze kurz vor dem Muzzle, Akzent leuchtet in der Waffenfarbe
+	var gun: Node3D = load("res://scenes/weapons/railgun.tscn").instantiate()
+	gun.set_script(null)
+	current_scene.add_child(gun)
+	var gun_model: WeaponModel = gun.get_node("Model")
+	var tip_z: float = (gun_model.transform * gun_model._bounds(gun_model.get_node("Mesh"))).position.z
+	var glowing := gun_model.find_children("*", "MeshInstance3D", true, false).any(func(m): return range(m.mesh.get_surface_count()).any(
+		func(i): return m.get_surface_override_material(i) is StandardMaterial3D and m.get_surface_override_material(i).emission_enabled))
+	check(absf(tip_z - gun.get_node("Muzzle").position.z) < 0.05 and glowing, "Waffenmodell: Lauf am Muzzle (%.2f), Akzent leuchtet" % tip_z)
+	gun.queue_free()
 	var first_blood: AudioStream = SoundGenerator.load_announcer("first_blood")
 	check(SoundGenerator.load_announcer("fight") is AudioStreamMP3 and first_blood is AudioStreamRandomizer and first_blood.streams_count == 2,
 		"Eigene Ansager: MP3, First Blood mit 2 Varianten")

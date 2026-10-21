@@ -35,7 +35,7 @@ Das Herz eines Arena-Shooters. Hier entscheidet sich, ob es sich „wie Quake“
 | 1.1 | Luftbewegung an Quake 3 / CPMA angleichen (getrennte Werte für Strafe- und Vorwärts-Beschleunigung, Werte im Inspector zum Feintuning) | M |
 | 1.2 | ✅ **UT-Dodge**: Doppeltipp auf A/D/W/S für seitlichen Sprung, plus **Wall-Dodge** (Dodge von Wänden ab) | M |
 | 1.3 | ✅ Jump-Pads und Teleporter (mit Telefrag), beide mit NavigationLink3D für Bots. **Jump-Pads** und **Teleporter** (Area3D mit Ziel-Marker, Bots brauchen dafür NavigationLink3D) | M |
-| 1.4 | Rampen-Sliding und sauberes Treppensteigen (Step-Up), Landung ohne Geschwindigkeitsverlust beim Bunnyhop | M |
+| 1.4 | ✅ Rampen-Sliding und sauberes Treppensteigen (Step-Up), Landung ohne Geschwindigkeitsverlust beim Bunnyhop | M |
 | 1.5 | ✅ Kamera-Feedback: Landungs-Dip, View-Punch bei Treffern, leichtes FOV-Weiten bei hoher Geschwindigkeit (abschaltbar) | S |
 | 1.6 | ✅ Fallschaden ab großer Höhe, Schrittgeräusche abhängig vom Tempo | S |
 | 1.7 | ✅ Debug-Anzeige auf F3. Speedometer/Debug-Overlay für Movement-Tuning (Geschwindigkeit, Wunschrichtung, Luftzeit) | S |
@@ -82,13 +82,13 @@ Der aktuelle Stand sind einfache Meshes und prozedurale Effekte. Für einen mode
 | 3.2 | ✅ AgX, Bloom, SSAO, Volumetric Fog, Neon-Raster-Shader, Sternenhimmel-Shader (SSR bewusst weggelassen). `WorldEnvironment`: Tonemapping (AgX), Glow/Bloom, SSAO, SSR, leichter Volumetric Fog, eigener Skybox-Shader | S |
 | 3.3 | ✅ teilweise: SDFGI bei Grafik-Stufe Ultra (ohne Backen, jede Map). LightmapGI/VoxelGI backen geht nur mit Fenster bzw. im Editor. Licht: **LightmapGI** backen (beste Qualität bei statischer Arena) oder SDFGI für schnelle Iteration | M |
 | 3.4 | ✅ Neon-Brutalism (dunkle Low-Poly-Körper, Neonkanten). Stilrichtung festlegen. Empfehlung: **Sci-Fi-Industrial mit Neon-Akzenten** (UT99/UT4-Anmutung), das kaschiert einfache Geometrie und ist gut lesbar | – |
-| 3.5 | ✅ Bots: animiertes Quaternius-Mannequin mit Ragdoll (Waffenmodelle offen). Modelle: Waffen und Bots aus Blender oder CC0-Paketen (z. B. Kenney, Quaternius), Bots mit Lauf-/Schuss-/Todes-Animation und Ragdoll | L |
+| 3.5 | ✅ Bots: animiertes Quaternius-Mannequin mit Ragdoll, Waffen: Quaternius Sci-Fi Guns (CC0) mit Neon-Akzenten. Modelle: Waffen und Bots aus Blender oder CC0-Paketen (z. B. Kenney, Quaternius), Bots mit Lauf-/Schuss-/Todes-Animation und Ragdoll | L |
 | 3.6 | ✅ Fresnel-Rand und Hologramm-Respawn (Pickups, Bots), Teleporter-Portal, Schild-Puls am Bildrand (nur Spieler, Bot-Rüstung absorbiert nichts). Shader: leuchtende Pickups mit Fresnel-Rand, Schild-Effekt bei Rüstung, Teleporter-Portal, Hologramm-Respawn | M |
 | 3.7 | ✅ GPUParticles statt CPUParticles für Explosionen, Funken, Rauch | S |
 | 3.8 | ✅ **Lesbarkeit vor Schönheit**: Gegner in Team-/Hervorhebungsfarbe (Brightskins wie in Q3), optional abschaltbar | S |
-| 3.9 | Level von zu Hause mergen (nur lokal committet, noch nicht gepusht) | S |
+| 3.9 | ✅ Level von zu Hause mergen (nur lokal committet, noch nicht gepusht) | S |
 | 3.10 | **Map-Baukasten**: Generator mit Modulen (Turm, Steg, Treppe, Jump-Pad, Teleporter), damit eine neue Map in Stunden statt Tagen steht | M |
-| 3.11 | Weitere Maps: kleine Duell-Map (1 gegen 1), offene Railgun-/Instagib-Map | M |
+| 3.11 | ✅ Weitere Maps: kleine Duell-Map (1 gegen 1), offene Railgun-/Instagib-Map | M |
 
 ---
 
