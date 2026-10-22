@@ -34,8 +34,18 @@ var frag_limit: int = 15
 var time_limit_minutes: float = 10.0
 ## Instagib: nur Railgun mit unendlicher Munition, jeder Treffer toetet, keine Items
 var instagib: bool = false
-## Duell: genau ein Bot, eins gegen eins (Item-Timing entscheidet)
+## Duell: genau ein Bot, eins gegen eins (Item-Timing entscheidet; nur im Deathmatch)
 var duel: bool = false
+## Spielmodus (im Match-Fenster waehlbar)
+enum Mode { DEATHMATCH, TEAM_DEATHMATCH, CTF }
+const MODE_NAMES: Array[String] = ["Deathmatch", "Team Deathmatch", "Capture the Flag"]
+var game_mode: int = Mode.DEATHMATCH
+## Teams (Team-Modi): 0 = Rot, 1 = Blau. Der Spieler spielt fuer Blau, die Bots werden abwechselnd verteilt.
+const TEAM_NAMES: Array[String] = ["Rot", "Blau"]
+const TEAM_COLORS: Array[Color] = [Color(1.0, 0.25, 0.2), Color(0.25, 0.55, 1.0)]
+const PLAYER_TEAM: int = 1
+## Teampunkte (TDM: Frags, CTF: Eroberungen)
+var team_scores: Array[int] = [0, 0]
 const INSTAGIB_DAMAGE: float = 1000.0
 ## Sekunden Countdown vor dem Start (Tests setzen 0)
 var match_countdown: float = 3.0
@@ -311,6 +321,11 @@ func end_match(reason: String) -> void:
 		"player_won": rows.size() > 0 and rows[0].is_player,
 		"accuracy": (100.0 * player_hits / player_shots) if player_shots > 0 else 0.0,
 	}
+	if is_team_mode():
+		var blue_lead: int = team_scores[1] - team_scores[0]
+		results.winner = "Unentschieden" if blue_lead == 0 else "Team " + TEAM_NAMES[1 if blue_lead > 0 else 0]
+		results.player_won = team_scores[PLAYER_TEAM] > team_scores[1 - PLAYER_TEAM]
+		results["teams"] = team_scores.duplicate()
 	for row in rows:
 		if row.is_player:
 			results["player"] = row
@@ -345,10 +360,10 @@ func _close_match_end() -> void:
 
 
 ## Meldet einen Teilnehmer (Spieler oder Bot) fuer die Punktetabelle an
-func register_participant(display_name: String, is_player: bool = false) -> void:
+func register_participant(display_name: String, is_player: bool = false, team: int = -1) -> void:
 	if not scores.has(display_name):
 		scores[display_name] = {
-			"frags": 0, "deaths": 0, "is_player": is_player,
+			"frags": 0, "deaths": 0, "is_player": is_player, "team": team,
 			"damage_dealt": 0.0, "damage_taken": 0.0,
 			"spree": 0, "best_spree": 0, "weapon_kills": {},
 		}
@@ -416,6 +431,12 @@ func register_kill(killer: Node, victim: Node, weapon_name: String, headshot: bo
 	if not suicide and killer is Bot:
 		bot_frags += 1
 
+	# TDM: Frag fuers Team des Schuetzen, Selbstmord kostet das eigene Team einen Punkt
+	if game_mode == Mode.TEAM_DEATHMATCH:
+		var team: int = team_of(victim if suicide else killer)
+		if team >= 0:
+			team_scores[team] += -1 if suicide else 1
+
 	kill_registered.emit(killer_name, victim_name, weapon_name)
 	score_updated.emit(player_frags, player_deaths)
 	scoreboard_changed.emit()
@@ -423,9 +444,12 @@ func register_kill(killer: Node, victim: Node, weapon_name: String, headshot: bo
 		player_died.emit()
 		_player_multi = 0
 
-	# Fraglimit erreicht? (verzoegert, damit Effekte des letzten Kills noch starten)
-	if frag_limit > 0 and not suicide and scores[killer_name].frags >= frag_limit:
-		end_match.call_deferred("Fraglimit")
+	# Fraglimit erreicht? (verzoegert, damit Effekte des letzten Kills noch starten). Im TDM zaehlt das Team,
+	# in CTF nur Eroberungen
+	if frag_limit > 0 and not suicide and game_mode != Mode.CTF:
+		var reached: bool = team_scores[team_of(killer)] >= frag_limit if game_mode == Mode.TEAM_DEATHMATCH else scores[killer_name].frags >= frag_limit
+		if reached:
+			end_match.call_deferred("Fraglimit")
 
 
 ## Multi-Kill (mehrere Kills kurz hintereinander) und Serie (Kills ohne zu sterben) ansagen
@@ -477,6 +501,7 @@ func reset_game() -> void:
 	player_shots = 0
 	player_hits = 0
 	_player_multi = 0
+	team_scores = [0, 0]
 	scores.clear()
 	score_updated.emit(player_frags, player_deaths)
 	scoreboard_changed.emit()
@@ -522,6 +547,7 @@ func load_settings() -> void:
 		time_limit_minutes = cfg.get_value("match", "time_limit", time_limit_minutes)
 		instagib = cfg.get_value("match", "instagib", instagib)
 		duel = cfg.get_value("match", "duel", duel)
+		game_mode = clampi(cfg.get_value("match", "mode", game_mode), 0, MODE_NAMES.size() - 1)
 		graphics_preset = clampi(cfg.get_value("video", "graphics_preset", graphics_preset), 0, GRAPHICS_PRESETS.size() - 1)
 		vsync = cfg.get_value("video", "vsync", vsync)
 		window_mode = clampi(cfg.get_value("video", "window_mode", window_mode), 0, WINDOW_MODES.size() - 1)
@@ -559,6 +585,7 @@ func save_settings() -> void:
 	cfg.set_value("match", "time_limit", time_limit_minutes)
 	cfg.set_value("match", "instagib", instagib)
 	cfg.set_value("match", "duel", duel)
+	cfg.set_value("match", "mode", game_mode)
 	cfg.set_value("video", "graphics_preset", graphics_preset)
 	cfg.set_value("video", "vsync", vsync)
 	cfg.set_value("video", "window_mode", window_mode)
@@ -685,10 +712,11 @@ func register_spawn_point(point: Node3D) -> void:
 func get_spawn_transform(for_node: Node3D) -> Transform3D:
 	if spawn_points.is_empty():
 		return Transform3D(Basis(), Vector3(0.0, 1.5, 0.0))
+	# Abstand zu Gegnern zaehlt (im Team-Modus nicht zu den eigenen Leuten)
 	var others: Array[Node3D] = []
 	for group in ["player", "enemies"]:
 		for node in get_tree().get_nodes_in_group(group):
-			if node != for_node and node.get("health") != null and not node.health.is_dead:
+			if node != for_node and node.get("health") != null and not node.health.is_dead and not are_teammates(node, for_node):
 				others.append(node)
 	var rated: Array = []
 	for point in spawn_points:
@@ -699,6 +727,23 @@ func get_spawn_transform(for_node: Node3D) -> Transform3D:
 	rated.sort_custom(func(a, b): return a.dist > b.dist)
 	var pick: int = randi() % mini(2, rated.size())
 	return rated[pick].point.global_transform
+
+
+## Team- oder Einzelmodus?
+func is_team_mode() -> bool:
+	return game_mode != Mode.DEATHMATCH
+
+
+## Team eines Kaempfers (-1 = keins, z. B. im Deathmatch oder Umgebungsschaden)
+func team_of(node: Node) -> int:
+	if not is_instance_valid(node) or node.get("team") == null:
+		return -1
+	return node.team
+
+
+## Zwei verschiedene Kaempfer im selben Team? (kein Eigenbeschuss, Bots zielen nicht aufeinander)
+func are_teammates(a: Node, b: Node) -> bool:
+	return is_team_mode() and a != b and team_of(a) >= 0 and team_of(a) == team_of(b)
 
 
 ## Gibt einen zufaelligen Spawnpunkt zurueck

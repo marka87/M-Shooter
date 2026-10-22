@@ -157,6 +157,33 @@ func run() -> void:
 	check("HEADSHOT" in announcements, "Kopftreffer-Kill wird angesagt (%s)" % [announcements])
 	player.camera_pitch = 0.0
 
+	# --- Team Deathmatch: Teams ausgeglichen, kein Eigenbeschuss, Teampunkte, Fraglimit fuers Team ---
+	gm.game_mode = gm.Mode.TEAM_DEATHMATCH
+	gm.bot_count = 3
+	gm.frag_limit = 2
+	gm.reset_game()
+	change_scene_to_file("res://levels/test_arena.tscn")
+	await create_timer(0.5).timeout
+	player = gm.current_player
+	var team_bots: Array = get_nodes_in_group("enemies")
+	for b in team_bots:
+		b.set_physics_process(false)
+	var bot_teams: Array = team_bots.map(func(b): return b.team)
+	check(player.team == gm.PLAYER_TEAM and bot_teams == [0, 1, 0], "TDM: Spieler Blau, Bots Rot/Blau/Rot (%s)" % [bot_teams])
+	var mate = team_bots[1]
+	var mate_hp: float = mate.health.health
+	mate.take_damage(DamageInfo.create(50.0, player, mate.global_position, Vector3.ZERO, "Test"))
+	check(mate.health.health == mate_hp, "TDM: kein Schaden am eigenen Team")
+	check(not gm.are_teammates(player, player), "TDM: Selbsttreffer bleiben moeglich (Rocket-Jump)")
+	team_bots[0].take_damage(DamageInfo.create(500.0, player, team_bots[0].global_position, Vector3.ZERO, "Test"))
+	check(gm.team_scores == [0, 1], "TDM: Frag zaehlt fuers Team (%s)" % [gm.team_scores])
+	team_bots[2].take_damage(DamageInfo.create(500.0, player, team_bots[2].global_position, Vector3.ZERO, "Test"))
+	await process_frame
+	check(gm.current_state == gm.GameState.GAME_OVER and gm.team_scores == [0, 2], "TDM: Team-Fraglimit beendet das Match")
+	gm._close_match_end()
+	gm.game_mode = gm.Mode.DEATHMATCH
+	gm.bot_count = 1
+
 	# --- Hauptmenue ---
 	gm.return_to_menu()
 	await process_frame

@@ -394,6 +394,17 @@ text = "Schwierigkeit:"
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 
+[node name="ModeContainer" type="VBoxContainer" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/ModeContainer"]
+layout_mode = 2
+text = "Modus:"
+
+[node name="ModeOption" type="OptionButton" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/ModeContainer"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+
 [node name="LimitsContainer" type="HBoxContainer" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 12

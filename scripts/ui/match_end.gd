@@ -29,6 +29,8 @@ func show_results(results: Dictionary) -> void:
 		title_label.text = "NIEDERLAGE"
 		title_label.add_theme_color_override("font_color", Color(1.0, 0.35, 0.3))
 	subtitle_label.text = "%s gewinnt – %s erreicht" % [results.winner, results.reason]
+	if results.has("teams"):
+		subtitle_label.text += "   (Rot %d : %d Blau)" % [results.teams[0], results.teams[1]]
 
 	# Rangliste
 	for text in ["#", "NAME", "FRAGS", "TODE", "SCHADEN"]:

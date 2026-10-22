@@ -34,6 +34,8 @@ var current_state: State = State.PATROL
 @export var reaction_time: float = 0.4
 ## Leuchtfarbe (Visier, Brustlicht, Schulterpanzer), damit Bots gut unterscheidbar sind
 @export var skin_color: Color = Color(1.0, 0.25, 0.2)
+## Team im Team-Modus (0 = Rot, 1 = Blau), sonst -1; setzt die Arena vor dem Einfuegen
+var team: int = -1
 
 # ==============================================================================
 # SCHWIERIGKEIT
@@ -160,7 +162,7 @@ var flash_mat: StandardMaterial3D
 func _ready() -> void:
 	if display_name.is_empty():
 		display_name = name
-	GameManager.register_participant(display_name, false)
+	GameManager.register_participant(display_name, false, team)
 	weapon_manager.switch_hold = switch_hold
 	_setup_animation()
 	# Zielknoten fuer die Waffen: Schuss vom Auge entlang -Z (wie die Kamera beim Spieler)
@@ -574,7 +576,7 @@ func _update_target() -> void:
 	var best_dist: float = sight_range
 	for group in ["player", "enemies"]:
 		for node in get_tree().get_nodes_in_group(group):
-			if node == self or not _is_alive(node):
+			if node == self or not _is_alive(node) or GameManager.are_teammates(self, node):
 				continue
 			var dist: float = global_position.distance_to(node.global_position)
 			if dist < best_dist and _check_line_of_sight(node):
@@ -669,7 +671,7 @@ func launch(launch_velocity: Vector3) -> void:
 
 ## Schadens-Empfang (wird von Maschinengewehr, Railgun und Explosionen aufgerufen)
 func take_damage(info: DamageInfo) -> void:
-	if current_state == State.DEAD:
+	if current_state == State.DEAD or GameManager.are_teammates(info.attacker, self):
 		return
 	var amount: float = info.amount
 

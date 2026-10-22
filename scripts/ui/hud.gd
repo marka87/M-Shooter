@@ -334,7 +334,10 @@ func _on_ammo_updated(current_ammo: int, max_ammo: int) -> void:
 
 
 func _on_score_updated(frags: int, _deaths: int) -> void:
-	if GameManager.frag_limit > 0:
+	if GameManager.is_team_mode():
+		var limit := " / %d" % GameManager.frag_limit if GameManager.frag_limit > 0 and GameManager.game_mode == GameManager.Mode.TEAM_DEATHMATCH else ""
+		frags_label.text = "Rot %d : %d Blau%s" % [GameManager.team_scores[0], GameManager.team_scores[1], limit]
+	elif GameManager.frag_limit > 0:
 		frags_label.text = "Frags: %d / %d" % [frags, GameManager.frag_limit]
 	else:
 		frags_label.text = "Frags: %d" % frags
@@ -377,6 +380,8 @@ func _refresh_scoreboard() -> void:
 	_add_score_row("NAME", "FRAGS", "TODE", Color(0.6, 0.65, 0.75))
 	for row in GameManager.get_scoreboard():
 		var color := Color(1.0, 0.85, 0.3) if row.is_player else Color.WHITE
+		if GameManager.is_team_mode() and row.team >= 0:
+			color = GameManager.TEAM_COLORS[row.team].lightened(0.35 if row.is_player else 0.0)
 		_add_score_row(row.name, str(row.frags), str(row.deaths), color)
 
 

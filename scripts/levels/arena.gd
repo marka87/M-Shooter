@@ -36,12 +36,16 @@ func _ready() -> void:
 
 ## Bots nach Match-Einstellungen erzeugen, jeweils am freiesten Spawnpunkt
 func _spawn_bots() -> void:
-	var count: int = 1 if GameManager.duel else GameManager.bot_count
+	var count: int = 1 if GameManager.duel and not GameManager.is_team_mode() else GameManager.bot_count
 	for i in clampi(count, 0, BOT_NAMES.size()):
 		var bot: Bot = BOT_SCENE.instantiate()
 		bot.name = "Bot%d" % (i + 1)
 		bot.display_name = BOT_NAMES[i]
 		bot.skin_color = BOT_COLORS[i]
+		if GameManager.is_team_mode():
+			# Abwechselnd Rot und Blau; der Spieler ist Blau, so bleiben die Teams ausgeglichen
+			bot.team = (i + 1 - GameManager.PLAYER_TEAM) % 2
+			bot.skin_color = GameManager.TEAM_COLORS[bot.team]
 		bot.personality = i % Bot.Personality.size()
 		bot.apply_skill(GameManager.bot_skill)
 		add_child(bot)

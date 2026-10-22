@@ -15,6 +15,7 @@ extends Control
 @onready var time_limit_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/TimeBox/TimeLimitOption
 @onready var skill_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/SkillContainer/SkillOption
 @onready var duel_check: CheckButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/DuelCheck
+@onready var game_mode_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/ModeContainer/ModeOption
 @onready var instagib_check: CheckButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/InstagibCheck
 @onready var fight_button: Button = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/FightButton
 @onready var match_back_button: Button = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/MatchBackButton
@@ -146,7 +147,16 @@ func _ready() -> void:
 	skill_option.selected = GameManager.bot_skill
 	instagib_check.button_pressed = GameManager.instagib
 	duel_check.button_pressed = GameManager.duel
-	bot_slider.editable = not GameManager.duel
+	# Duell gibt es nur im Deathmatch (eins gegen eins ohne Teams)
+	for mode_name in GameManager.MODE_NAMES:
+		game_mode_option.add_item(mode_name)
+	game_mode_option.selected = GameManager.game_mode
+	duel_check.disabled = GameManager.is_team_mode()
+	bot_slider.editable = not (GameManager.duel and not GameManager.is_team_mode())
+	game_mode_option.item_selected.connect(func(i: int):
+		GameManager.game_mode = i
+		duel_check.disabled = GameManager.is_team_mode()
+		bot_slider.editable = not (GameManager.duel and not GameManager.is_team_mode()))
 	duel_check.toggled.connect(func(on: bool):
 		GameManager.duel = on
 		bot_slider.editable = not on)

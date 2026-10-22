@@ -47,6 +47,8 @@ signal dodged(local_dir: Vector3, wall: bool)
 
 ## Name in Killfeed und Scoreboard
 @export var display_name: String = "Spieler"
+## Team im Team-Modus (GameManager.PLAYER_TEAM), sonst -1
+var team: int = -1
 
 @export_group("Respawn")
 ## Sekunden bis zum Respawn nach dem Tod
@@ -92,7 +94,8 @@ func _ready() -> void:
 
 	# Spieler im GameManager registrieren
 	GameManager.current_player = self
-	GameManager.register_participant(display_name, true)
+	team = GameManager.PLAYER_TEAM if GameManager.is_team_mode() else -1
+	GameManager.register_participant(display_name, true, team)
 
 	# Maximale Neigung fuer Boeden (verhindert das Hochklettern steiler Waende)
 	floor_max_angle = deg_to_rad(45.0)
@@ -218,7 +221,7 @@ func launch(launch_velocity: Vector3) -> void:
 
 ## Schadens-Empfang (von Bots, Raketen-Selbsttreffern und Explosionen)
 func take_damage(info: DamageInfo) -> void:
-	if is_dead:
+	if is_dead or GameManager.are_teammates(info.attacker, self):
 		return
 	GameManager.register_damage(info, self)
 	health.apply_damage(info)
