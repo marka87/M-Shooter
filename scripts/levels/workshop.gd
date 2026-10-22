@@ -17,4 +17,6 @@ func _ready() -> void:
 	# Kein Match: keine Frags (die Uhr bleibt ohne Restzeit ohnehin aus)
 	player.hud.frags_label.hide()
 	player.hud.control_hints.hide()
-	player.get_node("ViewmodelTuner").set_active(true)
+	var tuner: ViewmodelTuner = player.get_node("ViewmodelTuner")
+	tuner.hand_by_default = true
+	tuner.set_active(true)

@@ -16,6 +16,8 @@ const JOINT_NAMES := ["alle Glieder", "Glied 1 (Wurzel)", "Glied 2", "Glied 3 (S
 
 var weapon_manager: WeaponManager
 var hands: ViewHands
+## Hand bei noch nicht eingestellten Waffen zeigen (die Werkstatt schaltet das an, im Spiel aus)
+var hand_by_default: bool = false
 ## Waffen-ID -> Werte (siehe defaults())
 var settings: Dictionary = {}
 var _active := false
@@ -28,7 +30,7 @@ var _label: Label
 func defaults() -> Dictionary:
 	return {
 		"pos": weapon_manager.default_pos, "scale": weapon_manager.view_scale,
-		"hand": false, "hand_offset": Vector3.ZERO, "hand_rot": Vector3.ZERO, "hand_scale": 0.06,
+		"hand": hand_by_default, "hand_offset": Vector3(-0.02, 0.04, -0.12), "hand_rot": Vector3.ZERO, "hand_scale": 0.06,
 		"fingers": {
 			"thumb": Vector4(20, 30, 25, 0), "index": Vector4(60, 75, 55, 0), "middle": Vector4(60, 75, 55, 0),
 			"ring": Vector4(60, 75, 55, 0), "pinky": Vector4(60, 75, 55, 0),

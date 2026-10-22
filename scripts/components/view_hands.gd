@@ -23,10 +23,13 @@ var _hand: Node3D
 
 
 func _ready() -> void:
+	# Heller Handschuh mit leichtem Randlicht, damit die Hand vor dunklen Waffen und Waenden erkennbar ist
 	var body := StandardMaterial3D.new()
-	body.albedo_color = Color(0.12, 0.13, 0.16)
-	body.metallic = 0.6
-	body.roughness = 0.35
+	body.albedo_color = Color(0.55, 0.57, 0.62)
+	body.metallic = 0.3
+	body.roughness = 0.5
+	body.rim_enabled = true
+	body.rim = 0.6
 	_hand = HAND.instantiate()
 	_hand.name = "HandR"
 	add_child(_hand)
