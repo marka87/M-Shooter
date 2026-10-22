@@ -188,6 +188,12 @@ func _on_fight_pressed() -> void:
 	get_tree().change_scene_to_file(GameManager.MAPS[GameManager.selected_map].scene)
 
 
+## Leere Map ohne Bots: alle Waffen und Hand pro Waffe einstellen (Viewmodel-Editor)
+func _on_workshop_button_pressed() -> void:
+	GameManager.reset_game()
+	get_tree().change_scene_to_file("res://levels/workshop.tscn")
+
+
 func _on_match_back_pressed() -> void:
 	GameManager.save_settings()
 	match_panel.visible = false

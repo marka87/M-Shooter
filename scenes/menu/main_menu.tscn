@@ -75,6 +75,12 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "EINSTELLUNGEN"
 
+[node name="WorkshopButton" type="Button" parent="CenterContainer/MainButtons"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "WAFFEN-WERKSTATT"
+
 [node name="QuitButton" type="Button" parent="CenterContainer/MainButtons"]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
@@ -476,5 +482,6 @@ horizontal_alignment = 2
 
 [connection signal="pressed" from="CenterContainer/MainButtons/StartButton" to="." method="_on_start_button_pressed"]
 [connection signal="pressed" from="CenterContainer/MainButtons/SettingsButton" to="." method="_on_settings_button_pressed"]
+[connection signal="pressed" from="CenterContainer/MainButtons/WorkshopButton" to="." method="_on_workshop_button_pressed"]
 [connection signal="pressed" from="CenterContainer/MainButtons/QuitButton" to="." method="_on_quit_button_pressed"]
 [connection signal="pressed" from="CenterContainer/SettingsPanel/MarginContainer/Columns/VBoxContainer/BackButton" to="." method="_on_back_button_pressed"]

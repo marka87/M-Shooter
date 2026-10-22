@@ -126,7 +126,7 @@ func _update_quad() -> void:
 
 ## Restzeit oben (mm:ss), letzte 30 Sekunden rot. Ohne Zeitlimit ausgeblendet.
 func _update_timer() -> void:
-	timer_label.visible = GameManager.time_limit_minutes > 0.0
+	timer_label.visible = GameManager.time_limit_minutes > 0.0 and GameManager.match_time_left > 0.0
 	if not timer_label.visible:
 		return
 	var t: int = ceili(GameManager.match_time_left)

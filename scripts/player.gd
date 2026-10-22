@@ -111,9 +111,14 @@ func _ready() -> void:
 
 	health.died.connect(_on_died)
 	hud.bind(self)
+	var hands := ViewHands.new()
+	hands.name = "ViewHands"
+	hands.weapon_manager = weapon_manager
+	weapon_manager.add_child(hands)
 	var tuner := ViewmodelTuner.new()
 	tuner.name = "ViewmodelTuner"
 	tuner.weapon_manager = weapon_manager
+	tuner.hands = hands
 	add_child(tuner)
 
 	_step_audio = AudioStreamPlayer.new()

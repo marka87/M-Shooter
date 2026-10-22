@@ -404,18 +404,35 @@ func run() -> void:
 	check(SoundGenerator.load_announcer("fight") is AudioStreamMP3 and first_blood is AudioStreamRandomizer and first_blood.streams_count == 2,
 		"Eigene Ansager: MP3, First Blood mit 2 Varianten")
 
-	# Viewmodel-Editor: F4 an, Pfeil rechts schiebt die Waffe 1 cm nach rechts
+	# Viewmodel-Editor: Werte pro Waffe (Pfeil verschiebt nur die aktuelle Waffe), Fingerglieder einzeln
 	var tuner = player.get_node("ViewmodelTuner")
-	var pos_before: Vector3 = player.weapon_manager.default_pos
-	for k in [KEY_F4, KEY_RIGHT]:
-		var ev := InputEventKey.new()
-		ev.keycode = k
-		ev.pressed = true
-		tuner._input(ev)
+	var press := func(keys: Array):
+		for k in keys:
+			var ev := InputEventKey.new()
+			ev.keycode = k
+			ev.pressed = true
+			tuner._input(ev)
+	var saved: Dictionary = tuner.settings.duplicate(true)
+	var cur_id: StringName = player.weapon_manager.get_current_weapon().weapon_id
+	var other_id: StringName = &"railgun" if cur_id != &"railgun" else &"shotgun"
+	var pos_before: Vector3 = tuner.current().pos
+	press.call([KEY_F4, KEY_RIGHT])
 	var moved: Vector3 = player.weapon_manager.default_pos - pos_before
 	check(tuner._active and moved.is_equal_approx(Vector3(0.01, 0, 0)), "Viewmodel-Editor: Pfeil verschiebt die Waffe (%s)" % moved)
-	player.weapon_manager.default_pos = pos_before
-	tuner._active = false
+	player.weapon_manager.give_weapon(other_id, 10)
+	player.weapon_manager.switch_to_weapon_id(other_id)
+	check(player.weapon_manager.default_pos.is_equal_approx(tuner.settings[other_id].pos) and not tuner.settings[other_id].pos.is_equal_approx(tuner.settings[cur_id].pos),
+		"Viewmodel-Editor: jede Waffe hat eigene Werte")
+	# Zeigefinger (F5 x6), Glied 2 waehlen (rechts x2), einmal beugen: nur dieses Glied dreht sich weiter
+	var index_before: Vector4 = tuner.current().fingers.index
+	press.call([KEY_H, KEY_F5, KEY_F5, KEY_F5, KEY_F5, KEY_F5, KEY_F5, KEY_RIGHT, KEY_RIGHT, KEY_UP])
+	var index_after: Vector4 = tuner.current().fingers.index
+	var joint2: Node3D = tuner.hands._hand.find_child("index_1", true, false)
+	check(index_after - index_before == Vector4(0, 5, 0, 0) and is_equal_approx(joint2.rotation.x, -deg_to_rad(index_after.y)),
+		"Viewmodel-Editor: Fingerglied einzeln beugen (%s)" % (index_after - index_before))
+	tuner.settings = saved
+	tuner.set_active(false)
+	player.weapon_manager.switch_to_weapon_id(cur_id)
 
 	var hud = player.hud
 	# Fallschaden: 9 m nichts, 15 m 5, 25 m 15

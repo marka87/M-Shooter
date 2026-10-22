@@ -219,6 +219,13 @@ func run() -> void:
 	gm.game_mode = gm.Mode.DEATHMATCH
 	gm.bot_count = 1
 
+	# --- Waffen-Werkstatt: keine Bots, alle Waffen, Editor an ---
+	change_scene_to_file("res://levels/workshop.tscn")
+	await create_timer(0.5).timeout
+	var ws_player = gm.current_player
+	check(get_nodes_in_group("enemies").is_empty() and ws_player.weapon_manager.weapons.all(func(w): return w.owned)
+		and ws_player.get_node("ViewmodelTuner")._active, "Werkstatt: keine Bots, alle Waffen, Editor an")
+
 	# --- Hauptmenue ---
 	gm.return_to_menu()
 	await process_frame
