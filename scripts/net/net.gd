@@ -43,6 +43,8 @@ var _listener: PacketPeerUDP = null
 var _clients: Dictionary = {}
 ## Host: Clients, die schon fertig geladen haben, waehrend der Host noch laedt (Neustart)
 var _pending_ready: Array[int] = []
+## Host: zerstoerte Objekte dieses Levels (fuer spaeter Beitretende)
+var _destroyed_props: Array[NodePath] = []
 
 
 func _ready() -> void:
@@ -219,6 +221,7 @@ func on_level_ready(level: Node) -> void:
 		return
 	_level = level
 	entities.clear()
+	_destroyed_props.clear()
 	if is_host():
 		entities["P1"] = GameManager.current_player
 		for bot in get_tree().get_nodes_in_group("enemies"):
@@ -267,7 +270,7 @@ func _add_client(id: int) -> void:
 	for item in get_tree().get_nodes_in_group("pickups"):
 		if not item.is_active:
 			hidden.append(_level.get_path_to(item))
-	_welcome.rpc_id(id, roster, GameManager.scores, GameManager.team_scores, hidden)
+	_welcome.rpc_id(id, roster, GameManager.scores, GameManager.team_scores, hidden, _destroyed_props)
 	for other in _clients:
 		if other != id and _clients[other].has("ready"):
 			_add_entity.rpc_id(other, _entry(eid))
@@ -284,7 +287,7 @@ func _entry(eid: String) -> Dictionary:
 
 ## Host -> Client: alle Kaempfer, Punkte und eingesammelte Items
 @rpc("authority", "reliable")
-func _welcome(roster: Array, scores: Dictionary, team_scores: Array, hidden: Array) -> void:
+func _welcome(roster: Array, scores: Dictionary, team_scores: Array, hidden: Array, destroyed: Array) -> void:
 	for entry in roster:
 		_add_entity(entry)
 	GameManager.scores = scores.duplicate(true)
@@ -296,6 +299,10 @@ func _welcome(roster: Array, scores: Dictionary, team_scores: Array, hidden: Arr
 		var item := _level.get_node_or_null(path)
 		if item:
 			item._collect(true)
+	for path in destroyed:
+		var prop := _level.get_node_or_null(path)
+		if prop:
+			prop.queue_free()
 
 
 @rpc("authority", "reliable")
@@ -520,6 +527,21 @@ func _ev_item_respawn(path: NodePath) -> void:
 	var item := _level.get_node_or_null(path) if is_instance_valid(_level) else null
 	if item:
 		item._respawn()
+
+
+## Host: Kiste, Fass oder Glasscheibe zerstoert
+func on_prop_destroyed(prop: Node) -> void:
+	if is_host() and is_instance_valid(_level):
+		var path := _level.get_path_to(prop)
+		_destroyed_props.append(path)
+		_ev_prop_destroyed.rpc(path)
+
+
+@rpc("authority", "reliable")
+func _ev_prop_destroyed(path: NodePath) -> void:
+	var prop := _level.get_node_or_null(path) if is_instance_valid(_level) else null
+	if prop:
+		prop.destroy()
 
 
 ## Host: CTF-Eroberung und Ansagen

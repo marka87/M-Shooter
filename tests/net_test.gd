@@ -60,6 +60,10 @@ func run_host() -> void:
 	host_player.global_position = Vector3(30, 40, 30)
 	var bot = net.node_of("Bot1")
 	bot.set_physics_process(false)
+	# Feste, freie Stelle (Spawn 2 in der Testarena): sonst steht je nach Zufalls-Spawn eine Wand im Schussweg
+	var down := PhysicsRayQueryParameters3D.create(Vector3(0, 5, -25), Vector3(0, -5, -25), 1)
+	bot.global_position = current_scene.get_world_3d().direct_space_state.intersect_ray(down).position
+	var crate := _add_test_crate()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(RESULT_PATH))
 
 	var pid := OS.create_process(OS.get_executable_path(), ["--headless", "--path", ProjectSettings.globalize_path("res://"),
@@ -90,8 +94,10 @@ func run_host() -> void:
 	puppet.take_damage(DamageInfo.create(50.0, null, puppet.global_position, Vector3.ZERO, "Test"))
 	check(await wait_for(func(): return puppet.health.health > 50.0, 12.0), "Client sammelt Leben ein (der Host entscheidet)")
 
-	# Schuesse des Hosts sieht der Client, das Matchende bestimmt der Host
-	await create_timer(2.5).timeout
+	# Kiste zerstoeren (der Client sieht es), Schuesse des Hosts sieht der Client, Matchende bestimmt der Host
+	await create_timer(1.0).timeout
+	crate.take_damage(DamageInfo.create(100.0, host_player, crate.global_position, Vector3.ZERO, "Test"))
+	await create_timer(1.5).timeout
 	for i in 3:
 		host_player.weapon_manager.fire_current_weapon()
 		await create_timer(0.15).timeout
@@ -112,6 +118,16 @@ func run_host() -> void:
 	quit(1 if fails > 0 else 0)
 
 
+## Dieselbe Kiste bei Host und Client (gleicher Pfad im Level), schwebend und eingefroren
+func _add_test_crate() -> Node:
+	var crate = load("res://scenes/props/physics_crate.tscn").instantiate()
+	crate.name = "TestCrate"
+	crate.freeze = true
+	current_scene.add_child(crate)
+	crate.global_position = Vector3(0, 60, 0)
+	return crate
+
+
 func run_client() -> void:
 	await process_frame
 	var gm = root.get_node("GameManager")
@@ -122,6 +138,7 @@ func run_client() -> void:
 	net.join_game("127.0.0.1", "Gast")
 	check(await wait_for(func(): return is_instance_valid(net._level) and gm.current_player != null, 20.0), "Client laedt die Map des Hosts")
 	var player = gm.current_player
+	var crate := _add_test_crate()
 	check(player.display_name == "Gast", "Eigener Name kommt vom Host")
 	check(await wait_for(func(): return net.node_of("P1") != null and net.node_of("Bot1") != null, 5.0), "Client sieht Host und Bot als Puppen")
 	var bot = net.node_of("Bot1")
@@ -164,6 +181,7 @@ func run_client() -> void:
 		check(await wait_for(func(): return player.health.health > 50.0, 6.0), "Client bekommt Leben aus dem Item (%d HP)" % player.health.health)
 		check(not item.is_active, "Item ist beim Client weg")
 
+	check(await wait_for(func(): return not is_instance_valid(crate), 8.0), "Kiste ist auch beim Client zerstoert")
 	var count_tracers := func() -> int: return current_scene.find_children("*", "Tracer", false, false).size()
 	check(await wait_for(func(): return count_tracers.call() > 0, 8.0), "Client sieht die Schuesse des Hosts")
 	check(await wait_for(func(): return gm.current_state == gm.GameState.GAME_OVER, 8.0), "Matchende kommt vom Host")

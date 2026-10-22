@@ -71,7 +71,7 @@ var _head_offset: Vector3
 # Schritte: zurueckgelegte Strecke seit dem letzten Schrittgeraeusch
 const STEP_DISTANCE: float = 2.3
 var _step_distance: float = 0.0
-var _step_audio: AudioStreamPlayer = null
+var _step_audio: AudioStreamPlayer3D = null
 
 
 func _ready() -> void:
@@ -124,7 +124,10 @@ func _ready() -> void:
 	tuner.hands = hands
 	add_child(tuner)
 
-	_step_audio = AudioStreamPlayer.new()
+	# 3D ohne Abstand und Richtung: klingt wie 2D, hallt aber in Raeumen (ReverbZone)
+	_step_audio = AudioStreamPlayer3D.new()
+	_step_audio.attenuation_model = AudioStreamPlayer3D.ATTENUATION_DISABLED
+	_step_audio.panning_strength = 0.0
 	_step_audio.volume_db = -9.0
 	add_child(_step_audio)
 

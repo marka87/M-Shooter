@@ -30,6 +30,8 @@ MAP = {
     # Explosion und Einschlag
     'explosion': [S + 'explosionCrunch_000', S + 'explosionCrunch_002'],
     'combo': [S + 'lowFrequency_explosion_000'],
+    'glass_break': [I + 'impactGlass_heavy_000', I + 'impactGlass_heavy_002', I + 'impactGlass_heavy_004'],
+    'crate_break': [I + 'impactPlate_heavy_001', I + 'impactPlate_heavy_003'],
     'impact': [I + 'impactMetal_light_001', I + 'impactMetal_light_002', I + 'impactMetal_light_004', I + 'impactMetal_medium_003'],
     # Spieler und Bots
     'footstep_1': [I + 'footstep_concrete_000'],

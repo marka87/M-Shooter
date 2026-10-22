@@ -10,6 +10,10 @@
 [ext_resource type="Resource" path="res://resources/map/neon_map_settings.tres" id="8_settings"]
 [ext_resource type="Script" path="res://scripts/levels/void_kill_zone.gd" id="9_void"]
 [ext_resource type="Script" path="res://scripts/levels/damage_zone.gd" id="10_damage"]
+[ext_resource type="Script" path="res://scripts/levels/reverb_zone.gd" id="11_reverb"]
+[ext_resource type="PackedScene" path="res://scenes/props/physics_crate.tscn" id="12_crate"]
+[ext_resource type="PackedScene" path="res://scenes/props/physics_barrel.tscn" id="13_barrel"]
+[ext_resource type="Script" path="res://scripts/props/glass_pane.gd" id="14_glass"]
 [ext_resource type="PackedScene" path="res://scenes/items/ammo_pickup.tscn" id="item_ammo"]
 [ext_resource type="PackedScene" path="res://scenes/items/health_pickup.tscn" id="item_health"]
 [ext_resource type="PackedScene" path="res://scenes/items/armor_pickup.tscn" id="item_armor"]
@@ -69,6 +73,12 @@ agent_max_slope = 45.0
 
 [sub_resource type="BoxShape3D" id="Zone0"]
 size = Vector3(400.0, 10, 400.0)
+
+[sub_resource type="FogMaterial" id="Fog0"]
+density = 0.04
+albedo = Color(0.5, 0.3, 1.0, 1)
+emission = Color(0.2, 0.12, 0.4, 1)
+edge_fade = 0.4
 
 [node name="SkyYard" type="Node3D"]
 script = ExtResource("1_arena")
@@ -434,3 +444,33 @@ script = ExtResource("9_void")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Zone0"]
 shape = SubResource("Zone0")
+
+[node name="ReverbZones" type="Node3D" parent="."]
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="Crate1" parent="Props" instance=ExtResource("12_crate")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -8, 6.5, 55)
+
+[node name="Crate2" parent="Props" instance=ExtResource("12_crate")]
+transform = Transform3D(0.906308, 0, 0.422618, 0, 1, 0, -0.422618, 0, 0.906308, -8.2, 6.5, 53.8)
+
+[node name="Barrel3" parent="Props" instance=ExtResource("13_barrel")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -6.5, 0.6, -30)
+
+[node name="Crate4" parent="Props" instance=ExtResource("12_crate")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 8, 6.5, -55)
+
+[node name="Crate5" parent="Props" instance=ExtResource("12_crate")]
+transform = Transform3D(0.906308, 0, 0.422618, 0, 1, 0, -0.422618, 0, 0.906308, 8.2, 6.5, -53.8)
+
+[node name="Barrel6" parent="Props" instance=ExtResource("13_barrel")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 6.5, 0.6, 30)
+
+[node name="FogVolumes" type="Node3D" parent="."]
+
+[node name="Fog0" type="FogVolume" parent="FogVolumes"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0.0, -13.0, 0.0)
+size = Vector3(120, 22, 160)
+shape = 3
+material = SubResource("Fog0")

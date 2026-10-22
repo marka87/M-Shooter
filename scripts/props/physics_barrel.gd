@@ -19,6 +19,7 @@ func _ready() -> void:
 	current_health = max_health
 	collision_layer = Layers.PROPS
 	collision_mask = Layers.WORLD | Layers.CHARACTERS | Layers.PROPS
+	BulletHole.mark_dynamic(self)
 
 
 func take_damage(damage_info: DamageInfo) -> void:
@@ -33,13 +34,24 @@ func take_damage(damage_info: DamageInfo) -> void:
 		else:
 			apply_central_impulse(push)
 	
+	# Im Netzspiel meldet der Host, wann das Fass explodiert (Schaden zaehlt ohnehin nur dort)
+	if Net.is_client():
+		return
 	current_health -= damage_info.amount
 	if current_health <= 0.0:
 		_destroy(damage_info.attacker)
 
 
+## Vom Host im Netzspiel (ohne Verursacher)
+func destroy(_push: Vector3 = Vector3.ZERO) -> void:
+	_destroy(null)
+
+
 func _destroy(killer: Node) -> void:
+	if _exploded:
+		return
 	_exploded = true
+	Net.on_prop_destroyed(self)
 	if is_explosive and explosion_scene:
 		var expl := explosion_scene.instantiate() as Node3D
 		expl.max_damage = explosion_damage

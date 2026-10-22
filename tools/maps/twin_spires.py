@@ -86,4 +86,11 @@ def tower(sx):
 
 tower(-1)
 tower(1)
+
+# --- Leuchtender Nebel unter dem Asteroiden, Kisten und Faesser vor den Tuermen ---
+kit.fog_volume(-L - 30, -26, -W - 30, L + 30, -6, W + 30, (0.4, 0.3, 1.0), 0.04, 0.4)
+for sx in (-1, 1):
+    kit.crate(sx * (TX - 10), 0, 6)
+    kit.crate(sx * (TX - 10), 0, 7.2, 30)
+    kit.barrel(sx * (TX - 10), 0, -6)
 kit.write()

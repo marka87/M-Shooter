@@ -10,6 +10,10 @@
 [ext_resource type="Resource" path="res://resources/map/neon_map_settings.tres" id="8_settings"]
 [ext_resource type="Script" path="res://scripts/levels/void_kill_zone.gd" id="9_void"]
 [ext_resource type="Script" path="res://scripts/levels/damage_zone.gd" id="10_damage"]
+[ext_resource type="Script" path="res://scripts/levels/reverb_zone.gd" id="11_reverb"]
+[ext_resource type="PackedScene" path="res://scenes/props/physics_crate.tscn" id="12_crate"]
+[ext_resource type="PackedScene" path="res://scenes/props/physics_barrel.tscn" id="13_barrel"]
+[ext_resource type="Script" path="res://scripts/props/glass_pane.gd" id="14_glass"]
 [ext_resource type="PackedScene" path="res://scenes/items/ammo_pickup.tscn" id="item_ammo"]
 [ext_resource type="PackedScene" path="res://scenes/items/health_pickup.tscn" id="item_health"]
 [ext_resource type="PackedScene" path="res://scenes/items/armor_pickup.tscn" id="item_armor"]
@@ -66,6 +70,18 @@ agent_height = 1.75
 agent_radius = 0.5
 agent_max_climb = 0.5
 agent_max_slope = 45.0
+
+[sub_resource type="BoxShape3D" id="Reverb0"]
+size = Vector3(20, 5, 20)
+
+[sub_resource type="BoxShape3D" id="Reverb1"]
+size = Vector3(10, 4.5, 20)
+
+[sub_resource type="FogMaterial" id="Fog0"]
+density = 0.04
+albedo = Color(0.6, 0.4, 0.9, 1)
+emission = Color(0.0, 0.0, 0.0, 1)
+edge_fade = 0.4
 
 [node name="CampGround" type="Node3D"]
 script = ExtResource("1_arena")
@@ -259,3 +275,56 @@ light_color = Color(0.2, 0.85, 1, 1)
 light_energy = 2.5
 light_volumetric_fog_energy = 2.0
 omni_range = 8
+
+[node name="ReverbZones" type="Node3D" parent="."]
+
+[node name="Reverb0" type="Area3D" parent="ReverbZones"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -30.0, 2.5, 30.0)
+script = ExtResource("11_reverb")
+kind = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ReverbZones/Reverb0"]
+shape = SubResource("Reverb0")
+
+[node name="Reverb1" type="Area3D" parent="ReverbZones"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 25.0, 2.25, 30.0)
+script = ExtResource("11_reverb")
+kind = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ReverbZones/Reverb1"]
+shape = SubResource("Reverb1")
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="Glass1" type="StaticBody3D" parent="Props"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -20.0, 6.8, -30.0)
+script = ExtResource("14_glass")
+size = Vector3(10, 1.5999999999999996, 0.0799999999999983)
+
+[node name="Glass2" type="StaticBody3D" parent="Props"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 17.0, 6.8, -30.0)
+script = ExtResource("14_glass")
+size = Vector3(10, 1.5999999999999996, 0.0799999999999983)
+
+[node name="Crate3" parent="Props" instance=ExtResource("12_crate")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -18.5, 0.5, 18)
+
+[node name="Crate4" parent="Props" instance=ExtResource("12_crate")]
+transform = Transform3D(0.906308, 0, 0.422618, 0, 1, 0, -0.422618, 0, 0.906308, -18.5, 0.5, 16.8)
+
+[node name="Crate5" parent="Props" instance=ExtResource("12_crate")]
+transform = Transform3D(0.984808, 0, -0.173648, 0, 1, 0, 0.173648, 0, 0.984808, 18.5, 0.5, 17.5)
+
+[node name="Barrel6" parent="Props" instance=ExtResource("13_barrel")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 28.5, 0.6, 17.5)
+
+[node name="Barrel7" parent="Props" instance=ExtResource("13_barrel")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -37, 0.6, -37)
+
+[node name="FogVolumes" type="Node3D" parent="."]
+
+[node name="Fog0" type="FogVolume" parent="FogVolumes"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0.0, 0.6, 0.0)
+size = Vector3(60, 1.2, 60)
+shape = 3
+material = SubResource("Fog0")

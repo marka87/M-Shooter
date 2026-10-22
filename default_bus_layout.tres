@@ -15,7 +15,7 @@ room_size = 0.55
 damping = 0.55
 spread = 0.8
 dry = 1.0
-wet = 0.12
+wet = 0.06
 
 [resource]
 bus/1/name = &"Music"

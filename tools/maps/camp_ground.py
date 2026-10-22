@@ -87,4 +87,14 @@ for x, y, z, yaw in ((-34, 0, 34, 0), (35, H_WALK, -26, 90), (-12, 0, -12, 135),
                      (35, H_WALK, 20, 90), (-34, 0, -28, 180), (-26, 0, 14, 0), (-8, H_WALK, -36, 180)):
     kit.spawn(x, y, z, yaw)
 
+# --- Zerstoerbare Objekte, leichter Bodennebel im Innenhof ---
+kit.glass(-25, H_WALK + 1, -30.04, -15, H_WALK + 2.6, -29.96)    # Glasschilde auf dem Gelaender Nord
+kit.glass(12, H_WALK + 1, -30.04, 22, H_WALK + 2.6, -29.96)
+kit.crate(-18.5, 0, 18)
+kit.crate(-18.5, 0, 16.8, 25)
+kit.crate(18.5, 0, 17.5, -10)
+kit.barrel(28.5, 0, 17.5)
+kit.barrel(-37, 0, -37)
+kit.fog_volume(-30, 0, -30, 30, 1.2, 30, (0.6, 0.4, 0.9), 0.04)
+
 kit.write()

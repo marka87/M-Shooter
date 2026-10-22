@@ -83,4 +83,11 @@ for x, z, yaw in ((-5, -12, 0), (5, 12, 180), (5, -28, 0), (-5, 28, 180)):
 kit.light(0, 5, -20, (0.2, 0.85, 1), 2.0, 14)
 kit.light(0, 5, 20, (0.2, 0.85, 1), 2.0, 14)
 
+# --- Leuchtender Nebel unter den Plattformen, Kisten auf den Koepfen, Faesser im Hof ---
+kit.fog_volume(-60, -24, -80, 60, -2, 80, (0.5, 0.3, 1.0), 0.04, 0.4)
+for sz in (-1, 1):
+    kit.crate(sz * 8, 6, sz * -55)
+    kit.crate(sz * 8.2, 6, sz * -53.8, 25)
+    kit.barrel(sz * 6.5, 0, sz * 30)
+
 kit.write()

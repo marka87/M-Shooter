@@ -134,15 +134,16 @@ var last_host_ip: String = "127.0.0.1"
 var bot_skill: int = 2
 const MAX_BOTS: int = 15
 ## Spielbare Arenen: Anzeigename und Szene
-## max_players: Spieler plus Bots, nach Groesse der Map (jede Map hat mindestens so viele Spawnpunkte)
+## max_players: Spieler plus Bots, nach Groesse der Map (jede Map hat mindestens so viele Spawnpunkte).
+## reverb: Hall fuer die ganze Map, wenn sie keine eigenen Hall-Zonen hat (Baukasten-Maps haben sie)
 const MAPS: Array[Dictionary] = [
-	{ "name": "Neon Foundry", "scene": "res://levels/neon_foundry.tscn", "max_players": 8 },
+	{ "name": "Neon Foundry", "scene": "res://levels/neon_foundry.tscn", "max_players": 8, "reverb": ReverbZone.Kind.HALL },
 	{ "name": "Orbital Void", "scene": "res://levels/orbital_void.tscn", "max_players": 8 },
 	{ "name": "Sky Yard", "scene": "res://levels/sky_yard.tscn", "max_players": 12 },
 	{ "name": "Duck 17", "scene": "res://levels/duck_17.tscn", "max_players": 16 },
 	{ "name": "Twin Spires", "scene": "res://levels/twin_spires.tscn", "max_players": 16 },
 	{ "name": "Camp Ground", "scene": "res://levels/camp_ground.tscn", "max_players": 12 },
-	{ "name": "Testarena", "scene": "res://levels/test_arena.tscn", "max_players": 8 },
+	{ "name": "Testarena", "scene": "res://levels/test_arena.tscn", "max_players": 8, "reverb": ReverbZone.Kind.ROOM },
 ]
 ## Index in MAPS
 var selected_map: int = 0
@@ -174,6 +175,7 @@ func _ready() -> void:
 
 ## Musik- und Ansager-Spieler anlegen, Musik als Endlosschleife starten
 func _setup_audio() -> void:
+	ReverbZone.create_buses()
 	_announcer = AudioStreamPlayer.new()
 	_announcer.bus = &"Announcer"
 	add_child(_announcer)
@@ -194,6 +196,9 @@ func _setup_audio() -> void:
 func _route_to_sfx(node: Node) -> void:
 	if (node is AudioStreamPlayer or node is AudioStreamPlayer3D) and node.bus == &"Master":
 		node.bus = &"SFX"
+	# 3D-Sounds hallen in Raeumen und Hallen (ReverbZone)
+	if node is AudioStreamPlayer3D:
+		node.area_mask |= Layers.AUDIO_ZONES
 
 
 func apply_sfx_volume() -> void:
@@ -644,6 +649,7 @@ func apply_graphics(level: Node = null) -> void:
 			env.ssao_enabled = false
 		if p < 1:
 			env.volumetric_fog_enabled = false
+		env.volumetric_fog_temporal_reprojection_enabled = true
 		# Ultra: indirektes Licht in Echtzeit (SDFGI), ohne Backen und fuer jede Map. Neonflaechen
 		# werfen ihr Licht auf Boden und Waende. Gebackene Lightmaps gehen nur im Editor.
 		env.sdfgi_enabled = p == 3
@@ -652,6 +658,11 @@ func apply_graphics(level: Node = null) -> void:
 			env.sdfgi_cascades = 4
 			env.sdfgi_min_cell_size = 0.2
 			env.sdfgi_bounce_feedback = 0.5
+	BulletHole.pool_size = BulletHole.POOL_SIZES[p]
+	# Aufloesung des volumetrischen Nebels (Lichtkegel, Dunst): feiner je Stufe
+	var fog_size: int = [32, 48, 64, 128][p]
+	RenderingServer.environment_set_volumetric_fog_volume_size(fog_size, [32, 48, 64, 96][p])
+	RenderingServer.environment_set_volumetric_fog_filter_active(p >= 2)
 	# Sonnenschatten nur so weit wie die Arena reicht, Filterqualitaet je Stufe
 	RenderingServer.directional_soft_shadow_filter_set_quality([RenderingServer.SHADOW_QUALITY_HARD,
 		RenderingServer.SHADOW_QUALITY_SOFT_LOW, RenderingServer.SHADOW_QUALITY_SOFT_MEDIUM, RenderingServer.SHADOW_QUALITY_SOFT_HIGH][p])

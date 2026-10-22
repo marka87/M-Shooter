@@ -470,7 +470,7 @@ func run() -> void:
 	var sparks_before: int = count_sparks.call()
 	for i in 80:
 		HitSpark.spawn(current_scene, Vector3(i * 0.1, 0.0, 40.0), Vector3.UP)
-	check(count_sparks.call() <= HitSpark.MAX_DECALS, "Funken-Pool begrenzt (%d -> %d)" % [sparks_before, count_sparks.call()])
+	check(count_sparks.call() <= HitSpark.MAX_SPARKS, "Funken-Pool begrenzt (%d -> %d)" % [sparks_before, count_sparks.call()])
 	await wait(0.5)
 	var count_tracers := func() -> int: return current_scene.find_children("*", "Tracer", false, false).size()
 	var tracers_before: int = count_tracers.call()
@@ -478,6 +478,41 @@ func run() -> void:
 		Tracer.spawn(current_scene, Vector3(0, 2, 0), Vector3(0, 2, -10), Color.WHITE)
 		await wait(0.2)
 	check(count_tracers.call() <= tracers_before + 1, "Leuchtspuren werden wiederverwendet (%d -> %d)" % [tracers_before, count_tracers.call()])
+
+	# Zerstoerbare Objekte: Kiste zerplatzt, Glas haelt Schuesse auf und zerspringt
+	var crate = load("res://scenes/props/physics_crate.tscn").instantiate()
+	current_scene.add_child(crate)
+	crate.freeze = true
+	crate.global_position = Vector3(0, 60, 0)
+	crate.take_damage(DamageInfo.create(100.0, null, crate.global_position, Vector3.ZERO, "Test"))
+	await process_frame
+	check(not is_instance_valid(crate) and current_scene.find_children("*", "VoxelBurst", false, false).size() > 0, "Kiste zerplatzt in Wuerfel")
+	var glass = load("res://scripts/props/glass_pane.gd").new()
+	current_scene.add_child(glass)
+	glass.global_position = Vector3(0, 60, 5)
+	await physics_frame
+	var space: PhysicsDirectSpaceState3D = current_scene.get_world_3d().direct_space_state
+	var ray := PhysicsRayQueryParameters3D.create(Vector3(0, 60, 8), Vector3(0, 60, 2), 1 | 16)
+	check(space.intersect_ray(ray).get("collider") == glass, "Glas haelt Schuesse auf")
+	glass.take_damage(DamageInfo.create(30.0, null, glass.global_position, Vector3(0, 0, -1), "Test"))
+	await physics_frame
+	await physics_frame
+	check(space.intersect_ray(ray).is_empty(), "Glas zerspringt, der Weg ist frei")
+
+	# Einschussloecher: bleiben stehen, hoechstens so viele wie die Grafikstufe erlaubt
+	var hole_script = load("res://scripts/effects/bullet_hole.gd")
+	for i in 400:
+		hole_script.spawn(current_scene, Vector3(i * 0.05, 60, 12), Vector3.UP)
+	var holes: int = current_scene.find_children("*", "BulletHole", false, false).size()
+	check(holes == hole_script.pool_size, "Einschussloecher begrenzt (%d)" % holes)
+
+	# Hall: Busse angelegt, Testarena hat eine Raum-Zone, 3D-Sounds sehen die Zonen
+	check(AudioServer.get_bus_index("Hall Raum") >= 0 and AudioServer.get_bus_index("Hall Halle") >= 0, "Hall-Busse angelegt")
+	check(current_scene.find_children("*", "ReverbZone", false, false).size() == 1, "Testarena hat eine Hall-Zone")
+	var probe := AudioStreamPlayer3D.new()
+	current_scene.add_child(probe)
+	check(probe.area_mask & (1 << 6) != 0 and probe.bus == &"SFX", "3D-Sounds hallen in den Zonen")
+	probe.queue_free()
 
 	# Hauptmenue: CTF zeigt das Capture-Limit, "Beliebig" uebernimmt den Wert aus dem Zahlenfeld
 	var old_mode: int = gm.game_mode

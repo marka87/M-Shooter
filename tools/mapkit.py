@@ -123,6 +123,7 @@ class MapKit:
         self.world = []    # Kollision + Optik
         self.details = []  # nur Optik (Stufen, Leuchtstreifen)
         self.spawns, self.items, self.weapons, self.pads, self.teles, self.lights, self.zones = [], [], [], [], [], [], []
+        self.reverbs, self.props, self.fogs = [], [], []  # Hall-Zonen, zerstoerbare Objekte, Nebel-Volumen
 
     # --- Grundformen ---
     def solid(self, x0, y0, z0, x1, y1, z1, tex=METAL):
@@ -219,6 +220,7 @@ class MapKit:
         """Vier Waende; doors = [(Seite 'n'/'s'/'w'/'o', von, bis)] (von/bis entlang der Wand)."""
         x0, x1 = sorted((x0, x1))
         z0, z1 = sorted((z0, z1))
+        self.reverb(x0, y0, z0, x1, y1, z1, 'raum')
         sides = {'n': ('x', z0, x0, x1), 's': ('x', z1, x0, x1), 'w': ('z', x0, z0, z1), 'o': ('z', x1, z0, z1)}
         for side, (axis, at, a0, a1) in sides.items():
             door = [d for d in doors if d[0] == side]
@@ -262,6 +264,38 @@ class MapKit:
         self.zones.append(('damage', ((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2), (x1 - x0, y1 - y0, z1 - z0), dps))
         self.deco(x0, y1 - 0.15, z0, x1, y1 - 0.1, z1, glow)
 
+    def reverb(self, x0, y0, z0, x1, y1, z1, kind='halle'):
+        """Hall-Zone ('raum' = kurz und dicht, 'halle' = lang); Raeume gewinnen in einer Halle."""
+        x0, x1 = sorted((x0, x1))
+        y0, y1 = sorted((y0, y1))
+        z0, z1 = sorted((z0, z1))
+        self.reverbs.append((((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2), (x1 - x0, y1 - y0, z1 - z0), 0 if kind == 'raum' else 1))
+
+    def crate(self, x, y, z, yaw=0.0):
+        """Zerstoerbare Kiste (1 m) auf Oberflaeche y. Nicht in Laufwege stellen (Bots kennen sie nicht)."""
+        self.props.append(('crate', (x, y + 0.5, z), yaw, None))
+
+    def barrel(self, x, y, z):
+        """Explosives Fass auf Oberflaeche y."""
+        self.props.append(('barrel', (x, y + 0.6, z), 0.0, None))
+
+    def glass(self, x0, y0, z0, x1, y1, z1):
+        """Zerbrechliche Glasscheibe als duenner Quader (eine Seite duenn, z. B. Fenster in einer Wand)."""
+        x0, x1 = sorted((x0, x1))
+        y0, y1 = sorted((y0, y1))
+        z0, z1 = sorted((z0, z1))
+        sx, sy, sz = x1 - x0, y1 - y0, z1 - z0
+        # Die Scheibe ist im Spiel in lokaler Z-Richtung duenn: duenn in X -> um 90 Grad drehen
+        yaw, size = (90.0, (sz, sy, sx)) if sx < sz else (0.0, (sx, sy, sz))
+        self.props.append(('glass', ((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2), yaw, size))
+
+    def fog_volume(self, x0, y0, z0, x1, y1, z1, color=(0.5, 0.4, 0.9), density=0.08, glow=0.0):
+        """Volumetrischer Nebel in einem Quader (Bodennebel, Dunst), optional selbstleuchtend."""
+        x0, x1 = sorted((x0, x1))
+        y0, y1 = sorted((y0, y1))
+        z0, z1 = sorted((z0, z1))
+        self.fogs.append((((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2), (x1 - x0, y1 - y0, z1 - z0), color, density, glow))
+
     # --- Ausgabe ---
     def write(self, build=True):
         map_path = os.path.join(ROOT, 'maps', self.map_id + '.map')
@@ -273,7 +307,8 @@ class MapKit:
         with open(template, 'w', encoding='utf-8', newline='\n') as f:
             f.write(self._scene())
         print(f'{self.map_id}: {len(self.world)} Brushes Welt, {len(self.details)} Deko, {len(self.spawns)} Spawns, '
-              f'{len(self.items) + len(self.weapons)} Items, {len(self.pads)} Jump-Pads, {len(self.teles)} Teleporter')
+              f'{len(self.items) + len(self.weapons)} Items, {len(self.pads)} Jump-Pads, {len(self.teles)} Teleporter, '
+              f'{len(self.props)} Objekte, {len(self.reverbs)} Hall-Zonen, {len(self.fogs)} Nebel')
         if build:
             subprocess.run([GODOT, '--headless', '--path', ROOT, '--import'], check=True, capture_output=True)
             res = subprocess.run([GODOT, '--headless', '--path', ROOT, '-s', 'res://tools/build_level.gd', '--',
@@ -296,6 +331,10 @@ class MapKit:
             ('Resource', 'res://resources/map/neon_map_settings.tres', '8_settings'),
             ('Script', 'res://scripts/levels/void_kill_zone.gd', '9_void'),
             ('Script', 'res://scripts/levels/damage_zone.gd', '10_damage'),
+            ('Script', 'res://scripts/levels/reverb_zone.gd', '11_reverb'),
+            ('PackedScene', 'res://scenes/props/physics_crate.tscn', '12_crate'),
+            ('PackedScene', 'res://scenes/props/physics_barrel.tscn', '13_barrel'),
+            ('Script', 'res://scripts/props/glass_pane.gd', '14_glass'),
         ]
         ext += [('PackedScene', f'res://scenes/items/{scene}.tscn', f'item_{kind}') for kind, scene in ITEM_SCENES.items()]
         ext += [('PackedScene', f'res://scenes/weapons/{scene}.tscn', f'w_{wid}') for wid, (scene, _, _) in WEAPONS.items()]
@@ -350,6 +389,11 @@ agent_max_slope = 45.0
 ''')
         for i, (kind, _, size, _) in enumerate(self.zones):
             out.append(f'[sub_resource type="BoxShape3D" id="Zone{i}"]\nsize = Vector3({size[0]}, {size[1]}, {size[2]})\n')
+        for i, (_, size, _) in enumerate(self.reverbs):
+            out.append(f'[sub_resource type="BoxShape3D" id="Reverb{i}"]\nsize = Vector3({size[0]}, {size[1]}, {size[2]})\n')
+        for i, (_, _, c, density, glow) in enumerate(self.fogs):
+            out.append(f'[sub_resource type="FogMaterial" id="Fog{i}"]\ndensity = {density}\nalbedo = Color({c[0]}, {c[1]}, {c[2]}, 1)\n'
+                       f'emission = Color({c[0] * glow}, {c[1] * glow}, {c[2] * glow}, 1)\nedge_fade = 0.4\n')
         out.append(f'''[node name="{self.node_name}" type="Node3D"]
 script = ExtResource("1_arena")
 
@@ -405,4 +449,20 @@ map_settings = ExtResource("8_settings")
             extra = f'damage_per_second = {dps}\n' if kind == 'damage' else ''
             out.append(f'[node name="Zone{i}" type="Area3D" parent="."]\ntransform = {_tf(*center)}\nscript = ExtResource("{script}")\n{extra}')
             out.append(f'[node name="CollisionShape3D" type="CollisionShape3D" parent="Zone{i}"]\nshape = SubResource("Zone{i}")\n')
+        out.append('[node name="ReverbZones" type="Node3D" parent="."]\n')
+        for i, (center, _, kind) in enumerate(self.reverbs):
+            out.append(f'[node name="Reverb{i}" type="Area3D" parent="ReverbZones"]\ntransform = {_tf(*center)}\nscript = ExtResource("11_reverb")\nkind = {kind}\n')
+            out.append(f'[node name="CollisionShape3D" type="CollisionShape3D" parent="ReverbZones/Reverb{i}"]\nshape = SubResource("Reverb{i}")\n')
+        out.append('[node name="Props" type="Node3D" parent="."]\n')
+        for i, (kind, pos, yaw, size) in enumerate(self.props, start=1):
+            if kind == 'glass':
+                out.append(f'[node name="Glass{i}" type="StaticBody3D" parent="Props"]\ntransform = {_tf(*pos, yaw)}\nscript = ExtResource("14_glass")\n'
+                           f'size = Vector3({size[0]}, {size[1]}, {size[2]})\n')
+            else:
+                rid = '12_crate' if kind == 'crate' else '13_barrel'
+                out.append(f'[node name="{kind.capitalize()}{i}" parent="Props" instance=ExtResource("{rid}")]\ntransform = {_tf(*pos, yaw)}\n')
+        out.append('[node name="FogVolumes" type="Node3D" parent="."]\n')
+        for i, (center, size, _, _, _) in enumerate(self.fogs):
+            out.append(f'[node name="Fog{i}" type="FogVolume" parent="FogVolumes"]\ntransform = {_tf(*center)}\n'
+                       f'size = Vector3({size[0]}, {size[1]}, {size[2]})\nshape = 3\nmaterial = SubResource("Fog{i}")\n')
         return '\n'.join(out)

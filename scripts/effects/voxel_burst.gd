@@ -14,6 +14,7 @@ func burst(color: Color) -> void:
 	mat.albedo_color = color
 	mat.emission = color
 	cubes.material_override = mat
+	cubes.layers = BulletHole.DYNAMIC_LAYER
 	flash.light_color = color
 	cubes.restart()
 	cubes.emitting = true

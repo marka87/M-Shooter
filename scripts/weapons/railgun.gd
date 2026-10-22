@@ -38,7 +38,7 @@ func _on_fire(shooter: Node3D, camera: Node3D) -> void:
 		var collider: Object = result.collider
 		
 		# Funken am Treffpunkt
-		HitSpark.spawn(shooter.get_parent(), hit_pos, hit_normal)
+		HitSpark.spawn(shooter.get_parent(), hit_pos, hit_normal, 1.8, 2.5)  # grosses, heisses Loch
 		
 		# Hoher Schaden am Ziel
 		if collider and collider.has_method("take_damage"):

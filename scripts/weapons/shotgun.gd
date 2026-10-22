@@ -50,7 +50,7 @@ func _on_fire(shooter: Node3D, camera: Node3D) -> void:
 
 		var hit_pos: Vector3 = result.position
 		var collider: Object = result.collider
-		HitSpark.spawn(shooter.get_parent(), hit_pos, result.normal)
+		HitSpark.spawn(shooter.get_parent(), hit_pos, result.normal, 0.6)  # Schrot: viele kleine Loecher
 
 		if collider and collider.has_method("take_damage"):
 			damage_per_target[collider] = damage_per_target.get(collider, 0.0) + damage

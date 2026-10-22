@@ -110,4 +110,18 @@ for x, y, z, yaw in ((-45, 0, -21, -122), (45, 0, 21, 58), (-45, 0, 21, -58), (4
                      (-20, H_WALK, -32, 180), (20, H_WALK, 32, 0), (-36, 0, -12, -90), (36, 0, 12, 90)):
     kit.spawn(x, y, z, yaw)
 
+# --- Hall, Dunst unter der Decke, zerstoerbare Objekte ---
+kit.reverb(-AX, -5, -AZ, AX, H_WALL, AZ, 'halle')
+kit.fog_volume(-AX, H_BRIDGE, -AZ, AX, H_WALL, AZ, (1, 0.6, 0.25), 0.02)
+for sx in (-1, 1):
+    # Glasschilde auf den Gelaendern der Sniper-Balkone
+    x = sx * (AX - 8)
+    kit.glass(x - 0.04, H_BALC + 1, -18, x + 0.04, H_BALC + 3, -5)
+    kit.glass(x - 0.04, H_BALC + 1, 5, x + 0.04, H_BALC + 3, 18)
+    for sz in (-1, 1):
+        kit.barrel(sx * 16, 0, sz * 10.5)                  # an den Grubenecken
+    kit.crate(sx * 30, 0, sx * 33.5)                       # unter den Laufstegen
+    kit.crate(sx * 31.2, 0, sx * 33.3, 20)
+    kit.crate(sx * -10, 0, sx * 33.5, -15)
+
 kit.write()

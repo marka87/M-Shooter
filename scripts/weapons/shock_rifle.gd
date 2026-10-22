@@ -47,7 +47,7 @@ func _on_fire(shooter: Node3D, camera: Node3D) -> void:
 			collider.take_damage(info)
 			if shooter.has_method("on_enemy_hit"):
 				shooter.on_enemy_hit(headshot, collider)
-		HitSpark.spawn(shooter.get_parent(), end, hit.normal)
+		HitSpark.spawn(shooter.get_parent(), end, hit.normal, 1.3, 1.5)
 
 
 func _on_fire_alt(shooter: Node3D, camera: Node3D) -> void:

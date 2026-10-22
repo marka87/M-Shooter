@@ -44,6 +44,7 @@ func _ready() -> void:
 	# Netzspiel: Bots laufen nur beim Host, Clients bekommen sie als Puppen (Net)
 	if not Net.is_client():
 		_spawn_bots()
+	_add_map_reverb()
 	GameManager.apply_graphics(self)
 	GameManager.start_match()
 	Net.on_level_ready(self)
@@ -65,3 +66,18 @@ func _spawn_bots() -> void:
 		bot.apply_skill(GameManager.bot_skill)
 		add_child(bot)
 		bot.global_transform = GameManager.get_spawn_transform(bot)
+
+
+## Maps ohne eigene Hall-Zonen: eine Zone ueber die ganze Map (Art aus GameManager.MAPS)
+func _add_map_reverb() -> void:
+	if has_node("ReverbZones"):
+		return
+	for map_info in GameManager.MAPS:
+		if map_info.scene == scene_file_path and map_info.has("reverb"):
+			var zone := ReverbZone.new()
+			zone.kind = map_info.reverb
+			var shape := CollisionShape3D.new()
+			shape.shape = BoxShape3D.new()
+			shape.shape.size = Vector3(400.0, 200.0, 400.0)
+			zone.add_child(shape)
+			add_child(zone)

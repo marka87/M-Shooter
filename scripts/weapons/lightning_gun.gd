@@ -38,7 +38,7 @@ func _on_fire(shooter: Node3D, camera: Node3D) -> void:
 			if shooter.has_method("on_enemy_hit") and _tick % 3 == 0:
 				shooter.on_enemy_hit(false, collider)
 		elif _tick % 3 == 0:
-			HitSpark.spawn(shooter.get_parent(), end, hit.normal)
+			HitSpark.spawn(shooter.get_parent(), end, hit.normal, 0.6, 1.5)  # Brandfleck
 
 
 ## Zickzack-Blitz: seitlich versetzte Knickpunkte plus duenne weisse Kernlinie.

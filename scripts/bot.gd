@@ -191,6 +191,7 @@ func _ready() -> void:
 	flash_mat.emission_energy_multiplier = 2.0
 
 	_apply_skin_color()
+	BulletHole.mark_dynamic(model)
 	_step_audio = AudioStreamPlayer3D.new()
 	_step_audio.unit_size = 4.0
 	_step_audio.max_distance = 35.0
