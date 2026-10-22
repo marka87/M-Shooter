@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://cv0l1hk8d6145"
+path="res://.godot/imported/sky_yard.map-e7eff0bbf112d9afb091c09c5e012ed3.tres"
+
+[deps]
+
+source_file="res://maps/sky_yard.map"
+dest_files=["res://.godot/imported/sky_yard.map-e7eff0bbf112d9afb091c09c5e012ed3.tres"]
+
+[params]
+

@@ -22,7 +22,8 @@ static func spawn(parent: Node, from: Vector3, to: Vector3, color: Color, width:
 		return
 	var tracer: Tracer = null
 	while tracer == null and not _free.is_empty():
-		var candidate: Tracer = _free.pop_back()
+		# Untypisiert holen: nach einem Mapwechsel liegen freigegebene Spuren im Pool (typisiert waere das ein Fehler)
+		var candidate = _free.pop_back()
 		if is_instance_valid(candidate):
 			tracer = candidate
 	if tracer:

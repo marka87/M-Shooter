@@ -131,6 +131,8 @@ const MAX_BOTS: int = 7
 const MAPS: Array[Dictionary] = [
 	{ "name": "Neon Foundry", "scene": "res://levels/neon_foundry.tscn" },
 	{ "name": "Orbital Void", "scene": "res://levels/orbital_void.tscn" },
+	{ "name": "Sky Yard", "scene": "res://levels/sky_yard.tscn" },
+	{ "name": "Duck 17", "scene": "res://levels/duck_17.tscn" },
 	{ "name": "Testarena", "scene": "res://levels/test_arena.tscn" },
 ]
 ## Index in MAPS

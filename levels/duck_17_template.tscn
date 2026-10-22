@@ -1,0 +1,364 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/arena.gd" id="1_arena"]
+[ext_resource type="PackedScene" uid="uid://bplayer_character_001" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/items/jump_pad.tscn" id="3_pad"]
+[ext_resource type="PackedScene" path="res://scenes/items/teleporter.tscn" id="4_tele"]
+[ext_resource type="PackedScene" path="res://scenes/items/weapon_pickup.tscn" id="5_wpick"]
+[ext_resource type="Shader" path="res://assets/shaders/space_sky.gdshader" id="6_sky"]
+[ext_resource type="Script" path="res://addons/func_godot/src/map/func_godot_map.gd" id="7_map"]
+[ext_resource type="Resource" path="res://resources/map/neon_map_settings.tres" id="8_settings"]
+[ext_resource type="Script" path="res://scripts/levels/void_kill_zone.gd" id="9_void"]
+[ext_resource type="Script" path="res://scripts/levels/damage_zone.gd" id="10_damage"]
+[ext_resource type="PackedScene" path="res://scenes/items/ammo_pickup.tscn" id="item_ammo"]
+[ext_resource type="PackedScene" path="res://scenes/items/health_pickup.tscn" id="item_health"]
+[ext_resource type="PackedScene" path="res://scenes/items/armor_pickup.tscn" id="item_armor"]
+[ext_resource type="PackedScene" path="res://scenes/items/quad_damage_pickup.tscn" id="item_quad"]
+[ext_resource type="PackedScene" path="res://scenes/items/mega_health_pickup.tscn" id="item_mega"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/machine_gun.tscn" id="w_machine_gun"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/shotgun.tscn" id="w_shotgun"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/plasma_gun.tscn" id="w_plasma"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/rocket_launcher.tscn" id="w_rocket_launcher"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/lightning_gun.tscn" id="w_lightning"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/railgun.tscn" id="w_railgun"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/shock_rifle.tscn" id="w_shock_rifle"]
+
+[sub_resource type="ShaderMaterial" id="SkyMat"]
+shader = ExtResource("6_sky")
+shader_parameter/zenith_color = Color(0.01, 0.015, 0.04, 1)
+shader_parameter/horizon_color = Color(0.12, 0.1, 0.05, 1)
+shader_parameter/horizon_glow = Color(1, 0.6, 0.2, 1)
+shader_parameter/nebula_color = Color(0.9, 0.5, 0.2, 1)
+shader_parameter/star_density = 0.5
+shader_parameter/star_brightness = 6.0
+shader_parameter/nebula_strength = 0.4
+
+[sub_resource type="Sky" id="Sky_1"]
+sky_material = SubResource("SkyMat")
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 2
+sky = SubResource("Sky_1")
+ambient_light_source = 2
+ambient_light_color = Color(0.25, 0.28, 0.35, 1)
+ambient_light_energy = 0.8
+tonemap_mode = 4
+tonemap_exposure = 1.1
+ssao_enabled = true
+ssao_radius = 1.5
+ssao_intensity = 1.6
+glow_enabled = true
+glow_intensity = 0.7
+glow_strength = 1.1
+glow_bloom = 0.05
+glow_hdr_threshold = 0.9
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.016
+volumetric_fog_albedo = Color(0.6, 0.55, 0.85, 1)
+volumetric_fog_anisotropy = 0.4
+adjustment_enabled = true
+adjustment_contrast = 1.08
+adjustment_saturation = 1.15
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_1"]
+geometry_parsed_geometry_type = 1
+agent_height = 1.75
+agent_radius = 0.5
+agent_max_climb = 0.5
+agent_max_slope = 45.0
+
+[sub_resource type="BoxShape3D" id="Zone0"]
+size = Vector3(28, 1.4, 18)
+
+[node name="Duck17" type="Node3D"]
+script = ExtResource("1_arena")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 25, 0)
+light_color = Color(0.85, 0.9, 1, 1)
+light_energy = 0.8
+shadow_enabled = true
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_1")
+
+[node name="Map" type="Node3D" parent="NavigationRegion3D"]
+script = ExtResource("7_map")
+local_map_file = "res://maps/duck_17.map"
+map_settings = ExtResource("8_settings")
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+
+[node name="SpawnPoint1" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(-0.529919, 0, -0.848048, 0, 1, 0, 0.848048, 0, -0.529919, -45, 1.0, -21)
+
+[node name="SpawnPoint2" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(0.529919, 0, 0.848048, 0, 1, 0, -0.848048, 0, 0.529919, 45, 1.0, 21)
+
+[node name="SpawnPoint3" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(0.529919, 0, -0.848048, 0, 1, 0, 0.848048, 0, 0.529919, -45, 1.0, 21)
+
+[node name="SpawnPoint4" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(-0.529919, 0, 0.848048, 0, 1, 0, -0.848048, 0, -0.529919, 45, 1.0, -21)
+
+[node name="SpawnPoint5" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(-1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, -1.000000, -10, 7.0, -32)
+
+[node name="SpawnPoint6" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 10, 7.0, 32)
+
+[node name="SpawnPoint7" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(-1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, -1.000000, 25, 7.0, -32)
+
+[node name="SpawnPoint8" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -25, 7.0, 32)
+
+[node name="SpawnPoint9" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1, 0, 1.000000, 0, 0.000000, -46, 13.0, 5)
+
+[node name="SpawnPoint10" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1, 0, -1.000000, 0, 0.000000, 46, 13.0, -5)
+
+[node name="SpawnPoint11" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, 1.0, -20)
+
+[node name="SpawnPoint12" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(-1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, -1.000000, 0, 1.0, 20)
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(-0.529919, 0, -0.848048, 0, 1, 0, 0.848048, 0, -0.529919, -45, 1.0, -21)
+
+[node name="Items" type="Node3D" parent="."]
+
+[node name="Mega1" parent="Items" instance=ExtResource("item_mega")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, 16.8, 0)
+
+[node name="Armor2" parent="Items" instance=ExtResource("item_armor")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -47, 12.8, 14)
+
+[node name="Ammo3" parent="Items" instance=ExtResource("item_ammo")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -30, 6.8, -32)
+
+[node name="Ammo4" parent="Items" instance=ExtResource("item_ammo")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -30, 6.8, 32)
+
+[node name="Health5" parent="Items" instance=ExtResource("item_health")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -40, 0.8, -24)
+
+[node name="Health6" parent="Items" instance=ExtResource("item_health")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -40, 0.8, 24)
+
+[node name="Armor7" parent="Items" instance=ExtResource("item_armor")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 47, 12.8, -14)
+
+[node name="Ammo8" parent="Items" instance=ExtResource("item_ammo")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 30, 6.8, -32)
+
+[node name="Ammo9" parent="Items" instance=ExtResource("item_ammo")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 30, 6.8, 32)
+
+[node name="Health10" parent="Items" instance=ExtResource("item_health")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 40, 0.8, -24)
+
+[node name="Health11" parent="Items" instance=ExtResource("item_health")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 40, 0.8, 24)
+
+[node name="Weapon1" parent="Items" instance=ExtResource("5_wpick")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -47, 12.9, -10)
+weapon_id = &"railgun"
+weapon_scene = ExtResource("w_railgun")
+display_name = "Railgun"
+
+[node name="OmniLight3D" parent="Items/Weapon1" index="4"]
+light_color = Color(0.3, 1, 0.9, 1)
+
+[node name="Weapon2" parent="Items" instance=ExtResource("5_wpick")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 47, 12.9, 10)
+weapon_id = &"shock_rifle"
+weapon_scene = ExtResource("w_shock_rifle")
+display_name = "Shock Rifle"
+
+[node name="OmniLight3D" parent="Items/Weapon2" index="4"]
+light_color = Color(0.6, 0.35, 1, 1)
+
+[node name="Weapon3" parent="Items" instance=ExtResource("5_wpick")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -32, 0.9, 0)
+weapon_id = &"rocket_launcher"
+weapon_scene = ExtResource("w_rocket_launcher")
+display_name = "Raketenwerfer"
+
+[node name="OmniLight3D" parent="Items/Weapon3" index="4"]
+light_color = Color(1, 0.4, 0.1, 1)
+
+[node name="Weapon4" parent="Items" instance=ExtResource("5_wpick")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 32, 0.9, 0)
+weapon_id = &"lightning"
+weapon_scene = ExtResource("w_lightning")
+display_name = "Lightning Gun"
+
+[node name="OmniLight3D" parent="Items/Weapon4" index="4"]
+light_color = Color(0.7, 0.9, 1, 1)
+
+[node name="Weapon5" parent="Items" instance=ExtResource("5_wpick")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, 6.9, -32)
+weapon_id = &"plasma"
+weapon_scene = ExtResource("w_plasma")
+display_name = "Plasma"
+
+[node name="OmniLight3D" parent="Items/Weapon5" index="4"]
+light_color = Color(0.25, 0.75, 1, 1)
+
+[node name="Weapon6" parent="Items" instance=ExtResource("5_wpick")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, 6.9, 32)
+weapon_id = &"shotgun"
+weapon_scene = ExtResource("w_shotgun")
+display_name = "Shotgun"
+
+[node name="OmniLight3D" parent="Items/Weapon6" index="4"]
+light_color = Color(1, 0.55, 0.15, 1)
+
+[node name="Weapon7" parent="Items" instance=ExtResource("5_wpick")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, 0.9, 0)
+weapon_id = &"machine_gun"
+weapon_scene = ExtResource("w_machine_gun")
+display_name = "Maschinengewehr"
+
+[node name="OmniLight3D" parent="Items/Weapon7" index="4"]
+light_color = Color(1, 0.75, 0.25, 1)
+
+[node name="JumpPads" type="Node3D" parent="."]
+
+[node name="Pad1Target" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -20, 6.1, -31)
+
+[node name="Pad1" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("3_pad")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -20, 0, -22)
+target = NodePath("../Pad1Target")
+apex_height = 2.0
+
+[node name="Pad2Target" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 20, 6.1, 31)
+
+[node name="Pad2" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("3_pad")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 20, 0, 22)
+target = NodePath("../Pad2Target")
+apex_height = 2.0
+
+[node name="Pad3Target" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -46, 12.1, 0)
+
+[node name="Pad3" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("3_pad")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -38, 0, 0)
+target = NodePath("../Pad3Target")
+apex_height = 2.5
+
+[node name="Pad4Target" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -46, 12.1, -15)
+
+[node name="Pad4" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("3_pad")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -40, 6, -32)
+target = NodePath("../Pad4Target")
+apex_height = 2.0
+
+[node name="Pad5Target" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -36, 16.1, 0)
+
+[node name="Pad5" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("3_pad")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -46, 12, 12)
+target = NodePath("../Pad5Target")
+apex_height = 2.0
+
+[node name="Pad6Target" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 46, 12.1, 0)
+
+[node name="Pad6" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("3_pad")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 38, 0, 0)
+target = NodePath("../Pad6Target")
+apex_height = 2.5
+
+[node name="Pad7Target" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 46, 12.1, -15)
+
+[node name="Pad7" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("3_pad")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 40, 6, -32)
+target = NodePath("../Pad7Target")
+apex_height = 2.0
+
+[node name="Pad8Target" type="Marker3D" parent="JumpPads"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 36, 16.1, 0)
+
+[node name="Pad8" parent="JumpPads" node_paths=PackedStringArray("target") instance=ExtResource("3_pad")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 46, 12, 12)
+target = NodePath("../Pad8Target")
+apex_height = 2.0
+
+[node name="Teleporters" type="Node3D" parent="."]
+
+[node name="Tele1Exit" type="Marker3D" parent="Teleporters"]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1, 0, -1.000000, 0, 0.000000, 46, 12.05, -8)
+
+[node name="Tele1" parent="Teleporters" node_paths=PackedStringArray("target") instance=ExtResource("4_tele")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -44, 0, 26)
+target = NodePath("../Tele1Exit")
+
+[node name="Tele2Exit" type="Marker3D" parent="Teleporters"]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1, 0, 1.000000, 0, 0.000000, -46, 12.05, 8)
+
+[node name="Tele2" parent="Teleporters" node_paths=PackedStringArray("target") instance=ExtResource("4_tele")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 44, 0, -26)
+target = NodePath("../Tele2Exit")
+
+[node name="Lights" type="Node3D" parent="."]
+
+[node name="Light1" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, -1, 0)
+light_color = Color(1, 0.85, 0.2, 1)
+light_energy = 4.0
+light_volumetric_fog_energy = 2.0
+omni_range = 18
+
+[node name="Light2" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, 9, -32)
+light_color = Color(1, 0.6, 0.2, 1)
+light_energy = 2.5
+light_volumetric_fog_energy = 2.0
+omni_range = 16
+
+[node name="Light3" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, 9, 32)
+light_color = Color(1, 0.6, 0.2, 1)
+light_energy = 2.5
+light_volumetric_fog_energy = 2.0
+omni_range = 16
+
+[node name="Light4" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -46, 15, 0)
+light_color = Color(1, 0.25, 0.8, 1)
+light_energy = 3.0
+light_volumetric_fog_energy = 2.0
+omni_range = 14
+
+[node name="Light5" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 46, 15, 0)
+light_color = Color(1, 0.25, 0.8, 1)
+light_energy = 3.0
+light_volumetric_fog_energy = 2.0
+omni_range = 14
+
+[node name="Light6" type="OmniLight3D" parent="Lights"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, 19, 0)
+light_color = Color(1, 0.25, 0.8, 1)
+light_energy = 3.0
+light_volumetric_fog_energy = 2.0
+omni_range = 12
+
+[node name="Zone0" type="Area3D" parent="."]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0.0, -3.3, 0.0)
+script = ExtResource("10_damage")
+damage_per_second = 25.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Zone0"]
+shape = SubResource("Zone0")

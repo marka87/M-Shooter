@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://f0mlew1h2h2y"
+path="res://.godot/imported/duck_17.map-9a36500eecf811531e6fb4f9b3b37261.tres"
+
+[deps]
+
+source_file="res://maps/duck_17.map"
+dest_files=["res://.godot/imported/duck_17.map-9a36500eecf811531e6fb4f9b3b37261.tres"]
+
+[params]
+
