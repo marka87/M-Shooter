@@ -127,7 +127,7 @@ Heute können Bots nur patrouillieren, verfolgen und mit einer Waffe schießen.
 | 6.2 | ✅ Scoreboard, Killfeed, Multi-Kill- und Serien-Ansagen. **Scoreboard** (Tab), **Killfeed** oben rechts, Multi-Kill-/Spree-System | M |
 | 6.3 | ✅ teilweise: Quad Damage und Mega Health. **Power-ups**: Quad Damage / UDamage, Mega Health, Red Armor, Shield Belt, Invisibility. Große Items erzeugen die typische Map-Kontrolle | M |
 | 6.4 | ✅ **Instagib** (nur Railgun, ein Treffer tötet), ideal als schneller Zusatzmodus | S |
-| 6.5 | **Team Deathmatch**, danach **Capture the Flag** | L |
+| 6.5 | ✅ Modus-Auswahl im Menü; TDM ohne Eigenbeschuss, CTF mit automatischen Basen und Bot-Rollen (Angriff/Verteidigung). **Team Deathmatch**, danach **Capture the Flag** | L |
 | 6.6 | ✅ Duel-Modus (1 gegen 1, Item-Timing entscheidet) | S |
 
 ---

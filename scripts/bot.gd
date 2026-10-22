@@ -10,7 +10,7 @@ class_name Bot
 # ZUSTAENDE (STATE MACHINE)
 # ==============================================================================
 
-enum State { PATROL, CHASE, ATTACK, DEAD }
+enum State { PATROL, CHASE, ATTACK, DEAD, OBJECTIVE }
 var current_state: State = State.PATROL
 
 # ==============================================================================
@@ -134,6 +134,12 @@ var _los_timer: float = 0.0
 var _los_visible: bool = false
 var _los_target: Node3D = null
 var _decide_timer: float = 0.0
+# Modus-Ziel: beste erreichte Entfernung und Zeit ohne Fortschritt (gegen Festhaengen)
+var _objective_best: float = INF
+var _objective_stuck: float = 0.0
+var _objective_pos: Vector3 = Vector3.INF
+# Items, zu denen kein Weg fuehrt (z. B. auf Saeulen): Item -> Zeitpunkt (ms), bis dahin ignorieren
+var _unreachable: Dictionary = {}
 ## Ab diesem Schaden zerplatzt der Bot in Wuerfel statt als Ragdoll umzufallen
 const GIB_DAMAGE: float = 120.0
 const GIB_SPLASH_DAMAGE: float = 50.0
@@ -263,6 +269,15 @@ func _physics_process(delta: float) -> void:
 			_process_chase(delta, target, target_visible, distance_to_target)
 		State.ATTACK:
 			_process_attack(delta, target, target_visible, distance_to_target)
+		State.OBJECTIVE:
+			_process_objective(delta, target, target_visible, distance_to_target)
+	# Ausser im Angriff (der zielt selbst): unterwegs auf sichtbare Gegner in Reichweite feuern,
+	# auch beim Rueckzug zum Heilen oder mit der Flagge
+	if current_state != State.ATTACK:
+		reaction_timer -= delta
+		if target_visible and distance_to_target <= attack_range and reaction_timer <= 0.0 and shoot_timer <= 0.0:
+			if _fire_at(target, distance_to_target):
+				shoot_timer = shoot_interval
 
 	# Bewegung ausfuehren
 	move_and_slide()
@@ -302,6 +317,11 @@ func _process_patrol(delta: float, _target: CharacterBody3D, _target_visible: bo
 		velocity.x = 0.0
 		velocity.z = 0.0
 		patrol_travel_timer = 0.0
+		return
+	# Weg zu Ende, Item aber nicht erreicht (liegt z. B. auf einer Saeule): 30 s lang ignorieren
+	if item_wanted and nav_agent.is_navigation_finished() and to_target.length() > 1.5:
+		_unreachable[patrol_item] = Time.get_ticks_msec() + 30000
+		_pick_new_patrol_point()
 		return
 	var arrive_dist: float = 0.5 if item_wanted else 2.0
 	var arrived: bool = to_target.length() < arrive_dist or (not item_wanted and nav_agent.is_navigation_finished())
@@ -358,14 +378,48 @@ func _process_attack(delta: float, attack_target: CharacterBody3D, target_visibl
 			shoot_timer = shoot_interval
 
 
+## Modus-Ziel (CTF): hinlaufen bzw. dort bleiben (gefeuert wird in _physics_process)
+func _process_objective(delta: float, _fight_target: CharacterBody3D, _target_visible: bool, _distance: float) -> void:
+	var goal: Dictionary = GameManager.ctf.objective_for(self) if is_instance_valid(GameManager.ctf) else {}
+	if goal.is_empty():
+		return
+	# Neues Ziel (Flagge genommen, anderes Ziel, Traeger bewegt sich): Fortschritt neu messen
+	if goal.pos.distance_to(_objective_pos) > 3.0:
+		_objective_pos = goal.pos
+		_objective_best = INF
+		_objective_stuck = 0.0
+	var to_goal: Vector3 = goal.pos - global_position
+	to_goal.y = 0.0
+	if to_goal.length() <= 1.0:
+		velocity.x = 0.0
+		velocity.z = 0.0
+		_objective_stuck = 0.0
+		return
+	_move_towards(goal.pos, chase_speed, delta)
+	# Kommt der Bot dem Ziel 3 s nicht naeher (Weg zum bewegten Ziel gerade nicht gangbar),
+	# laeuft er kurz woanders hin und entscheidet dann neu
+	if to_goal.length() < _objective_best - 1.0:
+		_objective_best = to_goal.length()
+		_objective_stuck = 0.0
+	else:
+		_objective_stuck += delta
+		if _objective_stuck > 3.0:
+			_objective_stuck = 0.0
+			_objective_best = INF
+			_switch_state(State.PATROL)
+			_pick_new_patrol_point()
+			_decide_timer = 2.0
+
+
 ## Utility-AI (Roadmap 5.5): Punktzahl 0..1 je Handlung aus der Lage und der Persoenlichkeit.
 ## hp = (Leben + halbe Ruestung) / max. Leben, seen = Sekunden seit Sichtkontakt (0 = sichtbar),
 ## item_value = Wert des besten Items (ItemPickup.value_for, durch Entfernung geteilt).
 ## Wenig Leben senkt Angreifen/Verfolgen und hebt Item holen: der Bot zieht sich zum Heilen zurueck.
-func utility_scores(hp: float, has_target: bool, seen: float, distance: float, item_value: float) -> Dictionary:
+## objective = Wichtigkeit des Modus-Ziels (CTF: Flagge holen/heimbringen/verteidigen), 0 = keins.
+func utility_scores(hp: float, has_target: bool, seen: float, distance: float, item_value: float, objective: float = 0.0) -> Dictionary:
 	var courage: float = clampf(hp, 0.15, 1.0) * AGGRESSION[personality]
 	var memory: float = 8.0 if personality == Personality.AGGRESSIVE else 5.0
-	var scores := { "patrol": 0.2, "collect": clampf(item_value / 50.0, 0.0, 1.0) * (1.6 - clampf(hp, 0.0, 1.0)), "chase": 0.0, "attack": 0.0 }
+	var scores := { "patrol": 0.2, "collect": clampf(item_value / 50.0, 0.0, 1.0) * (1.6 - clampf(hp, 0.0, 1.0)), "chase": 0.0, "attack": 0.0, "objective": objective }
 	if has_target:
 		# Im Kampf etwas mehr Reichweite halten, damit der Bot nicht an der Grenze hin- und herschaltet
 		var reach: float = attack_range * (1.35 if current_state == State.ATTACK else 1.0)
@@ -380,8 +434,9 @@ func utility_scores(hp: float, has_target: bool, seen: float, distance: float, i
 func _decide(target_visible: bool, distance: float) -> void:
 	var best_item: Array = _best_item_scored()
 	var hp: float = (health.health + health.armor * 0.5) / health.max_health
-	var scores := utility_scores(hp, _is_alive(target), 0.0 if target_visible else lose_target_timer, distance, best_item[1])
-	var current: String = {State.ATTACK: "attack", State.CHASE: "chase"}.get(current_state, "collect" if patrol_item else "patrol")
+	var goal: Dictionary = GameManager.ctf.objective_for(self) if is_instance_valid(GameManager.ctf) else {}
+	var scores := utility_scores(hp, _is_alive(target), 0.0 if target_visible else lose_target_timer, distance, best_item[1], goal.get("value", 0.0))
+	var current: String = {State.ATTACK: "attack", State.CHASE: "chase", State.OBJECTIVE: "objective"}.get(current_state, "collect" if patrol_item else "patrol")
 	scores[current] += 0.1
 	var choice: String = scores.keys().reduce(func(a, b): return a if scores[a] >= scores[b] else b)
 	match choice:
@@ -392,6 +447,11 @@ func _decide(target_visible: bool, distance: float) -> void:
 		"chase":
 			if current_state != State.CHASE:
 				_switch_state(State.CHASE)
+		"objective":
+			if current_state != State.OBJECTIVE:
+				_switch_state(State.OBJECTIVE)
+				_objective_best = INF
+				_objective_stuck = 0.0
 		"collect":
 			# Aus dem Kampf heraus (oder beim Herumlaufen ohne Item) das beste Item ansteuern
 			if current_state != State.PATROL or patrol_item == null:
@@ -900,7 +960,7 @@ func _best_item_scored() -> Array:
 	var best: Node3D = null
 	var best_score: float = 0.0
 	for item in get_tree().get_nodes_in_group("pickups"):
-		if not item.has_method("is_useful_for") or not item.is_useful_for(self):
+		if not item.has_method("is_useful_for") or not item.is_useful_for(self) or _unreachable.get(item, 0) > Time.get_ticks_msec():
 			continue
 		var dist: float = global_position.distance_to(item.global_position)
 		var score: float = item.value_for(self) / (1.0 + dist / 15.0)
@@ -923,6 +983,7 @@ func _update_nameplate() -> void:
 		State.CHASE: state_text = "Verfolgen"
 		State.ATTACK: state_text = "Angriff"
 		State.DEAD: state_text = "TOT"
+		State.OBJECTIVE: state_text = "Flagge"
 
 	nameplate.text = "%s [%s] - %d HP" % [display_name, state_text, int(health.health)]
 

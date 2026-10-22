@@ -46,6 +46,10 @@ const TEAM_COLORS: Array[Color] = [Color(1.0, 0.25, 0.2), Color(0.25, 0.55, 1.0)
 const PLAYER_TEAM: int = 1
 ## Teampunkte (TDM: Frags, CTF: Eroberungen)
 var team_scores: Array[int] = [0, 0]
+## CTF: so viele Eroberungen gewinnen das Match
+var capture_limit: int = 3
+## CTF: Flaggen und Basen der aktuellen Map (null in anderen Modi)
+var ctf: CtfManager = null
 const INSTAGIB_DAMAGE: float = 1000.0
 ## Sekunden Countdown vor dem Start (Tests setzen 0)
 var match_countdown: float = 3.0
@@ -718,8 +722,14 @@ func get_spawn_transform(for_node: Node3D) -> Transform3D:
 		for node in get_tree().get_nodes_in_group(group):
 			if node != for_node and node.get("health") != null and not node.health.is_dead and not are_teammates(node, for_node):
 				others.append(node)
+	# CTF: nur auf der eigenen Kartenhaelfte spawnen
+	var candidates: Array[Node3D] = spawn_points
+	if is_instance_valid(ctf) and team_of(for_node) >= 0:
+		candidates = spawn_points.filter(func(p): return ctf.is_own_half(p.global_position, team_of(for_node)))
+		if candidates.is_empty():
+			candidates = spawn_points
 	var rated: Array = []
-	for point in spawn_points:
+	for point in candidates:
 		var nearest: float = INF
 		for other in others:
 			nearest = minf(nearest, point.global_position.distance_to(other.global_position))
@@ -727,6 +737,16 @@ func get_spawn_transform(for_node: Node3D) -> Transform3D:
 	rated.sort_custom(func(a, b): return a.dist > b.dist)
 	var pick: int = randi() % mini(2, rated.size())
 	return rated[pick].point.global_transform
+
+
+## CTF: Team erobert die Flagge (vom CtfManager aufgerufen)
+func register_capture(team: int, carrier: Node) -> void:
+	team_scores[team] += 1
+	player_announcement.emit("%s erobert die Flagge für %s!" % [_name_of(carrier), TEAM_NAMES[team]], TEAM_COLORS[team])
+	score_updated.emit(player_frags, player_deaths)
+	scoreboard_changed.emit()
+	if capture_limit > 0 and team_scores[team] >= capture_limit:
+		end_match.call_deferred("Eroberungslimit")
 
 
 ## Team- oder Einzelmodus?

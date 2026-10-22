@@ -335,7 +335,8 @@ func _on_ammo_updated(current_ammo: int, max_ammo: int) -> void:
 
 func _on_score_updated(frags: int, _deaths: int) -> void:
 	if GameManager.is_team_mode():
-		var limit := " / %d" % GameManager.frag_limit if GameManager.frag_limit > 0 and GameManager.game_mode == GameManager.Mode.TEAM_DEATHMATCH else ""
+		var limit_value: int = GameManager.capture_limit if GameManager.game_mode == GameManager.Mode.CTF else GameManager.frag_limit
+		var limit := " / %d" % limit_value if limit_value > 0 else ""
 		frags_label.text = "Rot %d : %d Blau%s" % [GameManager.team_scores[0], GameManager.team_scores[1], limit]
 	elif GameManager.frag_limit > 0:
 		frags_label.text = "Frags: %d / %d" % [frags, GameManager.frag_limit]

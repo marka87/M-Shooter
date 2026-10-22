@@ -181,6 +181,41 @@ func run() -> void:
 	await process_frame
 	check(gm.current_state == gm.GameState.GAME_OVER and gm.team_scores == [0, 2], "TDM: Team-Fraglimit beendet das Match")
 	gm._close_match_end()
+
+	# --- Capture the Flag: Basen, Flagge nehmen, erobern, fallen lassen, zurueckbringen ---
+	gm.game_mode = gm.Mode.CTF
+	gm.bot_count = 1
+	gm.reset_game()
+	change_scene_to_file("res://levels/test_arena.tscn")
+	await create_timer(0.5).timeout
+	player = gm.current_player
+	var ctf = gm.ctf
+	var red_bot = get_nodes_in_group("enemies")[0]
+	red_bot.set_physics_process(false)
+	check(ctf != null and ctf.flags.size() == 2 and ctf.home_of(0).distance_to(ctf.home_of(1)) > 20.0, "CTF: zwei Basen weit auseinander")
+	var red_flag = ctf.flags[0]
+	var blue_flag = ctf.flags[1]
+	player.global_position = red_flag.home
+	for i in 4:
+		await physics_frame
+	check(red_flag.carrier == player, "CTF: Spieler nimmt die rote Flagge")
+	player.global_position = blue_flag.home
+	for i in 4:
+		await physics_frame
+	check(gm.team_scores == [0, 1] and red_flag.state == red_flag.FlagState.HOME, "CTF: Eroberung zaehlt fuer Blau (%s)" % [gm.team_scores])
+	red_bot.global_position = blue_flag.home
+	player.global_position = red_flag.home + Vector3(0, 0, 4)
+	for i in 4:
+		await physics_frame
+	check(blue_flag.carrier == red_bot, "CTF: Bot nimmt die blaue Flagge")
+	red_bot.take_damage(DamageInfo.create(500.0, player, red_bot.global_position, Vector3.ZERO, "Test"))
+	for i in 3:
+		await physics_frame
+	check(blue_flag.state == blue_flag.FlagState.DROPPED, "CTF: Traeger stirbt, Flagge faellt")
+	player.global_position = blue_flag.global_position
+	for i in 4:
+		await physics_frame
+	check(blue_flag.state == blue_flag.FlagState.HOME, "CTF: eigenes Team bringt die Flagge zurueck")
 	gm.game_mode = gm.Mode.DEATHMATCH
 	gm.bot_count = 1
 

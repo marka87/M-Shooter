@@ -29,6 +29,15 @@ func _ready() -> void:
 			if spawn is Node3D:
 				GameManager.register_spawn_point(spawn)
 
+	# Capture the Flag: Basen und Flaggen vor den Bots, damit sie schon auf ihrer Haelfte spawnen
+	GameManager.ctf = null
+	if GameManager.game_mode == GameManager.Mode.CTF:
+		var ctf := CtfManager.new()
+		ctf.name = "CTF"
+		add_child(ctf)
+		ctf.setup()
+		GameManager.ctf = ctf
+
 	_spawn_bots()
 	GameManager.apply_graphics(self)
 	GameManager.start_match()
