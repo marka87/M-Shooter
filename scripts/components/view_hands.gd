@@ -1,65 +1,86 @@
 extends Node3D
 class_name ViewHands
 
-## Ego-Hand (assets/characters/Arm/hand.glb) rechts am Griff der aktuellen Waffe, Werte pro Waffe
-## aus dem ViewmodelTuner (resources/viewmodel.cfg). Haengt am WeaponHolder, schwankt also mit der Waffe.
-## Jedes Fingerglied ist ein eigener Knoten (index_0 -> index_1 -> index_2 ..., ebenso thumb):
-## Glieder beugen sich um die eigene X-Achse, das Wurzelglied spreizt zusaetzlich um Y.
-## Modell-Achsen: Finger nach -Z, Unterarm nach +Z, Handflaeche nach -Y, Daumen auf +X (linke Hand,
-## deshalb gespiegelt).
+## Ego-Arme (assets/characters/Arm/arms.glb): Arme und Animationen von DJMaesen (CC BY 4.0) aus dem
+## "FPS Hands"-Paket, die AK ist entfernt (tools/strip_arms.py), ihr Knoten "base_ak74_0" bleibt als Bezug.
+## Die Arme werden so gelegt, dass der AK-Griff auf dem Griffpunkt der aktuellen Waffe liegt und der AK-Lauf
+## in Laufrichtung zeigt; Feinheiten pro Waffe aus dem ViewmodelTuner (resources/viewmodel.cfg).
+## Haengt am WeaponHolder, schwankt also mit der Waffe. Die Ruhe-Animation laeuft gestreckt als Atmen,
+## beim Schuss kurz die Schuss-Animation; die Bewegung der AK darin wird herausgerechnet,
+## unsere Waffe bleibt also fest in den Haenden (Rueckstoss macht weiter der WeaponManager).
 
-const HAND: PackedScene = preload("res://assets/characters/Arm/hand.glb")
-const FINGERS := ["thumb", "index", "middle", "ring", "pinky"]
-## Grundlage im System der Waffe: Finger zeigen nach vorn, Handflaeche zum Griff (links); Feinheiten per hand_rot
-const BASE_FINGERS := Vector3(-0.3, 0.2, -1.0)
-const BASE_PALM := Vector3(-1, 0, 0)
-## Handflaechen-Mitte im Modell (Einheiten): dieser Punkt liegt am Griffpunkt der Waffe
-const PALM_CENTER := Vector3(0, -0.4, -1.1)
+const ARMS: PackedScene = preload("res://assets/characters/Arm/arms.glb")
+const ANIM := &"allanims"
+## Abschnitte in der Animation (Sekunden, 30 fps: Schuss Frame 0-7, Ruhe 199-221) und ihre Spieldauer
+const FIRE := Vector2(0.0, 7.0 / 30.0)
+const IDLE := Vector2(199.0 / 30.0, 221.0 / 30.0)
+const FIRE_SECONDS := 0.1
+const IDLE_SECONDS := 5.0
+## Griffmitte der rechten Hand im AK-Bezug (Modell-Einheiten ~ cm, AK-Lauf nach +Z)
+const AK_GRIP := Vector3(0.0, -3.7, -1.6)
+## Grundgroesse: Modell-Einheiten -> Waffen-Einheiten (linke Hand etwa am vorderen Drittel einer 0,8 langen Waffe)
+const BASE_SCALE := 0.0105
 
 var weapon_manager: Node3D
 ## Werte der aktuellen Waffe (ViewmodelTuner.defaults() als Vorlage)
 var settings: Dictionary = {}
-var _hand: Node3D
+var _arms: Node3D
+var _anim: AnimationPlayer
+var _gun: Node3D
+var _weapon: WeaponBase
+var _time: float = 0.0
+var _fire_left: float = 0.0
 
 
 func _ready() -> void:
-	# Heller Handschuh mit leichtem Randlicht, damit die Hand vor dunklen Waffen und Waenden erkennbar ist
-	var body := StandardMaterial3D.new()
-	body.albedo_color = Color(0.55, 0.57, 0.62)
-	body.metallic = 0.3
-	body.roughness = 0.5
-	body.rim_enabled = true
-	body.rim = 0.6
-	_hand = HAND.instantiate()
-	_hand.name = "HandR"
-	add_child(_hand)
-	for mesh: MeshInstance3D in _hand.find_children("*", "MeshInstance3D", true, false):
-		mesh.material_override = body
+	_arms = ARMS.instantiate()
+	_arms.name = "Arms"
+	add_child(_arms)
+	_gun = _arms.find_child("base_ak74_0", true, false)
+	_anim = _arms.find_children("*", "AnimationPlayer", true, false)[0]
+	_anim.play(ANIM)
+	_anim.pause()
+	for mesh: MeshInstance3D in _arms.find_children("*", "MeshInstance3D", true, false):
 		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		# Gleiche Render-Ebene wie die Waffen (eigenes Viewmodel-Licht)
 		mesh.layers = WeaponManager.VIEWMODEL_LAYER
+		# Handschuhe und Jacke sind fast schwarz: aufhellen und Randlicht, damit die Arme vor dunklen Waenden lesbar sind
+		for i in mesh.get_surface_override_material_count():
+			var mat := mesh.get_active_material(i).duplicate() as StandardMaterial3D
+			mat.albedo_color = Color(2.2, 2.2, 2.4)
+			mat.rim_enabled = true
+			mat.rim = 0.6
+			mat.rim_tint = 0.3
+			mesh.set_surface_override_material(i, mat)
 
 
-## Fingerhaltung aus settings.fingers: je Finger Vector4(Glied 1, Glied 2, Glied 3, Spreizen) in Grad
-func apply_pose() -> void:
-	for finger in FINGERS:
-		var pose: Vector4 = settings.fingers[finger]
-		for joint in 3:
-			var node := _hand.find_child("%s_%d" % [finger, joint], true, false) as Node3D
-			if node:
-				node.rotation = Vector3(-deg_to_rad(pose[joint]), deg_to_rad(pose.w) if joint == 0 else 0.0, 0.0)
-
-
-func _process(_delta: float) -> void:
-	var weapon: Node3D = weapon_manager.get_current_weapon() if weapon_manager else null
+func _process(delta: float) -> void:
+	var weapon: WeaponBase = weapon_manager.get_current_weapon() if weapon_manager else null
 	var model: WeaponModel = weapon.get_node_or_null("Model") as WeaponModel if weapon else null
-	visible = model != null and weapon.visible and settings.get("hand", false)
+	visible = model != null and weapon.visible and settings.get("hand", true)
 	if not visible:
 		return
-	# Drehung aus Finger- und Handflaechen-Richtung, Zusatzdrehung, dann spiegeln (Modell ist eine linke Hand)
-	var z := -BASE_FINGERS.normalized()
-	var y := -BASE_PALM
-	y = (y - z * y.dot(z)).normalized()
-	var turn := Basis.from_euler(settings.hand_rot * PI / 180.0)
-	var basis := weapon.basis * turn * Basis(y.cross(z), y, z).scaled(Vector3.ONE * settings.hand_scale) * Basis.from_scale(Vector3(-1, 1, 1))
-	_hand.transform = Transform3D(basis, weapon.transform * (model.grip_point() + settings.hand_offset) - basis * PALM_CENTER)
+	if weapon != _weapon:
+		if _weapon:
+			_weapon.fired.disconnect(_on_fired)
+		_weapon = weapon
+		_weapon.fired.connect(_on_fired)
+
+	_time += delta
+	var t: float = IDLE.x + fmod(_time / IDLE_SECONDS, 1.0) * (IDLE.y - IDLE.x)
+	if _fire_left > 0.0:
+		_fire_left -= delta
+		t = lerpf(FIRE.x, FIRE.y, clampf(1.0 - _fire_left / FIRE_SECONDS, 0.0, 1.0))
+	_anim.seek(t, true)
+
+	# AK-Bezug (animiert) herausrechnen, dann AK-Griff auf unseren Griffpunkt, AK-Lauf (+Z) auf unseren (-Z)
+	var gun: Transform3D = _arms.global_transform.affine_inverse() * _gun.global_transform
+	var size: float = BASE_SCALE * settings.get("arms_scale", 1.0)
+	var turn := Basis.from_euler(settings.get("arms_rot", Vector3.ZERO) * PI / 180.0) * Basis(Vector3.UP, PI)
+	var place := Transform3D(weapon.basis * turn * Basis.from_scale(Vector3.ONE * size),
+		weapon.transform * (model.grip_point() + settings.get("arms_offset", Vector3.ZERO)))
+	_arms.transform = place * Transform3D(Basis(), -AK_GRIP) * gun.affine_inverse()
+
+
+func _on_fired() -> void:
+	_fire_left = FIRE_SECONDS

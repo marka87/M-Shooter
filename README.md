@@ -54,6 +54,8 @@ Alle Tasten laufen über die InputMap (Projekt → Projekteinstellungen → Eing
 | **Shock Rifle** (7) | Strahl / Kugel | 45 Strahl, 55 + 35 Fläche Kugel | 0.75s / 0.6s | Rechtsklick feuert eine langsame Shock-Kugel. Trifft der Strahl die Kugel: **Combo**, 150 Schaden im Radius 7 m. **Muss eingesammelt werden** |
 | **Railgun** (6) | Hitscan-Strahl | 100 | 1.25s Abklingzeit | Sofortiger Einschlag über 300m, nachleuchtender Cyan-Energiestrahl |
 
+Rechte Maustaste halten zoomt bei allen Waffen ohne Alt-Feuer halb heran. Die Ego-Waffe halten **animierte Arme** (Atmen in Ruhe, Abzug beim Schuss): Arme und Animationen von **DJMaesen, CC BY 4.0**, aus dem Godot-Addon „FPS Hands“ (nur das Modell, siehe `assets/characters/Arm/LICENSE_arms.txt`). Lage von Waffe und Armen pro Waffe im Viewmodel-Editor (F4, in der Waffen-Werkstatt sofort an).
+
 ---
 
 ## 🏁 Match-Ablauf

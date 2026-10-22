@@ -1,0 +1,8 @@
+Ego-Arme (arms.glb, arms_0-2.png): Arme und Animationen von DJMaesen, Lizenz CC BY 4.0
+(https://creativecommons.org/licenses/by/4.0/).
+
+Bezogen aus dem Godot-Addon "FPS Hands" von Bytez (https://codeberg.org/Bytez/godot-fps-hands),
+Datei fps-ak/reasources/fps_ak_animated.glb. Verwendet wird nur das Modell, nicht der Addon-Code (GPLv3).
+
+Geaendert (tools/strip_arms.py): AK-Modell, -Material und -Texturen entfernt, Arm-Texturen auf 1024 px
+verkleinert. Im Spiel aufgehellt und mit Randlicht versehen (scripts/components/view_hands.gd).

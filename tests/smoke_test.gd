@@ -416,7 +416,7 @@ func run() -> void:
 	check(SoundGenerator.load_announcer("fight") is AudioStreamMP3 and first_blood is AudioStreamRandomizer and first_blood.streams_count == 2,
 		"Eigene Ansager: MP3, First Blood mit 2 Varianten")
 
-	# Viewmodel-Editor: Werte pro Waffe (Pfeil verschiebt nur die aktuelle Waffe), Fingerglieder einzeln
+	# Viewmodel-Editor: Werte pro Waffe (Pfeil verschiebt nur die aktuelle Waffe), Arme an der Waffe
 	var tuner = player.get_node("ViewmodelTuner")
 	var press := func(keys: Array):
 		for k in keys:
@@ -435,13 +435,18 @@ func run() -> void:
 	player.weapon_manager.switch_to_weapon_id(other_id)
 	check(player.weapon_manager.default_pos.is_equal_approx(tuner.settings[other_id].pos) and not tuner.settings[other_id].pos.is_equal_approx(tuner.settings[cur_id].pos),
 		"Viewmodel-Editor: jede Waffe hat eigene Werte")
-	# Zeigefinger (F5 x6), Glied 2 waehlen (rechts x2), einmal beugen: nur dieses Glied dreht sich weiter
-	var index_before: Vector4 = tuner.current().fingers.index
-	press.call([KEY_H, KEY_F5, KEY_F5, KEY_F5, KEY_F5, KEY_F5, KEY_F5, KEY_RIGHT, KEY_RIGHT, KEY_UP])
-	var index_after: Vector4 = tuner.current().fingers.index
-	var joint2: Node3D = tuner.hands._hand.find_child("index_1", true, false)
-	check(index_after - index_before == Vector4(0, 5, 0, 0) and is_equal_approx(joint2.rotation.x, -deg_to_rad(index_after.y)),
-		"Viewmodel-Editor: Fingerglied einzeln beugen (%s)" % (index_after - index_before))
+	# Ego-Arme: rechte Handflaeche am Griff der Waffe (seitlich daneben), H blendet sie fuer diese Waffe aus
+	await create_timer(0.3).timeout  # Waffenwechsel abwarten
+	var hands = tuner.hands
+	var skel: Skeleton3D = hands.find_children("*", "Skeleton3D", true, false)[0]
+	var palm: Vector3 = skel.global_transform * skel.get_bone_global_pose(skel.find_bone("R_palm_039")).origin
+	var weapon: Node3D = player.weapon_manager.get_current_weapon()
+	var grip: Vector3 = player.weapon_manager.global_transform * (weapon.transform * weapon.get_node("Model").grip_point())
+	check(hands.visible and palm.distance_to(grip) < 0.3, "Ego-Arme greifen die Waffe (Abstand %.2f)" % palm.distance_to(grip))
+	press.call([KEY_H])
+	await process_frame
+	await process_frame
+	check(not hands.visible, "Viewmodel-Editor: H blendet die Arme aus")
 	tuner.settings = saved
 	tuner.set_active(false)
 	player.weapon_manager.switch_to_weapon_id(cur_id)

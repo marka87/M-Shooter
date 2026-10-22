@@ -18,5 +18,4 @@ func _ready() -> void:
 	player.hud.frags_label.hide()
 	player.hud.control_hints.hide()
 	var tuner: ViewmodelTuner = player.get_node("ViewmodelTuner")
-	tuner.hand_by_default = true
 	tuner.set_active(true)
