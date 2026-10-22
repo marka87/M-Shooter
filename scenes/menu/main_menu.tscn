@@ -427,6 +427,29 @@ text = "Frag-Limit:"
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 
+[node name="CaptureBox" type="VBoxContainer" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/CaptureBox"]
+layout_mode = 2
+text = "Capture-Limit:"
+
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/CaptureBox"]
+layout_mode = 2
+
+[node name="CaptureLimitOption" type="OptionButton" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/CaptureBox/HBox"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CaptureSpin" type="SpinBox" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/CaptureBox/HBox"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+min_value = 1.0
+max_value = 99.0
+value = 3.0
+
 [node name="TimeBox" type="VBoxContainer" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer"]
 layout_mode = 2
 size_flags_horizontal = 3

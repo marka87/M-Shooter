@@ -46,7 +46,7 @@ func _on_fire(shooter: Node3D, camera: Node3D) -> void:
 			info.is_headshot = headshot
 			collider.take_damage(info)
 			if shooter.has_method("on_enemy_hit"):
-				shooter.on_enemy_hit(headshot)
+				shooter.on_enemy_hit(headshot, collider)
 		HitSpark.spawn(shooter.get_parent(), end, hit.normal)
 
 

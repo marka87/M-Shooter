@@ -49,7 +49,7 @@ func _explode(pos: Vector3, direct_target: Object = null) -> void:
 	if direct_target and direct_target.has_method("take_damage") and direct_target != shooter:
 		direct_target.take_damage(DamageInfo.create(direct_damage, shooter, pos, -global_transform.basis.z, weapon_name))
 		if shooter and shooter.has_method("on_enemy_hit"):
-			shooter.on_enemy_hit()
+			shooter.on_enemy_hit(false, direct_target)
 	
 	# Explosions-Flaechenschaden erzeugen
 	if explosion_scene:

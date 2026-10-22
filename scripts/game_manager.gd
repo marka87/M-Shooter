@@ -48,6 +48,8 @@ const PLAYER_TEAM: int = 1
 var team_scores: Array[int] = [0, 0]
 ## CTF: so viele Eroberungen gewinnen das Match
 var capture_limit: int = 3
+## Feste Auswahl im Menue, daneben ist ein beliebiger Wert waehlbar
+const CAPTURE_LIMITS: Array[int] = [1, 3, 5]
 ## CTF: Flaggen und Basen der aktuellen Map (null in anderen Modi)
 var ctf: CtfManager = null
 const INSTAGIB_DAMAGE: float = 1000.0
@@ -552,6 +554,7 @@ func load_settings() -> void:
 		bot_skill = clampi(cfg.get_value("match", "bot_skill", bot_skill), 0, 4)
 		selected_map = clampi(cfg.get_value("match", "map", selected_map), 0, MAPS.size() - 1)
 		frag_limit = cfg.get_value("match", "frag_limit", frag_limit)
+		capture_limit = clampi(cfg.get_value("match", "capture_limit", capture_limit), 1, 99)
 		time_limit_minutes = cfg.get_value("match", "time_limit", time_limit_minutes)
 		instagib = cfg.get_value("match", "instagib", instagib)
 		duel = cfg.get_value("match", "duel", duel)
@@ -590,6 +593,7 @@ func save_settings() -> void:
 	cfg.set_value("match", "bot_skill", bot_skill)
 	cfg.set_value("match", "map", selected_map)
 	cfg.set_value("match", "frag_limit", frag_limit)
+	cfg.set_value("match", "capture_limit", capture_limit)
 	cfg.set_value("match", "time_limit", time_limit_minutes)
 	cfg.set_value("match", "instagib", instagib)
 	cfg.set_value("match", "duel", duel)

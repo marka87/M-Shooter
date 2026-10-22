@@ -36,7 +36,7 @@ func _on_fire(shooter: Node3D, camera: Node3D) -> void:
 		if collider and collider.has_method("take_damage"):
 			collider.take_damage(DamageInfo.create(damage, shooter, end, forward * 0.2, weapon_name))
 			if shooter.has_method("on_enemy_hit") and _tick % 3 == 0:
-				shooter.on_enemy_hit()
+				shooter.on_enemy_hit(false, collider)
 		elif _tick % 3 == 0:
 			HitSpark.spawn(shooter.get_parent(), end, hit.normal)
 

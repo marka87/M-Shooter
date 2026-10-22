@@ -68,7 +68,7 @@ func objective_for(bot: Node3D) -> Dictionary:
 	if _is_defender(bot):
 		return { "pos": own.home, "value": 0.45 }
 	if enemy.state == CtfFlag.FlagState.CARRIED and is_instance_valid(enemy.carrier):
-		return { "pos": enemy.carrier.global_position, "value": 0.4 }  # eigenen Traeger begleiten
+		return { "pos": enemy.carrier.global_position, "value": 0.7 }  # eigenen Traeger begleiten (allein kommt er selten heim)
 	return { "pos": enemy.global_position, "value": 0.65 }
 
 

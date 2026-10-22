@@ -77,7 +77,7 @@ func _on_fire(shooter: Node3D, camera: Node3D) -> void:
 		if collider and collider.has_method("take_damage"):
 			collider.take_damage(DamageInfo.create(damage, shooter, hit_pos, forward, weapon_name))
 			if shooter and shooter.has_method("on_enemy_hit"):
-				shooter.on_enemy_hit()
+				shooter.on_enemy_hit(false, collider)
 
 
 func _flash_muzzle() -> void:

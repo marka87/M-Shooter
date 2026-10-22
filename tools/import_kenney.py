@@ -18,7 +18,9 @@ OUT = os.path.join(ROOT, 'assets', 'sounds')
 
 S, I, D = 'scifi/Audio/', 'impact/Audio/', 'digital/Audio/'
 MAP = {
-    # Waffen (MG, Shotgun, Raketenstart, Blitz: keine passenden Kenney-Samples, bleiben synthetisch)
+    # Waffen (Shotgun, Raketenstart, Blitz: keine passenden Kenney-Samples, bleiben synthetisch)
+    # shortcut: MG als kurzer Metallschlag, bis ein eigener Schuss-Sound in assets/sounds/custom liegt
+    'machinegun': [I + 'impactMetal_heavy_000', I + 'impactMetal_heavy_002', I + 'impactMetal_heavy_004'],
     'plasma': [S + 'laserSmall_000', S + 'laserSmall_001', S + 'laserSmall_003'],
     'railgun': [S + 'laserLarge_000'],
     'shock_beam': [S + 'laserLarge_002', S + 'laserLarge_003'],

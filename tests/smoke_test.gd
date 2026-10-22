@@ -479,5 +479,23 @@ func run() -> void:
 		await wait(0.2)
 	check(count_tracers.call() <= tracers_before + 1, "Leuchtspuren werden wiederverwendet (%d -> %d)" % [tracers_before, count_tracers.call()])
 
+	# Hauptmenue: CTF zeigt das Capture-Limit, "Beliebig" uebernimmt den Wert aus dem Zahlenfeld
+	var old_mode: int = gm.game_mode
+	var old_capture: int = gm.capture_limit
+	var menu: Control = load("res://scenes/menu/main_menu.tscn").instantiate()
+	root.add_child(menu)
+	await process_frame
+	menu.game_mode_option.item_selected.emit(gm.Mode.CTF)
+	check(menu.capture_box.visible and not menu.frag_box.visible, "Menue: CTF zeigt Capture-Limit statt Frag-Limit")
+	check(menu.match_title.text == "CAPTURE THE FLAG", "Menue: Titel zeigt den Modus (%s)" % menu.match_title.text)
+	menu.capture_limit_option.item_selected.emit(1)
+	check(gm.capture_limit == 3 and not menu.capture_spin.visible, "Menue: Capture-Limit 3 gewaehlt")
+	menu.capture_limit_option.item_selected.emit(gm.CAPTURE_LIMITS.size())
+	menu.capture_spin.value = 7
+	check(gm.capture_limit == 7 and menu.capture_spin.visible, "Menue: beliebiges Capture-Limit (%d)" % gm.capture_limit)
+	menu.queue_free()
+	gm.game_mode = old_mode
+	gm.capture_limit = old_capture
+
 	print("FEHLER: ", fails)
 	quit(1 if fails > 0 else 0)

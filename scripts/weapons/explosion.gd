@@ -153,7 +153,7 @@ func _apply_blast_damage_and_impulse() -> void:
 				actual_damage *= 0.4
 			body.take_damage(DamageInfo.create(actual_damage, shooter_node, explosion_pos, dir, weapon_name, true))
 			if shooter_node and shooter_node != body and shooter_node.has_method("on_enemy_hit"):
-				shooter_node.on_enemy_hit()
+				shooter_node.on_enemy_hit(false, body)
 
 
 ## Prueft, ob zwischen Explosion und Ziel keine Wand liegt (andere Figuren schirmen nicht ab)

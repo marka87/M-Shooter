@@ -287,7 +287,9 @@ func on_item_picked(pickup_type: int, item_name: String = "") -> void:
 
 
 ## Treffer-Feedback: Quake-Trefferton (Kopftreffer mit eigenem Ton), Hitmarker zeigt das HUD
-func on_enemy_hit(headshot: bool = false) -> void:
+func on_enemy_hit(headshot: bool = false, target: Node = null) -> void:
+	if GameManager.are_teammates(self, target):
+		return
 	hitsound_audio.stream = SoundGenerator.create_headshot_sound() if headshot else SoundGenerator.create_hitsound()
 	hitsound_audio.pitch_scale = 1.0 if headshot else randf_range(0.98, 1.05)
 	hitsound_audio.play()

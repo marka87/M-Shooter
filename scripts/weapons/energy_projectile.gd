@@ -60,7 +60,7 @@ func _impact(pos: Vector3, normal: Vector3, direct_target: Object) -> void:
 	if direct_target and direct_target != shooter and direct_target.has_method("take_damage"):
 		direct_target.take_damage(DamageInfo.create(direct_damage, shooter, pos, dir * 0.3, weapon_name))
 		if is_instance_valid(shooter) and shooter.has_method("on_enemy_hit"):
-			shooter.on_enemy_hit()
+			shooter.on_enemy_hit(false, direct_target)
 	_splash(pos, direct_target)
 
 	var impact := IMPACT_SCENE.instantiate()

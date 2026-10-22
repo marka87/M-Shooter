@@ -12,9 +12,14 @@ extends Control
 @onready var bot_value_label: Label = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/BotsContainer/HBox/BotValueLabel
 @onready var map_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/MapContainer/MapOption
 @onready var frag_limit_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/FragBox/FragLimitOption
+@onready var frag_box: VBoxContainer = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/FragBox
+@onready var capture_box: VBoxContainer = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/CaptureBox
+@onready var capture_limit_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/CaptureBox/HBox/CaptureLimitOption
+@onready var capture_spin: SpinBox = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/CaptureBox/HBox/CaptureSpin
 @onready var time_limit_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/LimitsContainer/TimeBox/TimeLimitOption
 @onready var skill_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/SkillContainer/SkillOption
 @onready var duel_check: CheckButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/DuelCheck
+@onready var match_title: Label = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/MatchTitle
 @onready var game_mode_option: OptionButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/ModeContainer/ModeOption
 @onready var instagib_check: CheckButton = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/InstagibCheck
 @onready var fight_button: Button = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/FightButton
@@ -138,6 +143,18 @@ func _ready() -> void:
 		frag_limit_option.add_item(str(limit) if limit > 0 else "Kein")
 	frag_limit_option.selected = maxi(GameManager.FRAG_LIMITS.find(GameManager.frag_limit), 0)
 	frag_limit_option.item_selected.connect(func(i: int): GameManager.frag_limit = GameManager.FRAG_LIMITS[i])
+	# Capture-Limit (nur CTF): 1, 3, 5 oder beliebig per Zahlenfeld
+	for limit in GameManager.CAPTURE_LIMITS:
+		capture_limit_option.add_item(str(limit))
+	capture_limit_option.add_item("Beliebig")
+	var capture_index: int = GameManager.CAPTURE_LIMITS.find(GameManager.capture_limit)
+	capture_limit_option.selected = capture_index if capture_index >= 0 else GameManager.CAPTURE_LIMITS.size()
+	capture_spin.value = GameManager.capture_limit
+	capture_spin.visible = capture_index < 0
+	capture_limit_option.item_selected.connect(func(i: int):
+		capture_spin.visible = i >= GameManager.CAPTURE_LIMITS.size()
+		GameManager.capture_limit = int(capture_spin.value) if capture_spin.visible else GameManager.CAPTURE_LIMITS[i])
+	capture_spin.value_changed.connect(func(v: float): GameManager.capture_limit = int(v))
 	for minutes in GameManager.TIME_LIMITS:
 		time_limit_option.add_item("%d Min" % minutes if minutes > 0 else "Kein")
 	time_limit_option.selected = maxi(GameManager.TIME_LIMITS.find(int(GameManager.time_limit_minutes)), 0)
@@ -151,12 +168,10 @@ func _ready() -> void:
 	for mode_name in GameManager.MODE_NAMES:
 		game_mode_option.add_item(mode_name)
 	game_mode_option.selected = GameManager.game_mode
-	duel_check.disabled = GameManager.is_team_mode()
-	bot_slider.editable = not (GameManager.duel and not GameManager.is_team_mode())
+	_update_mode_controls()
 	game_mode_option.item_selected.connect(func(i: int):
 		GameManager.game_mode = i
-		duel_check.disabled = GameManager.is_team_mode()
-		bot_slider.editable = not (GameManager.duel and not GameManager.is_team_mode()))
+		_update_mode_controls())
 	duel_check.toggled.connect(func(on: bool):
 		GameManager.duel = on
 		bot_slider.editable = not on)
@@ -302,3 +317,13 @@ func _update_sens_label(val: float) -> void:
 func _update_volume_label(val: float) -> void:
 	if volume_value_label:
 		volume_value_label.text = "%d%%" % int(val * 100)
+
+
+## Titel zeigt den Modus, CTF zeigt das Capture-Limit statt des Frag-Limits, Duell gibt es nur ohne Teams
+func _update_mode_controls() -> void:
+	var ctf: bool = GameManager.game_mode == GameManager.Mode.CTF
+	match_title.text = GameManager.MODE_NAMES[GameManager.game_mode].to_upper()
+	frag_box.visible = not ctf
+	capture_box.visible = ctf
+	duel_check.disabled = GameManager.is_team_mode()
+	bot_slider.editable = not (GameManager.duel and not GameManager.is_team_mode())
