@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://d0tlu4ytcrkm3"
+path="res://.godot/imported/camp_ground.map-fbd9b4138530a1678c455dcfaf7fda97.tres"
+
+[deps]
+
+source_file="res://maps/camp_ground.map"
+dest_files=["res://.godot/imported/camp_ground.map-fbd9b4138530a1678c455dcfaf7fda97.tres"]
+
+[params]
+

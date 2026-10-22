@@ -185,6 +185,8 @@ class MapKit:
         x0, x1 = sorted((x0, x1))
         z0, z1 = sorted((z0, z1))
         length = (x1 - x0) if horizontal else (z1 - z0)
+        # Navmesh nimmt hoechstens 45 Grad; mit Abstand bleiben, sonst entscheidet die Rundung
+        assert rise / length <= 0.84, f'Treppe zu steil: {rise} m auf {length} m'
         run, h = length / steps, rise / steps
         sign = 1 if rise_dir[0] == '+' else -1
         start = (x0 if sign > 0 else x1) if horizontal else (z0 if sign > 0 else z1)

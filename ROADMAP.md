@@ -87,7 +87,7 @@ Der aktuelle Stand sind einfache Meshes und prozedurale Effekte. Für einen mode
 | 3.7 | ✅ GPUParticles statt CPUParticles für Explosionen, Funken, Rauch | S |
 | 3.8 | ✅ **Lesbarkeit vor Schönheit**: Gegner in Team-/Hervorhebungsfarbe (Brightskins wie in Q3), optional abschaltbar | S |
 | 3.9 | ✅ Level von zu Hause mergen (nur lokal committet, noch nicht gepusht) | S |
-| 3.10 | **Map-Baukasten**: Generator mit Modulen (Turm, Steg, Treppe, Jump-Pad, Teleporter), damit eine neue Map in Stunden statt Tagen steht | M |
+| 3.10 | ✅ tools/mapkit.py + tools/maps/*.py: Sky Yard, Duck 17, Twin Spires, Camp Ground, tests/maps_test.gd. **Map-Baukasten**: Generator mit Modulen (Turm, Steg, Treppe, Jump-Pad, Teleporter), damit eine neue Map in Stunden statt Tagen steht | M |
 | 3.11 | ✅ Weitere Maps: kleine Duell-Map (1 gegen 1), offene Railgun-/Instagib-Map | M |
 
 ---

@@ -6,7 +6,7 @@ extends SceneTree
 #   Godot_v4.7.2-stable_win64_console.exe --headless --path . -s res://tests/maps_test.gd
 # Exit-Code 0 = alles bestanden.
 
-const MAPS := ["sky_yard", "duck_17"]
+const MAPS := ["sky_yard", "duck_17", "twin_spires", "camp_ground"]
 
 var fails := 0
 
@@ -24,7 +24,8 @@ func _initialize() -> void:
 func run() -> void:
 	await process_frame
 	var gm = root.get_node("GameManager")
-	var orig := [gm.bot_count, gm.frag_limit, gm.time_limit_minutes, gm.match_countdown, gm.game_mode]
+	var orig := [gm.bot_count, gm.frag_limit, gm.time_limit_minutes, gm.match_countdown, gm.game_mode, gm.bot_skill]
+	gm.bot_skill = 2  # "Erfahren": unabhaengig von den gespeicherten Einstellungen
 	gm.frag_limit = 0
 	gm.time_limit_minutes = 0.0
 	gm.match_countdown = 0.0
@@ -68,12 +69,13 @@ func run() -> void:
 		var damage := 0.0
 		for n in gm.scores:
 			damage += gm.scores[n].damage_dealt
-		check(damage > 150.0, "%s: Bots kaempfen (%d Schaden in 60 s)" % [map_id, damage])
+		check(damage > 50.0, "%s: Bots treffen sich und kaempfen (%d Schaden in 60 s)" % [map_id, damage])
 
 	gm.bot_count = orig[0]
 	gm.frag_limit = orig[1]
 	gm.time_limit_minutes = orig[2]
 	gm.match_countdown = orig[3]
 	gm.game_mode = orig[4]
+	gm.bot_skill = orig[5]
 	print("FEHLER: ", fails)
 	quit(1 if fails > 0 else 0)

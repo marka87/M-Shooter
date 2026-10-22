@@ -133,6 +133,8 @@ const MAPS: Array[Dictionary] = [
 	{ "name": "Orbital Void", "scene": "res://levels/orbital_void.tscn" },
 	{ "name": "Sky Yard", "scene": "res://levels/sky_yard.tscn" },
 	{ "name": "Duck 17", "scene": "res://levels/duck_17.tscn" },
+	{ "name": "Twin Spires", "scene": "res://levels/twin_spires.tscn" },
+	{ "name": "Camp Ground", "scene": "res://levels/camp_ground.tscn" },
 	{ "name": "Testarena", "scene": "res://levels/test_arena.tscn" },
 ]
 ## Index in MAPS

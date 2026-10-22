@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://dtecr8q8m744q"
+path="res://.godot/imported/twin_spires.map-bd60d76c86a328846776f66d8c5ddac2.tres"
+
+[deps]
+
+source_file="res://maps/twin_spires.map"
+dest_files=["res://.godot/imported/twin_spires.map-bd60d76c86a328846776f66d8c5ddac2.tres"]
+
+[params]
+
