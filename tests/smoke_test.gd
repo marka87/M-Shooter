@@ -493,6 +493,15 @@ func run() -> void:
 	menu.capture_limit_option.item_selected.emit(gm.CAPTURE_LIMITS.size())
 	menu.capture_spin.value = 7
 	check(gm.capture_limit == 7 and menu.capture_spin.visible, "Menue: beliebiges Capture-Limit (%d)" % gm.capture_limit)
+	var old_map: int = gm.selected_map
+	var old_bots: int = gm.bot_count
+	menu.map_option.item_selected.emit(3)  # Duck 17: 16 Spieler
+	menu.bot_slider.value = 15
+	check(menu.bot_slider.max_value == 15 and gm.bot_count == 15, "Menue: Duck 17 erlaubt 15 Bots")
+	menu.map_option.item_selected.emit(0)  # Neon Foundry: 8 Spieler
+	check(menu.bot_slider.max_value == 7 and gm.bot_count == 7, "Menue: kleine Map kuerzt auf 7 Bots (%d)" % gm.bot_count)
+	gm.selected_map = old_map
+	gm.bot_count = old_bots
 	menu.queue_free()
 	gm.game_mode = old_mode
 	gm.capture_limit = old_capture

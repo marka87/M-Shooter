@@ -61,6 +61,23 @@ func apply_damage(info: DamageInfo) -> void:
 		died.emit(info)
 
 
+## Netzspiel (Client): Treffer mit dem Lebensstand, den der Host ausgerechnet hat
+func apply_net(info: DamageInfo, new_health: float, new_armor: float, dead: bool) -> void:
+	if is_dead:
+		return
+	last_damage = info
+	last_absorbed = maxf(armor - new_armor, 0.0)
+	var health_lost: float = maxf(health - new_health, 0.0)
+	health = new_health
+	armor = new_armor
+	damaged.emit(info, health_lost)
+	changed.emit(health, armor)
+	if dead:
+		health = 0.0
+		is_dead = true
+		died.emit(info)
+
+
 func _process(delta: float) -> void:
 	# Ueberheilung langsam wieder auf max_health abbauen
 	if not is_dead and health > max_health:

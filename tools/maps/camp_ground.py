@@ -84,7 +84,7 @@ kit.item('health', 10, 0, 30)
 # --- Spawns (Raketen-Raum und Laufsteg Ost liegen am weitesten auseinander = CTF-Basen) ---
 for x, y, z, yaw in ((-34, 0, 34, 0), (35, H_WALK, -26, 90), (-12, 0, -12, 135), (12, 0, 12, -45),
                      (-12, 0, 12, 45), (12, 0, -12, -135), (-20, H_WALK, -35, 180), (15, H_WALK, -35, 180),
-                     (35, H_WALK, 20, 90), (-34, 0, -28, 180)):
+                     (35, H_WALK, 20, 90), (-34, 0, -28, 180), (-26, 0, 14, 0), (-8, H_WALK, -36, 180)):
     kit.spawn(x, y, z, yaw)
 
 kit.write()

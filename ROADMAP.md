@@ -152,11 +152,11 @@ Für LAN fallen Lag-Compensation und Server-Browser weitgehend weg (geringe Late
 
 | # | Aufgabe | Aufwand |
 |---|---|---|
-| 8.1 | Architektur vorbereiten: Eingaben als „Kommandos“ sammeln und getrennt von der Bewegung verarbeiten, Spielzustand nur an einer Stelle ändern | M |
-| 8.2 | LAN mit Godots High-Level-Multiplayer (ENet), **Host-autoritativ** (ein Spieler ist Server) | L |
-| 8.3 | Interpolation für Gegner, einfache Vorhersage der eigenen Bewegung | M |
-| 8.4 | Spiel im LAN finden (UDP-Broadcast) oder Direktverbindung per IP | S |
-| 8.5 | Bots laufen nur auf dem Host und werden wie Spieler übertragen | M |
+| 8.1 | ✅ anders gelöst: Jeder Rechner steuert seinen Spieler selbst (kein Umbau der Eingaben nötig), Schaden, Tod, Items und Punkte entscheidet nur der Host (scripts/net/net.gd). Ursprünglich: Architektur vorbereiten: Eingaben als „Kommandos“ sammeln und getrennt von der Bewegung verarbeiten, Spielzustand nur an einer Stelle ändern | M |
+| 8.2 | ✅ LAN mit Godots High-Level-Multiplayer (ENet), **Host-autoritativ** (ein Spieler ist Server) | L |
+| 8.3 | ✅ teilweise: Gegner gleiten zum Netzstand, die eigene Bewegung läuft lokal ohne Wartezeit. Offen: Lag-Ausgleich bei Treffern (im LAN kaum spürbar). Ursprünglich: Interpolation für Gegner, einfache Vorhersage der eigenen Bewegung | M |
+| 8.4 | ✅ Spiel im LAN finden (UDP-Broadcast) oder Direktverbindung per IP | S |
+| 8.5 | ✅ Bots laufen nur auf dem Host und werden wie Spieler übertragen | M |
 
 Bei reinem LAN entfallen Lag-Compensation und dedizierter Server.
 

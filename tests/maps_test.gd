@@ -37,7 +37,8 @@ func run() -> void:
 		await create_timer(1.0).timeout
 		var level := current_scene
 		var spawns: Array = level.get_node("SpawnPoints").get_children()
-		check(spawns.size() >= 8, "%s: %d Spawnpunkte" % [map_id, spawns.size()])
+		var max_players: int = gm.MAPS.filter(func(m): return m.scene.ends_with(map_id + ".tscn"))[0].max_players
+		check(spawns.size() >= max_players, "%s: %d Spawnpunkte fuer %d Spieler" % [map_id, spawns.size(), max_players])
 
 		# Bot-Wege: vom ersten Spawn zu allen Spawns und Items (Navigationsnetz + Pad/Teleporter-Links)
 		var nav_map: RID = level.get_world_3d().navigation_map

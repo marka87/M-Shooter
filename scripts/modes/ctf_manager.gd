@@ -79,6 +79,7 @@ func is_own_half(point: Vector3, team: int) -> bool:
 
 func announce(text: String, team: int) -> void:
 	GameManager.player_announcement.emit(text, GameManager.TEAM_COLORS[team])
+	Net.on_announce(text, GameManager.TEAM_COLORS[team])
 
 
 ## Jeder zweite Bot eines Teams verteidigt (bei einem Bot im Team greift er an)

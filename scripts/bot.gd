@@ -36,6 +36,10 @@ var current_state: State = State.PATROL
 @export var skin_color: Color = Color(1.0, 0.25, 0.2)
 ## Team im Team-Modus (0 = Rot, 1 = Blau), sonst -1; setzt die Arena vor dem Einfuegen
 var team: int = -1
+## Netzspiel: Puppe eines Kaempfers von einem anderen Rechner (keine KI, folgt den Netzdaten, siehe Net)
+var puppet: bool = false
+# Letzter Netzstand: [Position, Yaw, Neigung, Tempo, Waffe, am Boden, zielt]
+var _net_state: Array = []
 
 # ==============================================================================
 # SCHWIERIGKEIT
@@ -126,6 +130,7 @@ var _step_distance: float = 0.0
 var _step_audio: AudioStreamPlayer3D = null
 # Animation (Quaternius Universal Animation Library) und Ragdoll beim Tod
 var anim_tree: AnimationTree
+var _anim_time: float = 0.0
 var _aim: Node3D
 ## Erst beim Tod aufgebaut und beim Respawn wieder entfernt (lebende Bots ohne 11 Physik-Knochen)
 var ragdoll: PhysicalBoneSimulator3D = null
@@ -212,6 +217,9 @@ func _physics_process(delta: float) -> void:
 	if current_state == State.DEAD:
 		return
 	_update_animation(delta)
+	if puppet:
+		_follow_net(delta)
+		return
 
 	# Countdown / Siegerbildschirm: nur Schwerkraft, keine KI
 	if GameManager.is_frozen():
@@ -513,6 +521,7 @@ func _setup_animation() -> void:
 	tree.connect_node("output", 0, "hit")
 	anim_tree = AnimationTree.new()
 	anim_tree.tree_root = tree
+	anim_tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	model.add_child(anim_tree)
 	anim_tree.anim_player = anim_tree.get_path_to(model.get_node("AnimationPlayer"))
 
@@ -526,11 +535,23 @@ func _anim_node(anim_name: String) -> AnimationNodeAnimation:
 ## Tempo, Luft und Zielen weich in den AnimationTree uebertragen
 func _update_animation(delta: float) -> void:
 	var weight: float = clampf(delta * 10.0, 0.0, 1.0)
-	var air: float = 0.0 if is_on_floor() else 1.0
-	var aim: float = 1.0 if current_state == State.ATTACK else 0.0
+	var on_floor: bool = _net_state[5] if puppet and not _net_state.is_empty() else is_on_floor()
+	var air: float = 0.0 if on_floor else 1.0
+	var aiming: bool = _net_state[6] if puppet and not _net_state.is_empty() else current_state == State.ATTACK
+	var aim: float = 1.0 if aiming else 0.0
 	anim_tree.set("parameters/loco/blend_position", Vector2(velocity.x, velocity.z).length())
 	anim_tree.set("parameters/air/blend_amount", lerpf(anim_tree.get("parameters/air/blend_amount"), air, weight))
 	anim_tree.set("parameters/aim/blend_amount", lerpf(anim_tree.get("parameters/aim/blend_amount"), aim, weight))
+	# Animations-LOD: nah 60 Hz, mittel 30 Hz, fern 15 Hz (15 Bots kosteten sonst ~7 ms pro Frame)
+	_anim_time += delta
+	var cam := get_viewport().get_camera_3d()
+	var dist: float = cam.global_position.distance_to(global_position) if cam else 100.0
+	var step: float = 1.0 / 60.0 if dist < 20.0 else (1.0 / 30.0 if dist < 45.0 else 1.0 / 15.0)
+	if cam and not cam.is_position_in_frustum(global_position + Vector3.UP):
+		step = 0.1  # ausserhalb des Bildes reicht eine grobe Pose
+	if _anim_time >= step:
+		anim_tree.advance(_anim_time)
+		_anim_time = 0.0
 
 
 ## Physikalisches Skelett aus Code: Kapseln entlang der Hauptknochen, verbunden mit Kegelgelenken.
@@ -689,7 +710,10 @@ func _fire_at(fire_target: CharacterBody3D, distance: float) -> bool:
 	var dir: Vector3 = ((aim_point - eye).normalized() + Vector3(randf_range(-spread, spread), randf_range(-spread, spread), randf_range(-spread, spread))).normalized()
 	_aim.global_position = eye
 	_aim.look_at(eye + dir, Vector3.UP if absf(dir.y) < 0.98 else Vector3.FORWARD)
-	return weapon.try_fire(self, _aim)
+	if not weapon.try_fire(self, _aim):
+		return false
+	Net.on_fired(self, weapon.weapon_id, false, _aim.global_transform)
+	return true
 
 
 # ==============================================================================
@@ -725,6 +749,8 @@ func on_item_picked(pickup_type: int, _item_name: String = "") -> void:
 
 ## Wird von Jump-Pads aufgerufen
 func launch(launch_velocity: Vector3) -> void:
+	if puppet:
+		return
 	velocity = launch_velocity
 	is_launched = true
 
@@ -733,6 +759,28 @@ func launch(launch_velocity: Vector3) -> void:
 func take_damage(info: DamageInfo) -> void:
 	if current_state == State.DEAD or GameManager.are_teammates(info.attacker, self):
 		return
+	# Netzspiel: Nur der Host rechnet Schaden, die Clients bekommen ihn als Ereignis (net_damaged)
+	if Net.is_client():
+		return
+	_hit_effects(info)
+	GameManager.register_damage(info, self)
+	# Schaden zuletzt anwenden: Bei Tod startet health.died -> _die() mit Todes-Sound,
+	# der sonst vom Treffer-Sound in _hit_effects ueberschrieben wuerde
+	health.apply_damage(info)
+	Net.on_damaged(self, info)
+
+
+## Client im Netzspiel: Treffer vom Host mit dessen Lebensstand
+func net_damaged(info: DamageInfo, new_health: float, new_armor: float, dead: bool) -> void:
+	if current_state == State.DEAD:
+		return
+	_hit_effects(info)
+	GameManager.register_damage(info, self)
+	health.apply_net(info, new_health, new_armor, dead)
+
+
+## Schadenszahl, Treffer-Sound, Zucken, Rueckstoss, Aufblitzen und Rache (KI)
+func _hit_effects(info: DamageInfo) -> void:
 	var amount: float = info.amount
 
 	# Schwebende 3D-Schadenszahl erzeugen
@@ -766,12 +814,6 @@ func take_damage(info: DamageInfo) -> void:
 			lose_target_timer = 0.0
 		if current_state == State.PATROL:
 			_switch_state(State.CHASE)
-
-	GameManager.register_damage(info, self)
-
-	# Schaden zuletzt anwenden: Bei Tod startet health.died -> _die() mit Todes-Sound,
-	# der sonst vom Treffer-Sound oben ueberschrieben wuerde
-	health.apply_damage(info)
 
 
 ## Kurzes optisches Aufblitzen bei Treffern (ganzes Modell kurz weiss)
@@ -856,17 +898,20 @@ func _die(info: DamageInfo) -> void:
 	else:
 		_start_ragdoll(info)
 
-	# Respawn nach Verzoegerung
-	get_tree().create_timer(respawn_delay, false).timeout.connect(_respawn)
+	# Respawn nach Verzoegerung (Clients warten auf den Host)
+	if not Net.is_client():
+		get_tree().create_timer(respawn_delay, false).timeout.connect(_respawn)
 
 
-## Respawn: Reaktiviert den Bot an einem Spawnpunkt
-func _respawn() -> void:
+## Respawn: Reaktiviert den Bot an einem Spawnpunkt (Netzspiel: an dem, den der Host gewaehlt hat)
+func _respawn(at: Variant = null) -> void:
 	health.reset()
 
 	# Am Spawnpunkt mit dem groessten Abstand zu anderen Kaempfern
-	global_transform = GameManager.get_spawn_transform(self)
+	global_transform = at if at is Transform3D else GameManager.get_spawn_transform(self)
 	reset_physics_interpolation()
+	Net.on_respawned(self, global_transform)
+	_net_state.clear()
 	target = null
 
 	weapon_manager.reset_loadout()
@@ -883,6 +928,53 @@ func _respawn() -> void:
 	is_launched = false
 	_switch_state(State.PATROL)
 	_pick_new_patrol_point()
+
+
+# ==============================================================================
+# NETZSPIEL (Puppe)
+# ==============================================================================
+
+## Neuer Netzstand (vom Host bzw. vom steuernden Client)
+func net_update(state: Array) -> void:
+	_net_state = state
+	var weapon: WeaponBase = weapon_manager.get_weapon(state[4])
+	if weapon and weapon != weapon_manager.current:
+		weapon_manager._equip(weapon)
+
+
+## Letzter Netzstand (der Host reicht ihn an die anderen Clients weiter)
+func net_state() -> Array:
+	return _net_state if not _net_state.is_empty() else [global_position, rotation.y, 0.0, Vector3.ZERO, &"machine_gun", true, false]
+
+
+## Dem Netzstand weich folgen; grosse Spruenge (Respawn, Teleporter) sofort
+func _follow_net(delta: float) -> void:
+	if _net_state.is_empty():
+		return
+	var target_pos: Vector3 = _net_state[0]
+	var weight: float = clampf(delta * 15.0, 0.0, 1.0)
+	if global_position.distance_squared_to(target_pos) > 25.0:
+		global_position = target_pos
+		reset_physics_interpolation()
+	else:
+		global_position = global_position.lerp(target_pos, weight)
+	rotation.y = lerp_angle(rotation.y, _net_state[1], weight)
+	velocity = _net_state[3]
+
+
+## Schuss eines anderen Rechners nachspielen (Effekte, Projektile; Schaden nur auf dem Host)
+func net_fire(weapon_id: StringName, alt: bool, aim: Transform3D) -> void:
+	var weapon: WeaponBase = weapon_manager.get_weapon(weapon_id)
+	if weapon == null:
+		return
+	if weapon != weapon_manager.current:
+		weapon_manager._equip(weapon)
+	_aim.global_transform = aim
+	if alt:
+		weapon._on_fire_alt(self, _aim)
+	else:
+		weapon._on_fire(self, _aim)
+	weapon._pulse_muzzle()
 
 
 # ==============================================================================
@@ -977,6 +1069,10 @@ func _update_nameplate() -> void:
 	if not nameplate:
 		return
 
+	if puppet:
+		nameplate.text = "%s - %d HP" % [display_name, int(health.health)]
+		nameplate.modulate = Color(0.5, 0.5, 0.5) if health.is_dead else Color(0.3, 0.8, 1.0)
+		return
 	var state_text: String = ""
 	match current_state:
 		State.PATROL: state_text = "Patrouille"

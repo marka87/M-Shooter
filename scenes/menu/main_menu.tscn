@@ -69,6 +69,12 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "SPIEL STARTEN"
 
+[node name="LanButton" type="Button" parent="CenterContainer/MainButtons"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "LAN-SPIEL"
+
 [node name="SettingsButton" type="Button" parent="CenterContainer/MainButtons"]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
@@ -481,6 +487,83 @@ theme_override_font_sizes/font_size = 20
 text = "KÄMPFEN!"
 
 [node name="MatchBackButton" type="Button" parent="CenterContainer/MatchPanel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "ZURÜCK"
+
+[node name="LanPanel" type="PanelContainer" parent="CenterContainer"]
+visible = false
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_Settings")
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/LanPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/LanPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="LanTitle" type="Label" parent="CenterContainer/LanPanel/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 30
+text = "LAN-SPIEL"
+horizontal_alignment = 1
+
+[node name="NameLabel" type="Label" parent="CenterContainer/LanPanel/MarginContainer/VBox"]
+layout_mode = 2
+text = "Dein Name:"
+
+[node name="NameEdit" type="LineEdit" parent="CenterContainer/LanPanel/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+max_length = 16
+
+[node name="HostButton" type="Button" parent="CenterContainer/LanPanel/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "SPIEL HOSTEN"
+
+[node name="ServersLabel" type="Label" parent="CenterContainer/LanPanel/MarginContainer/VBox"]
+layout_mode = 2
+text = "Spiele im Netzwerk:"
+
+[node name="ServerList" type="ItemList" parent="CenterContainer/LanPanel/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+
+[node name="IpLabel" type="Label" parent="CenterContainer/LanPanel/MarginContainer/VBox"]
+layout_mode = 2
+text = "Adresse des Hosts:"
+
+[node name="JoinBox" type="HBoxContainer" parent="CenterContainer/LanPanel/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="IpEdit" type="LineEdit" parent="CenterContainer/LanPanel/MarginContainer/VBox/JoinBox"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "z. B. 192.168.0.12"
+
+[node name="JoinButton" type="Button" parent="CenterContainer/LanPanel/MarginContainer/VBox/JoinBox"]
+custom_minimum_size = Vector2(120, 36)
+layout_mode = 2
+text = "BEITRETEN"
+
+[node name="StatusLabel" type="Label" parent="CenterContainer/LanPanel/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.55, 0.4, 1)
+autowrap_mode = 3
+
+[node name="LanBackButton" type="Button" parent="CenterContainer/LanPanel/MarginContainer/VBox"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18

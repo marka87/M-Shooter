@@ -24,6 +24,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 GameManager="*res://scripts/game_manager.gd"
+Net="*res://scripts/net/net.gd"
 
 [display]
 

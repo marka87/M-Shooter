@@ -95,6 +95,9 @@ func _ready() -> void:
 	# Spieler im GameManager registrieren
 	GameManager.current_player = self
 	team = GameManager.PLAYER_TEAM if GameManager.is_team_mode() else -1
+	if Net.active:
+		display_name = Net.my_name
+		team = Net.my_team
 	GameManager.register_participant(display_name, true, team)
 
 	# Maximale Neigung fuer Boeden (verhindert das Hochklettern steiler Waende)
@@ -158,14 +161,15 @@ func _physics_process(delta: float) -> void:
 	# Tot: keine Eingabe, nur Schwerkraft und Respawn-Countdown (pausiert automatisch mit dem Spiel)
 	if is_dead:
 		death_timer -= delta
-		if death_timer <= 0.0:
+		# Im Netzspiel bestimmt der Host den Respawn (Net._ev_respawn)
+		if death_timer <= 0.0 and not Net.is_client():
 			_respawn()
 			return
 		movement.step_idle(delta)
 		return
 
-	# Countdown / Siegerbildschirm: stehen bleiben, nur Schwerkraft
-	if GameManager.is_frozen():
+	# Countdown / Siegerbildschirm, Pausenmenue im Netzspiel (dort laeuft das Spiel weiter): stehen bleiben
+	if GameManager.is_frozen() or GameManager.current_state == GameManager.GameState.PAUSED:
 		movement.step_idle(delta)
 		return
 
@@ -178,7 +182,9 @@ func _physics_process(delta: float) -> void:
 func _on_landed(fall_speed: float) -> void:
 	camera_feedback.land(fall_speed)
 	var fall_damage := movement.fall_damage_for(fall_speed)
-	if fall_damage > 0.0:
+	if fall_damage > 0.0 and Net.is_client():
+		Net.send_self_damage(fall_damage, "Sturz")
+	elif fall_damage > 0.0:
 		take_damage(DamageInfo.create(fall_damage, null, global_position, Vector3.ZERO, "Sturz"))
 	if fall_speed < -7.0:
 		_play_step(SoundGenerator.create_land_sound(), 0.0)
@@ -228,9 +234,26 @@ func launch(launch_velocity: Vector3) -> void:
 func take_damage(info: DamageInfo) -> void:
 	if is_dead or GameManager.are_teammates(info.attacker, self):
 		return
+	# Netzspiel: Nur der Host rechnet Schaden, die Clients bekommen ihn als Ereignis (net_damaged)
+	if Net.is_client():
+		return
 	GameManager.register_damage(info, self)
 	health.apply_damage(info)
+	Net.on_damaged(self, info)
+	_hurt_feedback(info)
 
+
+## Client im Netzspiel: Treffer vom Host mit dessen Lebensstand
+func net_damaged(info: DamageInfo, new_health: float, new_armor: float, dead: bool) -> void:
+	if is_dead:
+		return
+	GameManager.register_damage(info, self)
+	health.apply_net(info, new_health, new_armor, dead)
+	_hurt_feedback(info)
+
+
+## Rueckstoss, Kamerawackeln und Treffer-Sound
+func _hurt_feedback(info: DamageInfo) -> void:
 	# Physikalischer Impuls auf den Spieler
 	velocity += info.direction * (info.amount * 0.15)
 	camera_feedback.hit(info.amount)
@@ -253,12 +276,13 @@ func _on_died(info: DamageInfo) -> void:
 	GameManager.register_kill(info.attacker, self, info.weapon_name, info.is_headshot)
 
 
-## Respawn des Spielers an einem Spawnpunkt
-func _respawn() -> void:
+## Respawn des Spielers an einem Spawnpunkt (Netzspiel: an dem, den der Host gewaehlt hat)
+func _respawn(at: Variant = null) -> void:
 	health.reset()
 	weapon_manager.reset_loadout()
-	global_transform = GameManager.get_spawn_transform(self)
+	global_transform = at if at is Transform3D else GameManager.get_spawn_transform(self)
 	reset_physics_interpolation()
+	Net.on_respawned(self, global_transform)
 
 	# Blick wieder geradeaus richten
 	camera_pitch = 0.0

@@ -94,14 +94,30 @@ func _process(delta: float) -> void:
 
 
 func _on_body_entered(body: Node3D) -> void:
-	if not is_active:
+	# Im Netzspiel sammelt nur der Host ein und meldet es allen (Net._ev_pickup)
+	if not is_active or Net.is_client():
 		return
 	
 	if not (body.is_in_group("player") or body.is_in_group("enemies")):
 		return
+	if _apply_to(body):
+		if body.has_method("on_item_picked"):
+			body.on_item_picked(pickup_type, display_name)
+		_collect()
+		Net.on_picked(self, body)
+
+
+## Client im Netzspiel: Der Host meldet, wer das Item bekommen hat
+func net_pickup(body: Node3D) -> void:
+	_apply_to(body)
+	if body.has_method("on_item_picked"):
+		body.on_item_picked(pickup_type, display_name)
+	_collect()
+
+
+## Wirkung auf den Kaempfer. Nur einsammeln, wenn es etwas bringt (volle Werte lassen das Item liegen).
+func _apply_to(body: Node3D) -> bool:
 	var has_weapons: bool = body.get("weapon_manager") != null
-	
-	# Nur einsammeln, wenn es etwas bringt (volle Werte lassen das Item liegen)
 	var picked_up: bool = false
 	match pickup_type:
 		PickupType.AMMO_BOX:
@@ -121,11 +137,7 @@ func _on_body_entered(body: Node3D) -> void:
 			picked_up = body.health.mega_heal(mega_amount)
 		PickupType.WEAPON:
 			picked_up = has_weapons and body.weapon_manager.give_weapon(weapon_id, weapon_ammo_amount)
-
-	if picked_up:
-		if body.has_method("on_item_picked"):
-			body.on_item_picked(pickup_type, display_name)
-		_collect()
+	return picked_up
 
 
 ## Waffenmodell als Anzeige: Szene instanziieren, Skripte entfernen (keine Waffenlogik),
@@ -200,9 +212,10 @@ func value_for(body: Node) -> float:
 	return 0.0
 
 
-func _collect() -> void:
+## silent: beim Beitritt zum Netzspiel (Item ist beim Host schon weg)
+func _collect(silent: bool = false) -> void:
 	is_active = false
-	if audio_player:
+	if audio_player and not silent:
 		audio_player.pitch_scale = randf_range(0.98, 1.05)
 		audio_player.play()
 	
@@ -213,14 +226,16 @@ func _collect() -> void:
 	if collision_shape:
 		collision_shape.set_deferred("disabled", true)
 	
-	# Nach Ablauf der Respawn-Zeit wieder anzeigen
-	_respawn_timer = get_tree().create_timer(respawn_time, false)
-	_respawn_timer.timeout.connect(_respawn)
+	# Nach Ablauf der Respawn-Zeit wieder anzeigen (im Netzspiel meldet das der Host)
+	if not Net.is_client():
+		_respawn_timer = get_tree().create_timer(respawn_time, false)
+		_respawn_timer.timeout.connect(_respawn)
 
 
 func _respawn() -> void:
 	is_active = true
 	_respawn_timer = null
+	Net.on_item_respawned(self)
 	if visual_mesh:
 		visual_mesh.visible = true
 		# Hologramm-Respawn: Scanlines klingen ab, das Item ploppt auf

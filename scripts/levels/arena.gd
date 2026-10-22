@@ -5,11 +5,14 @@ extends Node3D
 ## nach den Match-Einstellungen (Anzahl und Schwierigkeit) aus dem GameManager.
 
 const BOT_SCENE: PackedScene = preload("res://scenes/bot.tscn")
-const BOT_NAMES: Array[String] = ["Vex", "Kortex", "Rhea", "Nyx", "Talon", "Orbit", "Grimm"]
+const BOT_NAMES: Array[String] = ["Vex", "Kortex", "Rhea", "Nyx", "Talon", "Orbit", "Grimm",
+	"Zane", "Pyra", "Echo", "Flux", "Krait", "Moxie", "Rook", "Sable"]
 ## Leuchtfarbe je Bot (gut unterscheidbar, keine davon nahe am Cyan des Bodens)
 const BOT_COLORS: Array[Color] = [
 	Color(1.0, 0.22, 0.18), Color(1.0, 0.8, 0.1), Color(0.55, 1.0, 0.2), Color(0.8, 0.3, 1.0),
 	Color(1.0, 0.45, 0.05), Color(1.0, 0.3, 0.75), Color(0.95, 0.95, 0.95),
+	Color(0.2, 0.9, 1.0), Color(1.0, 0.6, 0.6), Color(0.6, 0.6, 1.0), Color(0.2, 1.0, 0.6),
+	Color(0.7, 0.5, 0.2), Color(1.0, 1.0, 0.5), Color(0.5, 0.2, 0.6), Color(0.4, 0.4, 0.4),
 ]
 
 @onready var spawn_points_container: Node3D = $SpawnPoints
@@ -38,9 +41,12 @@ func _ready() -> void:
 		ctf.setup()
 		GameManager.ctf = ctf
 
-	_spawn_bots()
+	# Netzspiel: Bots laufen nur beim Host, Clients bekommen sie als Puppen (Net)
+	if not Net.is_client():
+		_spawn_bots()
 	GameManager.apply_graphics(self)
 	GameManager.start_match()
+	Net.on_level_ready(self)
 
 
 ## Bots nach Match-Einstellungen erzeugen, jeweils am freiesten Spawnpunkt

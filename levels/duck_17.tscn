@@ -367,247 +367,259 @@ _surfaces = [{
 [sub_resource type="BoxShape3D" id="Zone0"]
 size = Vector3(28, 1.4, 18)
 
-[node name="Duck17" type="Node3D" unique_id=1633361889]
+[node name="Duck17" type="Node3D" unique_id=29150731]
 script = ExtResource("1_m2mjc")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1459017717]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=478195771]
 environment = SubResource("Environment_1")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1360826726]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1452143367]
 transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 25, 0)
 light_color = Color(0.85, 0.9, 1, 1)
 light_energy = 0.8
 shadow_enabled = true
 
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=2080013995]
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=186875331]
 navigation_mesh = SubResource("NavigationMesh_1")
 
-[node name="Map" type="Node3D" parent="NavigationRegion3D" unique_id=1754343671]
+[node name="Map" type="Node3D" parent="NavigationRegion3D" unique_id=1489121052]
 script = ExtResource("3_y4pjy")
 local_map_file = "res://maps/duck_17.map"
 map_settings = ExtResource("4_caxyn")
 
-[node name="entity_0_worldspawn" type="StaticBody3D" parent="NavigationRegion3D/Map" unique_id=2111262480]
+[node name="entity_0_worldspawn" type="StaticBody3D" parent="NavigationRegion3D/Map" unique_id=196564196]
 collision_mask = 0
 
-[node name="entity_0_mesh_instance" type="MeshInstance3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=875031101]
+[node name="entity_0_mesh_instance" type="MeshInstance3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1395009544]
 mesh = SubResource("ArrayMesh_agp1t")
 
-[node name="entity_0_brush_0_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=2146550504]
+[node name="entity_0_brush_0_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=162881451]
 shape = SubResource("ConvexPolygonShape3D_5lbmx")
 
-[node name="entity_0_brush_1_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1824843370]
+[node name="entity_0_brush_1_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=395039861]
 shape = SubResource("ConvexPolygonShape3D_1dxge")
 
-[node name="entity_0_brush_2_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1116182578]
+[node name="entity_0_brush_2_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1258592889]
 shape = SubResource("ConvexPolygonShape3D_y2ta0")
 
-[node name="entity_0_brush_3_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=602686770]
+[node name="entity_0_brush_3_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=730256819]
 shape = SubResource("ConvexPolygonShape3D_evg3b")
 
-[node name="entity_0_brush_4_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=243564390]
+[node name="entity_0_brush_4_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1211484623]
 shape = SubResource("ConvexPolygonShape3D_5fpwn")
 
-[node name="entity_0_brush_5_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1826252354]
+[node name="entity_0_brush_5_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=2091158616]
 shape = SubResource("ConvexPolygonShape3D_rbbt7")
 
-[node name="entity_0_brush_6_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=57826181]
+[node name="entity_0_brush_6_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1382706602]
 shape = SubResource("ConvexPolygonShape3D_r8qpp")
 
-[node name="entity_0_brush_7_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1861549425]
+[node name="entity_0_brush_7_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1661326768]
 shape = SubResource("ConvexPolygonShape3D_4xpka")
 
-[node name="entity_0_brush_8_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=601700165]
+[node name="entity_0_brush_8_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=418365443]
 shape = SubResource("ConvexPolygonShape3D_0jbbd")
 
-[node name="entity_0_brush_9_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1303402772]
+[node name="entity_0_brush_9_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=139191735]
 shape = SubResource("ConvexPolygonShape3D_dqeyt")
 
-[node name="entity_0_brush_10_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1457625434]
+[node name="entity_0_brush_10_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=381726454]
 shape = SubResource("ConvexPolygonShape3D_4wb6r")
 
-[node name="entity_0_brush_11_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=2034418962]
+[node name="entity_0_brush_11_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=198164710]
 shape = SubResource("ConvexPolygonShape3D_psrt2")
 
-[node name="entity_0_brush_12_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1606778864]
+[node name="entity_0_brush_12_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=187596150]
 shape = SubResource("ConvexPolygonShape3D_u5xqu")
 
-[node name="entity_0_brush_13_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=212729402]
+[node name="entity_0_brush_13_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1975164205]
 shape = SubResource("ConvexPolygonShape3D_f1ybr")
 
-[node name="entity_0_brush_14_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=490166237]
+[node name="entity_0_brush_14_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=169440035]
 shape = SubResource("ConvexPolygonShape3D_tyr8j")
 
-[node name="entity_0_brush_15_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=654968972]
+[node name="entity_0_brush_15_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1819646545]
 shape = SubResource("ConvexPolygonShape3D_hmyd3")
 
-[node name="entity_0_brush_16_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=2115666443]
+[node name="entity_0_brush_16_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1773009784]
 shape = SubResource("ConvexPolygonShape3D_c241f")
 
-[node name="entity_0_brush_17_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=482865314]
+[node name="entity_0_brush_17_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1110397190]
 shape = SubResource("ConvexPolygonShape3D_1g5d5")
 
-[node name="entity_0_brush_18_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=851525317]
+[node name="entity_0_brush_18_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=474720167]
 shape = SubResource("ConvexPolygonShape3D_udqnh")
 
-[node name="entity_0_brush_19_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=2000956633]
+[node name="entity_0_brush_19_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=2141514419]
 shape = SubResource("ConvexPolygonShape3D_eqtch")
 
-[node name="entity_0_brush_20_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1062673310]
+[node name="entity_0_brush_20_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=846780782]
 shape = SubResource("ConvexPolygonShape3D_bk6ye")
 
-[node name="entity_0_brush_21_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=54440287]
+[node name="entity_0_brush_21_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1385663107]
 shape = SubResource("ConvexPolygonShape3D_yeuab")
 
-[node name="entity_0_brush_22_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=250179717]
+[node name="entity_0_brush_22_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1211269894]
 shape = SubResource("ConvexPolygonShape3D_ieqnk")
 
-[node name="entity_0_brush_23_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1980464722]
+[node name="entity_0_brush_23_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=851260933]
 shape = SubResource("ConvexPolygonShape3D_xsvs0")
 
-[node name="entity_0_brush_24_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1187115847]
+[node name="entity_0_brush_24_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1806939106]
 shape = SubResource("ConvexPolygonShape3D_2j8ik")
 
-[node name="entity_0_brush_25_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=293643025]
+[node name="entity_0_brush_25_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=217191907]
 shape = SubResource("ConvexPolygonShape3D_ro3xx")
 
-[node name="entity_0_brush_26_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=714715681]
+[node name="entity_0_brush_26_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1249231461]
 shape = SubResource("ConvexPolygonShape3D_l82hi")
 
-[node name="entity_0_brush_27_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1192796750]
+[node name="entity_0_brush_27_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=294550891]
 shape = SubResource("ConvexPolygonShape3D_n8alc")
 
-[node name="entity_0_brush_28_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=133159279]
+[node name="entity_0_brush_28_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=232099475]
 shape = SubResource("ConvexPolygonShape3D_a3gwi")
 
-[node name="entity_0_brush_29_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1877408902]
+[node name="entity_0_brush_29_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=979282767]
 shape = SubResource("ConvexPolygonShape3D_bdmqj")
 
-[node name="entity_0_brush_30_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=52800742]
+[node name="entity_0_brush_30_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=125263563]
 shape = SubResource("ConvexPolygonShape3D_baicc")
 
-[node name="entity_0_brush_31_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=2045963842]
+[node name="entity_0_brush_31_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1019778696]
 shape = SubResource("ConvexPolygonShape3D_n82mg")
 
-[node name="entity_0_brush_32_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1254950191]
+[node name="entity_0_brush_32_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1626323620]
 shape = SubResource("ConvexPolygonShape3D_srt15")
 
-[node name="entity_0_brush_33_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=979529739]
+[node name="entity_0_brush_33_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=2090873593]
 shape = SubResource("ConvexPolygonShape3D_j82ut")
 
-[node name="entity_0_brush_34_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=766299388]
+[node name="entity_0_brush_34_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=837757591]
 shape = SubResource("ConvexPolygonShape3D_rsoi3")
 
-[node name="entity_0_brush_35_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1062734001]
+[node name="entity_0_brush_35_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=399263265]
 shape = SubResource("ConvexPolygonShape3D_6qfks")
 
-[node name="entity_0_brush_36_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1636746462]
+[node name="entity_0_brush_36_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=801321984]
 shape = SubResource("ConvexPolygonShape3D_jncxx")
 
-[node name="entity_0_brush_37_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1270023480]
+[node name="entity_0_brush_37_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=953128913]
 shape = SubResource("ConvexPolygonShape3D_6v6yq")
 
-[node name="entity_0_brush_38_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=21756933]
+[node name="entity_0_brush_38_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=403137788]
 shape = SubResource("ConvexPolygonShape3D_qxnml")
 
-[node name="entity_0_brush_39_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=289012746]
+[node name="entity_0_brush_39_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=856343457]
 shape = SubResource("ConvexPolygonShape3D_w4g6f")
 
-[node name="entity_0_brush_40_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=2120746420]
+[node name="entity_0_brush_40_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=281442027]
 shape = SubResource("ConvexPolygonShape3D_mo7ib")
 
-[node name="entity_0_brush_41_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=220065311]
+[node name="entity_0_brush_41_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=978999561]
 shape = SubResource("ConvexPolygonShape3D_4a236")
 
-[node name="entity_0_brush_42_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=463561715]
+[node name="entity_0_brush_42_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1686879761]
 shape = SubResource("ConvexPolygonShape3D_1l4ni")
 
-[node name="entity_0_brush_43_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=193571212]
+[node name="entity_0_brush_43_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1234790471]
 shape = SubResource("ConvexPolygonShape3D_2grve")
 
-[node name="entity_0_brush_44_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1938755505]
+[node name="entity_0_brush_44_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=187387747]
 shape = SubResource("ConvexPolygonShape3D_2pmuq")
 
-[node name="entity_0_brush_45_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1969142606]
+[node name="entity_0_brush_45_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=518925464]
 shape = SubResource("ConvexPolygonShape3D_votd7")
 
-[node name="entity_0_brush_46_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1441519340]
+[node name="entity_0_brush_46_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=982949231]
 shape = SubResource("ConvexPolygonShape3D_yvda0")
 
-[node name="entity_0_brush_47_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=40609730]
+[node name="entity_0_brush_47_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=665035618]
 shape = SubResource("ConvexPolygonShape3D_bq7cp")
 
-[node name="entity_0_brush_48_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1029136777]
+[node name="entity_0_brush_48_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1885296806]
 shape = SubResource("ConvexPolygonShape3D_6p6oj")
 
-[node name="entity_0_brush_49_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1274983269]
+[node name="entity_0_brush_49_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1176651851]
 shape = SubResource("ConvexPolygonShape3D_cukog")
 
-[node name="entity_0_brush_50_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1625822276]
+[node name="entity_0_brush_50_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1588616796]
 shape = SubResource("ConvexPolygonShape3D_b2sgu")
 
-[node name="entity_0_brush_51_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=715126852]
+[node name="entity_0_brush_51_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1551730246]
 shape = SubResource("ConvexPolygonShape3D_o1hba")
 
-[node name="entity_0_brush_52_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=1132077632]
+[node name="entity_0_brush_52_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=780817067]
 shape = SubResource("ConvexPolygonShape3D_m1h5r")
 
-[node name="entity_0_brush_53_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=590042067]
+[node name="entity_0_brush_53_collision_shape" type="CollisionShape3D" parent="NavigationRegion3D/Map/entity_0_worldspawn" unique_id=715143128]
 shape = SubResource("ConvexPolygonShape3D_vumwm")
 
-[node name="entity_1_func_detail_illusionary" type="Node3D" parent="NavigationRegion3D/Map" unique_id=592875462]
+[node name="entity_1_func_detail_illusionary" type="Node3D" parent="NavigationRegion3D/Map" unique_id=1876681525]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0)
 
-[node name="entity_1_mesh_instance" type="MeshInstance3D" parent="NavigationRegion3D/Map/entity_1_func_detail_illusionary" unique_id=1897297709]
+[node name="entity_1_mesh_instance" type="MeshInstance3D" parent="NavigationRegion3D/Map/entity_1_func_detail_illusionary" unique_id=1522237788]
 mesh = SubResource("ArrayMesh_3ga2g")
 
-[node name="SpawnPoints" type="Node3D" parent="." unique_id=1507216000]
+[node name="SpawnPoints" type="Node3D" parent="." unique_id=349251608]
 
-[node name="SpawnPoint1" type="Marker3D" parent="SpawnPoints" unique_id=1593181917]
+[node name="SpawnPoint1" type="Marker3D" parent="SpawnPoints" unique_id=221802735]
 transform = Transform3D(-0.529919, 0, -0.848048, 0, 1, 0, 0.848048, 0, -0.529919, -45, 1, -21)
 
-[node name="SpawnPoint2" type="Marker3D" parent="SpawnPoints" unique_id=248757737]
+[node name="SpawnPoint2" type="Marker3D" parent="SpawnPoints" unique_id=2016223006]
 transform = Transform3D(0.529919, 0, 0.848048, 0, 1, 0, -0.848048, 0, 0.529919, 45, 1, 21)
 
-[node name="SpawnPoint3" type="Marker3D" parent="SpawnPoints" unique_id=155090010]
+[node name="SpawnPoint3" type="Marker3D" parent="SpawnPoints" unique_id=536782937]
 transform = Transform3D(0.529919, 0, -0.848048, 0, 1, 0, 0.848048, 0, 0.529919, -45, 1, 21)
 
-[node name="SpawnPoint4" type="Marker3D" parent="SpawnPoints" unique_id=1153065146]
+[node name="SpawnPoint4" type="Marker3D" parent="SpawnPoints" unique_id=1590387217]
 transform = Transform3D(-0.529919, 0, 0.848048, 0, 1, 0, -0.848048, 0, -0.529919, 45, 1, -21)
 
-[node name="SpawnPoint5" type="Marker3D" parent="SpawnPoints" unique_id=232981612]
+[node name="SpawnPoint5" type="Marker3D" parent="SpawnPoints" unique_id=213263014]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -10, 7, -32)
 
-[node name="SpawnPoint6" type="Marker3D" parent="SpawnPoints" unique_id=1747290964]
+[node name="SpawnPoint6" type="Marker3D" parent="SpawnPoints" unique_id=967226830]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 7, 32)
 
-[node name="SpawnPoint7" type="Marker3D" parent="SpawnPoints" unique_id=563706551]
+[node name="SpawnPoint7" type="Marker3D" parent="SpawnPoints" unique_id=1078088406]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 25, 7, -32)
 
-[node name="SpawnPoint8" type="Marker3D" parent="SpawnPoints" unique_id=2099459883]
+[node name="SpawnPoint8" type="Marker3D" parent="SpawnPoints" unique_id=151508410]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 7, 32)
 
-[node name="SpawnPoint9" type="Marker3D" parent="SpawnPoints" unique_id=475325039]
+[node name="SpawnPoint9" type="Marker3D" parent="SpawnPoints" unique_id=916104318]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -46, 13, 5)
 
-[node name="SpawnPoint10" type="Marker3D" parent="SpawnPoints" unique_id=1781110024]
+[node name="SpawnPoint10" type="Marker3D" parent="SpawnPoints" unique_id=1277101676]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 46, 13, -5)
 
-[node name="SpawnPoint11" type="Marker3D" parent="SpawnPoints" unique_id=1649263251]
+[node name="SpawnPoint11" type="Marker3D" parent="SpawnPoints" unique_id=1144630699]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -20)
 
-[node name="SpawnPoint12" type="Marker3D" parent="SpawnPoints" unique_id=276882909]
+[node name="SpawnPoint12" type="Marker3D" parent="SpawnPoints" unique_id=2057472652]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 1, 20)
 
-[node name="Player" type="CharacterBody3D" parent="." unique_id=310742367 groups=["player"] instance=ExtResource("14_8mjrc")]
+[node name="SpawnPoint13" type="Marker3D" parent="SpawnPoints" unique_id=1229850252]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -20, 7, -32)
+
+[node name="SpawnPoint14" type="Marker3D" parent="SpawnPoints" unique_id=392528505]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 7, 32)
+
+[node name="SpawnPoint15" type="Marker3D" parent="SpawnPoints" unique_id=1016979087]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -36, 1, -12)
+
+[node name="SpawnPoint16" type="Marker3D" parent="SpawnPoints" unique_id=536425230]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 36, 1, 12)
+
+[node name="Player" type="CharacterBody3D" parent="." unique_id=1380757505 groups=["player"] instance=ExtResource("14_8mjrc")]
 transform = Transform3D(-0.529919, 0, -0.848048, 0, 1, 0, 0.848048, 0, -0.529919, -45, 1, -21)
 collision_layer = 2
 collision_mask = 5
 script = ExtResource("15_f11cl")
 
-[node name="Items" type="Node3D" parent="." unique_id=1328350073]
+[node name="Items" type="Node3D" parent="." unique_id=1968023554]
 
-[node name="Mega1" type="Area3D" parent="Items" unique_id=1609017193 instance=ExtResource("16_4g3aa")]
+[node name="Mega1" type="Area3D" parent="Items" unique_id=1018065907 instance=ExtResource("16_4g3aa")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16.8, 0)
 collision_layer = 8
 collision_mask = 6
@@ -615,7 +627,7 @@ script = ExtResource("17_knum0")
 pickup_type = 5
 respawn_time = 35.0
 
-[node name="Armor2" type="Area3D" parent="Items" unique_id=183849964 instance=ExtResource("18_8ocfd")]
+[node name="Armor2" type="Area3D" parent="Items" unique_id=36191768 instance=ExtResource("18_8ocfd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -47, 12.8, 14)
 collision_layer = 8
 collision_mask = 6
@@ -623,21 +635,21 @@ script = ExtResource("17_knum0")
 pickup_type = 3
 respawn_time = 10.0
 
-[node name="Ammo3" type="Area3D" parent="Items" unique_id=764864106 instance=ExtResource("19_ftnot")]
+[node name="Ammo3" type="Area3D" parent="Items" unique_id=604503047 instance=ExtResource("19_ftnot")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 6.8, -32)
 collision_layer = 8
 collision_mask = 6
 script = ExtResource("17_knum0")
 respawn_time = 7.0
 
-[node name="Ammo4" type="Area3D" parent="Items" unique_id=697770613 instance=ExtResource("19_ftnot")]
+[node name="Ammo4" type="Area3D" parent="Items" unique_id=1455692282 instance=ExtResource("19_ftnot")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 6.8, 32)
 collision_layer = 8
 collision_mask = 6
 script = ExtResource("17_knum0")
 respawn_time = 7.0
 
-[node name="Health5" type="Area3D" parent="Items" unique_id=1194104764 instance=ExtResource("20_3fs5h")]
+[node name="Health5" type="Area3D" parent="Items" unique_id=356065563 instance=ExtResource("20_3fs5h")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 0.8, -24)
 collision_layer = 8
 collision_mask = 6
@@ -645,7 +657,7 @@ script = ExtResource("17_knum0")
 pickup_type = 2
 respawn_time = 10.0
 
-[node name="Health6" type="Area3D" parent="Items" unique_id=305971434 instance=ExtResource("20_3fs5h")]
+[node name="Health6" type="Area3D" parent="Items" unique_id=693560510 instance=ExtResource("20_3fs5h")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 0.8, 24)
 collision_layer = 8
 collision_mask = 6
@@ -653,7 +665,7 @@ script = ExtResource("17_knum0")
 pickup_type = 2
 respawn_time = 10.0
 
-[node name="Armor7" type="Area3D" parent="Items" unique_id=611726736 instance=ExtResource("18_8ocfd")]
+[node name="Armor7" type="Area3D" parent="Items" unique_id=2133515166 instance=ExtResource("18_8ocfd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47, 12.8, -14)
 collision_layer = 8
 collision_mask = 6
@@ -661,21 +673,21 @@ script = ExtResource("17_knum0")
 pickup_type = 3
 respawn_time = 10.0
 
-[node name="Ammo8" type="Area3D" parent="Items" unique_id=299303875 instance=ExtResource("19_ftnot")]
+[node name="Ammo8" type="Area3D" parent="Items" unique_id=306670264 instance=ExtResource("19_ftnot")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 6.8, -32)
 collision_layer = 8
 collision_mask = 6
 script = ExtResource("17_knum0")
 respawn_time = 7.0
 
-[node name="Ammo9" type="Area3D" parent="Items" unique_id=314405507 instance=ExtResource("19_ftnot")]
+[node name="Ammo9" type="Area3D" parent="Items" unique_id=1728051536 instance=ExtResource("19_ftnot")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 6.8, 32)
 collision_layer = 8
 collision_mask = 6
 script = ExtResource("17_knum0")
 respawn_time = 7.0
 
-[node name="Health10" type="Area3D" parent="Items" unique_id=1431500515 instance=ExtResource("20_3fs5h")]
+[node name="Health10" type="Area3D" parent="Items" unique_id=1560899192 instance=ExtResource("20_3fs5h")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0.8, -24)
 collision_layer = 8
 collision_mask = 6
@@ -683,7 +695,7 @@ script = ExtResource("17_knum0")
 pickup_type = 2
 respawn_time = 10.0
 
-[node name="Health11" type="Area3D" parent="Items" unique_id=358288349 instance=ExtResource("20_3fs5h")]
+[node name="Health11" type="Area3D" parent="Items" unique_id=1898834933 instance=ExtResource("20_3fs5h")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0.8, 24)
 collision_layer = 8
 collision_mask = 6
@@ -691,7 +703,7 @@ script = ExtResource("17_knum0")
 pickup_type = 2
 respawn_time = 10.0
 
-[node name="Weapon1" type="Area3D" parent="Items" unique_id=1797716929 instance=ExtResource("21_gh2k0")]
+[node name="Weapon1" type="Area3D" parent="Items" unique_id=905144316 instance=ExtResource("21_gh2k0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -47, 12.9, -10)
 collision_layer = 8
 collision_mask = 6
@@ -703,7 +715,7 @@ weapon_ammo_amount = 30
 weapon_scene = ExtResource("22_c4t4l")
 display_name = "Railgun"
 
-[node name="Weapon2" type="Area3D" parent="Items" unique_id=1982692322 instance=ExtResource("21_gh2k0")]
+[node name="Weapon2" type="Area3D" parent="Items" unique_id=2119850318 instance=ExtResource("21_gh2k0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47, 12.9, 10)
 collision_layer = 8
 collision_mask = 6
@@ -715,7 +727,7 @@ weapon_ammo_amount = 30
 weapon_scene = ExtResource("23_5vnws")
 display_name = "Shock Rifle"
 
-[node name="Weapon3" type="Area3D" parent="Items" unique_id=1137674841 instance=ExtResource("21_gh2k0")]
+[node name="Weapon3" type="Area3D" parent="Items" unique_id=1254921958 instance=ExtResource("21_gh2k0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0.9, 0)
 collision_layer = 8
 collision_mask = 6
@@ -727,7 +739,7 @@ weapon_ammo_amount = 30
 weapon_scene = ExtResource("24_1xciq")
 display_name = "Raketenwerfer"
 
-[node name="Weapon4" type="Area3D" parent="Items" unique_id=213067117 instance=ExtResource("21_gh2k0")]
+[node name="Weapon4" type="Area3D" parent="Items" unique_id=264556110 instance=ExtResource("21_gh2k0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0.9, 0)
 collision_layer = 8
 collision_mask = 6
@@ -739,7 +751,7 @@ weapon_ammo_amount = 30
 weapon_scene = ExtResource("25_bir4l")
 display_name = "Lightning Gun"
 
-[node name="Weapon5" type="Area3D" parent="Items" unique_id=1513868068 instance=ExtResource("21_gh2k0")]
+[node name="Weapon5" type="Area3D" parent="Items" unique_id=492565593 instance=ExtResource("21_gh2k0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.9, -32)
 collision_layer = 8
 collision_mask = 6
@@ -751,7 +763,7 @@ weapon_ammo_amount = 30
 weapon_scene = ExtResource("26_1qpgd")
 display_name = "Plasma"
 
-[node name="Weapon6" type="Area3D" parent="Items" unique_id=1339765684 instance=ExtResource("21_gh2k0")]
+[node name="Weapon6" type="Area3D" parent="Items" unique_id=1884396919 instance=ExtResource("21_gh2k0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.9, 32)
 collision_layer = 8
 collision_mask = 6
@@ -763,7 +775,7 @@ weapon_ammo_amount = 30
 weapon_scene = ExtResource("27_81pot")
 display_name = "Shotgun"
 
-[node name="Weapon7" type="Area3D" parent="Items" unique_id=1893430633 instance=ExtResource("21_gh2k0")]
+[node name="Weapon7" type="Area3D" parent="Items" unique_id=1865229210 instance=ExtResource("21_gh2k0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 collision_layer = 8
 collision_mask = 6
@@ -775,12 +787,12 @@ weapon_ammo_amount = 30
 weapon_scene = ExtResource("28_2rlt4")
 display_name = "Maschinengewehr"
 
-[node name="JumpPads" type="Node3D" parent="." unique_id=1781060981]
+[node name="JumpPads" type="Node3D" parent="." unique_id=402784990]
 
-[node name="Pad1Target" type="Marker3D" parent="JumpPads" unique_id=1464136070]
+[node name="Pad1Target" type="Marker3D" parent="JumpPads" unique_id=736239056]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 6.1, -31)
 
-[node name="Pad1" type="Area3D" parent="JumpPads" unique_id=1644449618 node_paths=PackedStringArray("target") instance=ExtResource("29_yq3tb")]
+[node name="Pad1" type="Area3D" parent="JumpPads" unique_id=1141317441 node_paths=PackedStringArray("target") instance=ExtResource("29_yq3tb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, -22)
 collision_layer = 8
 collision_mask = 6
@@ -788,10 +800,10 @@ script = ExtResource("30_iscpy")
 target = NodePath("../Pad1Target")
 apex_height = 2.0
 
-[node name="Pad2Target" type="Marker3D" parent="JumpPads" unique_id=926667944]
+[node name="Pad2Target" type="Marker3D" parent="JumpPads" unique_id=774700165]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 6.1, 31)
 
-[node name="Pad2" type="Area3D" parent="JumpPads" unique_id=573483122 node_paths=PackedStringArray("target") instance=ExtResource("29_yq3tb")]
+[node name="Pad2" type="Area3D" parent="JumpPads" unique_id=1794365812 node_paths=PackedStringArray("target") instance=ExtResource("29_yq3tb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 22)
 collision_layer = 8
 collision_mask = 6
@@ -799,10 +811,10 @@ script = ExtResource("30_iscpy")
 target = NodePath("../Pad2Target")
 apex_height = 2.0
 
-[node name="Pad3Target" type="Marker3D" parent="JumpPads" unique_id=476773623]
+[node name="Pad3Target" type="Marker3D" parent="JumpPads" unique_id=970172260]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -46, 12.1, 0)
 
-[node name="Pad3" type="Area3D" parent="JumpPads" unique_id=155075116 node_paths=PackedStringArray("target") instance=ExtResource("29_yq3tb")]
+[node name="Pad3" type="Area3D" parent="JumpPads" unique_id=988956994 node_paths=PackedStringArray("target") instance=ExtResource("29_yq3tb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 0, 0)
 collision_layer = 8
 collision_mask = 6
@@ -810,10 +822,10 @@ script = ExtResource("30_iscpy")
 target = NodePath("../Pad3Target")
 apex_height = 2.5
 
-[node name="Pad4Target" type="Marker3D" parent="JumpPads" unique_id=2035725]
+[node name="Pad4Target" type="Marker3D" parent="JumpPads" unique_id=1236100983]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -46, 12.1, -15)
 
-[node name="Pad4" type="Area3D" parent="JumpPads" unique_id=570322264 node_paths=PackedStringArray("target") instance=ExtResource("29_yq3tb")]
+[node name="Pad4" type="Area3D" parent="JumpPads" unique_id=1465008270 node_paths=PackedStringArray("target") instance=ExtResource("29_yq3tb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 6, -32)
 collision_layer = 8
 collision_mask = 6
@@ -821,10 +833,10 @@ script = ExtResource("30_iscpy")
 target = NodePath("../Pad4Target")
 apex_height = 2.0
 
-[node name="Pad5Target" type="Marker3D" parent="JumpPads" unique_id=953816680]
+[node name="Pad5Target" type="Marker3D" parent="JumpPads" unique_id=1875439734]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 16.1, 0)
 
-[node name="Pad5" type="Area3D" parent="JumpPads" unique_id=1204299157 node_paths=PackedStringArray("target") instance=ExtResource("29_yq3tb")]
+[node name="Pad5" type="Area3D" parent="JumpPads" unique_id=2117421320 node_paths=PackedStringArray("target") instance=ExtResource("29_yq3tb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -46, 12, 12)
 collision_layer = 8
 collision_mask = 6
@@ -832,10 +844,10 @@ script = ExtResource("30_iscpy")
 target = NodePath("../Pad5Target")
 apex_height = 2.0
 
-[node name="Pad6Target" type="Marker3D" parent="JumpPads" unique_id=601759517]
+[node name="Pad6Target" type="Marker3D" parent="JumpPads" unique_id=1709724734]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 12.1, 0)
 
-[node name="Pad6" type="Area3D" parent="JumpPads" unique_id=357574618 node_paths=PackedStringArray("target") instance=ExtResource("29_yq3tb")]
+[node name="Pad6" type="Area3D" parent="JumpPads" unique_id=297517034 node_paths=PackedStringArray("target") instance=ExtResource("29_yq3tb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 38, 0, 0)
 collision_layer = 8
 collision_mask = 6
@@ -843,10 +855,10 @@ script = ExtResource("30_iscpy")
 target = NodePath("../Pad6Target")
 apex_height = 2.5
 
-[node name="Pad7Target" type="Marker3D" parent="JumpPads" unique_id=1954265456]
+[node name="Pad7Target" type="Marker3D" parent="JumpPads" unique_id=135693409]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 12.1, -15)
 
-[node name="Pad7" type="Area3D" parent="JumpPads" unique_id=127510308 node_paths=PackedStringArray("target") instance=ExtResource("29_yq3tb")]
+[node name="Pad7" type="Area3D" parent="JumpPads" unique_id=525600245 node_paths=PackedStringArray("target") instance=ExtResource("29_yq3tb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 6, -32)
 collision_layer = 8
 collision_mask = 6
@@ -854,10 +866,10 @@ script = ExtResource("30_iscpy")
 target = NodePath("../Pad7Target")
 apex_height = 2.0
 
-[node name="Pad8Target" type="Marker3D" parent="JumpPads" unique_id=609090670]
+[node name="Pad8Target" type="Marker3D" parent="JumpPads" unique_id=311534731]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 16.1, 0)
 
-[node name="Pad8" type="Area3D" parent="JumpPads" unique_id=1340162327 node_paths=PackedStringArray("target") instance=ExtResource("29_yq3tb")]
+[node name="Pad8" type="Area3D" parent="JumpPads" unique_id=992650518 node_paths=PackedStringArray("target") instance=ExtResource("29_yq3tb")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 12, 12)
 collision_layer = 8
 collision_mask = 6
@@ -865,76 +877,76 @@ script = ExtResource("30_iscpy")
 target = NodePath("../Pad8Target")
 apex_height = 2.0
 
-[node name="Teleporters" type="Node3D" parent="." unique_id=1441130149]
+[node name="Teleporters" type="Node3D" parent="." unique_id=1251978870]
 
-[node name="Tele1Exit" type="Marker3D" parent="Teleporters" unique_id=907072992]
+[node name="Tele1Exit" type="Marker3D" parent="Teleporters" unique_id=863387569]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 46, 12.05, -8)
 
-[node name="Tele1" type="Area3D" parent="Teleporters" unique_id=982625892 node_paths=PackedStringArray("target") instance=ExtResource("31_8pj1r")]
+[node name="Tele1" type="Area3D" parent="Teleporters" unique_id=2013948480 node_paths=PackedStringArray("target") instance=ExtResource("31_8pj1r")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44, 0, 26)
 collision_layer = 8
 collision_mask = 6
 script = ExtResource("32_8ksel")
 target = NodePath("../Tele1Exit")
 
-[node name="Tele2Exit" type="Marker3D" parent="Teleporters" unique_id=545109576]
+[node name="Tele2Exit" type="Marker3D" parent="Teleporters" unique_id=1205311941]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -46, 12.05, 8)
 
-[node name="Tele2" type="Area3D" parent="Teleporters" unique_id=1443874826 node_paths=PackedStringArray("target") instance=ExtResource("31_8pj1r")]
+[node name="Tele2" type="Area3D" parent="Teleporters" unique_id=1102455638 node_paths=PackedStringArray("target") instance=ExtResource("31_8pj1r")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44, 0, -26)
 collision_layer = 8
 collision_mask = 6
 script = ExtResource("32_8ksel")
 target = NodePath("../Tele2Exit")
 
-[node name="Lights" type="Node3D" parent="." unique_id=1284294939]
+[node name="Lights" type="Node3D" parent="." unique_id=1718855708]
 
-[node name="Light1" type="OmniLight3D" parent="Lights" unique_id=1820178183]
+[node name="Light1" type="OmniLight3D" parent="Lights" unique_id=1139143527]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
 light_color = Color(1, 0.85, 0.2, 1)
 light_energy = 4.0
 light_volumetric_fog_energy = 2.0
 omni_range = 18.0
 
-[node name="Light2" type="OmniLight3D" parent="Lights" unique_id=1887669001]
+[node name="Light2" type="OmniLight3D" parent="Lights" unique_id=846221987]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9, -32)
 light_color = Color(1, 0.6, 0.2, 1)
 light_energy = 2.5
 light_volumetric_fog_energy = 2.0
 omni_range = 16.0
 
-[node name="Light3" type="OmniLight3D" parent="Lights" unique_id=1774832844]
+[node name="Light3" type="OmniLight3D" parent="Lights" unique_id=1729183033]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9, 32)
 light_color = Color(1, 0.6, 0.2, 1)
 light_energy = 2.5
 light_volumetric_fog_energy = 2.0
 omni_range = 16.0
 
-[node name="Light4" type="OmniLight3D" parent="Lights" unique_id=2143392834]
+[node name="Light4" type="OmniLight3D" parent="Lights" unique_id=78975684]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -46, 15, 0)
 light_color = Color(1, 0.25, 0.8, 1)
 light_energy = 3.0
 light_volumetric_fog_energy = 2.0
 omni_range = 14.0
 
-[node name="Light5" type="OmniLight3D" parent="Lights" unique_id=1956526605]
+[node name="Light5" type="OmniLight3D" parent="Lights" unique_id=1243704696]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46, 15, 0)
 light_color = Color(1, 0.25, 0.8, 1)
 light_energy = 3.0
 light_volumetric_fog_energy = 2.0
 omni_range = 14.0
 
-[node name="Light6" type="OmniLight3D" parent="Lights" unique_id=2059172125]
+[node name="Light6" type="OmniLight3D" parent="Lights" unique_id=353943269]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 19, 0)
 light_color = Color(1, 0.25, 0.8, 1)
 light_energy = 3.0
 light_volumetric_fog_energy = 2.0
 omni_range = 12.0
 
-[node name="Zone0" type="Area3D" parent="." unique_id=1258440732]
+[node name="Zone0" type="Area3D" parent="." unique_id=1570393445]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3.3, 0)
 script = ExtResource("33_yhucl")
 damage_per_second = 25.0
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Zone0" unique_id=1468719338]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Zone0" unique_id=1307704420]
 shape = SubResource("Zone0")

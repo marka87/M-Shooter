@@ -7,6 +7,14 @@ extends Control
 @onready var version_label: Label = $VersionLabel
 @onready var settings_panel: PanelContainer = $CenterContainer/SettingsPanel
 @onready var match_panel: PanelContainer = $CenterContainer/MatchPanel
+@onready var lan_panel: PanelContainer = $CenterContainer/LanPanel
+@onready var name_edit: LineEdit = $CenterContainer/LanPanel/MarginContainer/VBox/NameEdit
+@onready var server_list: ItemList = $CenterContainer/LanPanel/MarginContainer/VBox/ServerList
+@onready var ip_edit: LineEdit = $CenterContainer/LanPanel/MarginContainer/VBox/JoinBox/IpEdit
+@onready var join_button: Button = $CenterContainer/LanPanel/MarginContainer/VBox/JoinBox/JoinButton
+@onready var lan_status: Label = $CenterContainer/LanPanel/MarginContainer/VBox/StatusLabel
+## Match-Fenster wurde ueber "Spiel hosten" geoeffnet: Kaempfen startet einen LAN-Server
+var _hosting: bool = false
 
 @onready var bot_slider: HSlider = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/BotsContainer/HBox/BotSlider
 @onready var bot_value_label: Label = $CenterContainer/MatchPanel/MarginContainer/VBoxContainer/BotsContainer/HBox/BotValueLabel
@@ -131,13 +139,15 @@ func _ready() -> void:
 	hitmarker_check.toggled.connect(func(on: bool): GameManager.hitmarker_enabled = on)
 
 	# Match-Einstellungen
-	bot_slider.max_value = GameManager.MAX_BOTS
+	_update_bot_limit()
 	bot_slider.value = GameManager.bot_count
 	bot_value_label.text = str(GameManager.bot_count)
 	for map_info in GameManager.MAPS:
 		map_option.add_item(map_info.name)
 	map_option.selected = GameManager.selected_map
-	map_option.item_selected.connect(func(index: int): GameManager.selected_map = index)
+	map_option.item_selected.connect(func(index: int):
+		GameManager.selected_map = index
+		_update_bot_limit())
 	# Frag- und Zeit-Limit (0 = kein Limit)
 	for limit in GameManager.FRAG_LIMITS:
 		frag_limit_option.add_item(str(limit) if limit > 0 else "Kein")
@@ -177,6 +187,24 @@ func _ready() -> void:
 		bot_slider.editable = not on)
 	instagib_check.toggled.connect(func(on: bool): GameManager.instagib = on)
 
+	# LAN
+	$CenterContainer/MainButtons/LanButton.pressed.connect(_open_lan)
+	$CenterContainer/LanPanel/MarginContainer/VBox/HostButton.pressed.connect(_on_host_pressed)
+	$CenterContainer/LanPanel/MarginContainer/VBox/LanBackButton.pressed.connect(_close_lan)
+	join_button.pressed.connect(_on_join_pressed)
+	ip_edit.text_submitted.connect(func(_t: String): _on_join_pressed())
+	server_list.item_selected.connect(func(i: int): ip_edit.text = server_list.get_item_metadata(i))
+	server_list.item_activated.connect(func(i: int):
+		ip_edit.text = server_list.get_item_metadata(i)
+		_on_join_pressed())
+	Net.servers_changed.connect(_refresh_servers)
+	Net.join_result.connect(_on_join_result)
+	# Aus einem Netzspiel geflogen: Grund im LAN-Fenster zeigen
+	if Net.last_error != "":
+		_open_lan()
+		lan_status.text = Net.last_error
+		Net.last_error = ""
+
 	# Signale verbinden
 	bot_slider.value_changed.connect(_on_bot_count_changed)
 	skill_option.item_selected.connect(_on_skill_selected)
@@ -199,6 +227,14 @@ func _on_start_button_pressed() -> void:
 ## Match mit den gewaehlten Einstellungen in der gewaehlten Arena starten
 func _on_fight_pressed() -> void:
 	GameManager.save_settings()
+	if _hosting:
+		GameManager.duel = false
+		var error := Net.host_game(GameManager.player_name)
+		if error != "":
+			_on_match_back_pressed()
+			lan_status.text = error
+			return
+		Net.stop_listening()
 	GameManager.reset_game()
 	get_tree().change_scene_to_file(GameManager.MAPS[GameManager.selected_map].scene)
 
@@ -211,6 +247,12 @@ func _on_workshop_button_pressed() -> void:
 
 func _on_match_back_pressed() -> void:
 	GameManager.save_settings()
+	if _hosting:
+		_hosting = false
+		fight_button.text = "KÄMPFEN!"
+		match_panel.visible = false
+		_open_lan()
+		return
 	match_panel.visible = false
 	main_buttons.visible = true
 
@@ -319,6 +361,16 @@ func _update_volume_label(val: float) -> void:
 		volume_value_label.text = "%d%%" % int(val * 100)
 
 
+## Bot-Regler bis zum Spielerlimit der Map (ein Platz fuer den Spieler); zu viele Bots werden gekuerzt
+func _update_bot_limit() -> void:
+	var max_bots: int = mini(GameManager.MAPS[GameManager.selected_map].max_players - 1, GameManager.MAX_BOTS)
+	bot_slider.max_value = max_bots
+	bot_slider.tick_count = max_bots
+	GameManager.bot_count = mini(GameManager.bot_count, max_bots)
+	bot_slider.value = GameManager.bot_count
+	bot_value_label.text = str(GameManager.bot_count)
+
+
 ## Titel zeigt den Modus, CTF zeigt das Capture-Limit statt des Frag-Limits, Duell gibt es nur ohne Teams
 func _update_mode_controls() -> void:
 	var ctf: bool = GameManager.game_mode == GameManager.Mode.CTF
@@ -327,3 +379,67 @@ func _update_mode_controls() -> void:
 	capture_box.visible = ctf
 	duel_check.disabled = GameManager.is_team_mode()
 	bot_slider.editable = not (GameManager.duel and not GameManager.is_team_mode())
+
+
+# ==============================================================================
+# LAN
+# ==============================================================================
+
+func _open_lan() -> void:
+	main_buttons.visible = false
+	lan_panel.visible = true
+	name_edit.text = GameManager.player_name
+	ip_edit.text = GameManager.last_host_ip
+	lan_status.text = ""
+	join_button.disabled = false
+	Net.start_listening()
+	_refresh_servers()
+
+
+func _close_lan() -> void:
+	_store_lan_fields()
+	Net.stop_listening()
+	Net.leave()
+	lan_panel.visible = false
+	main_buttons.visible = true
+
+
+func _store_lan_fields() -> void:
+	GameManager.player_name = name_edit.text.strip_edges() if name_edit.text.strip_edges() != "" else "Spieler"
+	GameManager.last_host_ip = ip_edit.text.strip_edges()
+	GameManager.save_settings()
+
+
+## Match-Fenster als Host oeffnen (Karte, Modus, Bots, Limits wie beim normalen Spiel)
+func _on_host_pressed() -> void:
+	_store_lan_fields()
+	_hosting = true
+	lan_panel.visible = false
+	match_panel.visible = true
+	fight_button.text = "HOSTEN"
+	fight_button.grab_focus()
+
+
+func _on_join_pressed() -> void:
+	_store_lan_fields()
+	if GameManager.last_host_ip == "":
+		lan_status.text = "Bitte die Adresse des Hosts eingeben"
+		return
+	join_button.disabled = true
+	lan_status.text = "Verbinde mit %s ..." % GameManager.last_host_ip
+	Net.join_game(GameManager.last_host_ip, GameManager.player_name)
+
+
+func _on_join_result(ok: bool, message: String) -> void:
+	if not is_inside_tree() or ok:
+		return
+	join_button.disabled = false
+	lan_status.text = message
+
+
+func _refresh_servers() -> void:
+	server_list.clear()
+	for ip in Net.servers:
+		var info: Dictionary = Net.servers[ip]
+		var i := server_list.add_item("%s – %s (%d/%d)   %s" % [info.name, info.map, info.players, info.max, ip])
+		server_list.set_item_metadata(i, ip)

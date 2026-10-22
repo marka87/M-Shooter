@@ -45,6 +45,8 @@ for sx in (-1, 1):
     kit.weapon('plasma' if sx < 0 else 'lightning', sx * 12, 0, 24)
     kit.spawn(sx * 22, 0, 25, 90 * sx)
     kit.spawn(sx * 22, 0, -25, 90 * sx)
+    kit.spawn(sx * 42, 0, -10, 90 * sx)
+    kit.spawn(sx * 30, 0, 12, 90 * sx)
 
 
 def tower(sx):
@@ -70,10 +72,10 @@ def tower(sx):
     kit.pad(sx * (TX + 4), 6, 5, sx * (TX - 4), 14, -3, apex=2.0)
     # Spawns: Boden (Basis), Balkon, Dach
     # Boden-Spawns am weitesten aussen (diagonal ca. 142 m): dort stehen die CTF-Flaggen
-    kit.spawn(sx * (TX + 6), 0, sx * -4, -90 * sx)
-    kit.spawn(sx * (TX + 6), 0, sx * 4, -90 * sx)
-    kit.spawn(sx * (TX + 5), 6, 0, -90 * sx)
-    kit.spawn(sx * (TX - 4), 14, -4, -90 * sx)
+    kit.spawn(sx * (TX + 6), 0, sx * -4, 90 * sx)
+    kit.spawn(sx * (TX + 6), 0, sx * 4, 90 * sx)
+    kit.spawn(sx * (TX + 5), 6, 0, 90 * sx)
+    kit.spawn(sx * (TX - 4), 14, -4, 90 * sx)
     kit.item('armor', sx * (TX + 3), 0, 5)
     kit.item('ammo', sx * (TX + 6), 6, 2)
     kit.weapon('shock_rifle', sx * (TX + 3), 6, -3)

@@ -128,6 +128,18 @@ transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 
 [node name="SpawnPoint12" type="Marker3D" parent="SpawnPoints"]
 transform = Transform3D(-1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, -1.000000, 0, 1.0, 20)
 
+[node name="SpawnPoint13" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(-1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, -1.000000, -20, 7.0, -32)
+
+[node name="SpawnPoint14" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 20, 7.0, 32)
+
+[node name="SpawnPoint15" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(0.000000, 0, -1.000000, 0, 1, 0, 1.000000, 0, 0.000000, -36, 1.0, -12)
+
+[node name="SpawnPoint16" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(0.000000, 0, 1.000000, 0, 1, 0, -1.000000, 0, 0.000000, 36, 1.0, 12)
+
 [node name="Player" parent="." instance=ExtResource("2_player")]
 transform = Transform3D(-0.529919, 0, -0.848048, 0, 1, 0, 0.848048, 0, -0.529919, -45, 1.0, -21)
 

@@ -42,7 +42,7 @@ for sx in (-1, 1):
     kit.pillar(sx * 30, 0, -12, 9, w=2.0, glow=YELLOW)
     kit.pad(sx * 6, 0, 0, sx * 30, 10, 0, apex=3.0)                 # Hof -> Insel
     kit.pad(sx * 30, 10, sx * -4, sx * 4, 0, sx * -8, apex=2.0)     # Insel -> Hof
-    kit.spawn(sx * 33, 10, sx * 4, -90 * sx)
+    kit.spawn(sx * 33, 10, sx * 4, 90 * sx)
     kit.light(sx * 30, 14, 0, (1, 0.8, 0.2), 2.5, 12)
 kit.item('mega', -33, 10, 0)
 kit.weapon('railgun', 33, 10, 0)
@@ -62,6 +62,7 @@ for sx in (-1, 1):
         kit.pad(sx * 6, 0, sz * 22, cx, 4, cz, apex=2.5)                       # Hof -> Ecke
         kit.pad(cx + sx * 1.5, 4, cz - sz * 1.5, sx * 3, 0, sz * 18, apex=2.0)  # Ecke -> Hof
         kit.item('health', cx - sx * 1.5, 4, cz + sz * 1.5)
+        kit.spawn(cx + sx * 1.5, 4, cz + sz * 1.5, 0 if sz > 0 else 180)
 
 # --- Teleporter: Kopf Nord -> Ost-Insel, Kopf Sued -> West-Insel ---
 kit.tele(8, 6, -53, 30, 10, -3, 90)

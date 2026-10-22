@@ -17,8 +17,9 @@ const COLOR_PLAYER := Color(1.0, 0.85, 0.3)
 
 func _ready() -> void:
 	again_button.pressed.connect(GameManager.restart_match)
+	again_button.visible = not Net.is_client()  # Neustart bestimmt im Netzspiel der Host
 	menu_button.pressed.connect(GameManager.return_to_menu)
-	again_button.grab_focus()
+	(again_button if again_button.visible else menu_button).grab_focus()
 
 
 func show_results(results: Dictionary) -> void:

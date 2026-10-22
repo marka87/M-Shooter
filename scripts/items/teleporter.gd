@@ -34,7 +34,8 @@ func _process(delta: float) -> void:
 
 
 func _on_body_entered(body: Node3D) -> void:
-	if not target or not body is CharacterBody3D:
+	# Puppen im Netzspiel bewegt ihr eigener Rechner
+	if not target or not body is CharacterBody3D or body.get("puppet"):
 		return
 	var now: float = Time.get_ticks_msec() / 1000.0
 	if now < _cooldowns.get(body, 0.0):

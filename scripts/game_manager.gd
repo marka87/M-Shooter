@@ -126,18 +126,23 @@ const BINDABLE_ACTIONS := {
 # Match-Einstellungen
 ## Anzahl Bots in der Arena (1-7)
 var bot_count: int = 3
+## Name im Netzspiel (LAN)
+var player_name: String = "Spieler"
+## Zuletzt eingegebene Host-Adresse (LAN beitreten)
+var last_host_ip: String = "127.0.0.1"
 ## Schwierigkeit der Bots (Index in Bot.SKILL_PRESETS, 0 = Anfaenger ... 4 = Gott)
 var bot_skill: int = 2
-const MAX_BOTS: int = 7
+const MAX_BOTS: int = 15
 ## Spielbare Arenen: Anzeigename und Szene
+## max_players: Spieler plus Bots, nach Groesse der Map (jede Map hat mindestens so viele Spawnpunkte)
 const MAPS: Array[Dictionary] = [
-	{ "name": "Neon Foundry", "scene": "res://levels/neon_foundry.tscn" },
-	{ "name": "Orbital Void", "scene": "res://levels/orbital_void.tscn" },
-	{ "name": "Sky Yard", "scene": "res://levels/sky_yard.tscn" },
-	{ "name": "Duck 17", "scene": "res://levels/duck_17.tscn" },
-	{ "name": "Twin Spires", "scene": "res://levels/twin_spires.tscn" },
-	{ "name": "Camp Ground", "scene": "res://levels/camp_ground.tscn" },
-	{ "name": "Testarena", "scene": "res://levels/test_arena.tscn" },
+	{ "name": "Neon Foundry", "scene": "res://levels/neon_foundry.tscn", "max_players": 8 },
+	{ "name": "Orbital Void", "scene": "res://levels/orbital_void.tscn", "max_players": 8 },
+	{ "name": "Sky Yard", "scene": "res://levels/sky_yard.tscn", "max_players": 12 },
+	{ "name": "Duck 17", "scene": "res://levels/duck_17.tscn", "max_players": 16 },
+	{ "name": "Twin Spires", "scene": "res://levels/twin_spires.tscn", "max_players": 16 },
+	{ "name": "Camp Ground", "scene": "res://levels/camp_ground.tscn", "max_players": 12 },
+	{ "name": "Testarena", "scene": "res://levels/test_arena.tscn", "max_players": 8 },
 ]
 ## Index in MAPS
 var selected_map: int = 0
@@ -285,7 +290,8 @@ func _process(delta: float) -> void:
 				play_announcer("fight")
 				match_started.emit()
 		GameState.PLAYING:
-			if time_limit_minutes > 0.0 and match_time_left > 0.0:
+			# Netzspiel-Client: die Uhr kommt vom Host, das Matchende auch
+			if time_limit_minutes > 0.0 and match_time_left > 0.0 and not Net.is_client():
 				match_time_left -= delta
 				# Zeitansagen bei 5 Minuten und 1 Minute Restzeit
 				for warn in [300, 60]:
@@ -303,9 +309,11 @@ func start_match() -> void:
 	_last_tick = -1
 	_first_blood_done = false
 	_time_warnings_done.clear()
-	if match_countdown <= 0.0:
+	# Im Netzspiel ohne Countdown (Mitspieler kommen zu verschiedenen Zeiten dazu)
+	var countdown: float = 0.0 if Net.active else match_countdown
+	if countdown <= 0.0:
 		play_announcer("fight")
-	if match_countdown > 0.0:
+	if countdown > 0.0:
 		current_state = GameState.COUNTDOWN
 		countdown_left = match_countdown
 	else:
@@ -323,6 +331,7 @@ func end_match(reason: String) -> void:
 	if current_state == GameState.GAME_OVER or current_state == GameState.MENU:
 		return
 	current_state = GameState.GAME_OVER
+	Net.on_match_over(reason)
 	var rows := get_scoreboard()
 	var results := {
 		"reason": reason,
@@ -351,6 +360,7 @@ func end_match(reason: String) -> void:
 
 ## Siegerbildschirm schliessen und Level neu starten (gleiche Einstellungen)
 func restart_match() -> void:
+	Net.on_restart()
 	_close_match_end()
 	reset_game()
 	get_tree().reload_current_scene()
@@ -358,6 +368,7 @@ func restart_match() -> void:
 
 ## Siegerbildschirm schliessen und ins Hauptmenue
 func return_to_menu() -> void:
+	Net.leave()
 	_close_match_end()
 	get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
 
@@ -456,7 +467,7 @@ func register_kill(killer: Node, victim: Node, weapon_name: String, headshot: bo
 
 	# Fraglimit erreicht? (verzoegert, damit Effekte des letzten Kills noch starten). Im TDM zaehlt das Team,
 	# in CTF nur Eroberungen
-	if frag_limit > 0 and not suicide and game_mode != Mode.CTF:
+	if frag_limit > 0 and not suicide and game_mode != Mode.CTF and not Net.is_client():
 		var reached: bool = team_scores[team_of(killer)] >= frag_limit if game_mode == Mode.TEAM_DEATHMATCH else scores[killer_name].frags >= frag_limit
 		if reached:
 			end_match.call_deferred("Fraglimit")
@@ -524,7 +535,8 @@ func toggle_pause() -> void:
 	if current_state == GameState.PLAYING or current_state == GameState.COUNTDOWN:
 		_state_before_pause = current_state
 		current_state = GameState.PAUSED
-		get_tree().paused = true
+		# Im Netzspiel laeuft das Spiel weiter, nur das Menue liegt darueber
+		get_tree().paused = not Net.active
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		_pause_layer.visible = true
 		game_paused.emit(true)
@@ -554,6 +566,8 @@ func load_settings() -> void:
 		bot_skill = clampi(cfg.get_value("match", "bot_skill", bot_skill), 0, 4)
 		selected_map = clampi(cfg.get_value("match", "map", selected_map), 0, MAPS.size() - 1)
 		frag_limit = cfg.get_value("match", "frag_limit", frag_limit)
+		player_name = cfg.get_value("net", "name", player_name)
+		last_host_ip = cfg.get_value("net", "host_ip", last_host_ip)
 		capture_limit = clampi(cfg.get_value("match", "capture_limit", capture_limit), 1, 99)
 		time_limit_minutes = cfg.get_value("match", "time_limit", time_limit_minutes)
 		instagib = cfg.get_value("match", "instagib", instagib)
@@ -593,6 +607,8 @@ func save_settings() -> void:
 	cfg.set_value("match", "bot_skill", bot_skill)
 	cfg.set_value("match", "map", selected_map)
 	cfg.set_value("match", "frag_limit", frag_limit)
+	cfg.set_value("net", "name", player_name)
+	cfg.set_value("net", "host_ip", last_host_ip)
 	cfg.set_value("match", "capture_limit", capture_limit)
 	cfg.set_value("match", "time_limit", time_limit_minutes)
 	cfg.set_value("match", "instagib", instagib)
@@ -750,10 +766,11 @@ func get_spawn_transform(for_node: Node3D) -> Transform3D:
 ## CTF: Team erobert die Flagge (vom CtfManager aufgerufen)
 func register_capture(team: int, carrier: Node) -> void:
 	team_scores[team] += 1
+	Net.on_capture(team, carrier)
 	player_announcement.emit("%s erobert die Flagge für %s!" % [_name_of(carrier), TEAM_NAMES[team]], TEAM_COLORS[team])
 	score_updated.emit(player_frags, player_deaths)
 	scoreboard_changed.emit()
-	if capture_limit > 0 and team_scores[team] >= capture_limit:
+	if capture_limit > 0 and team_scores[team] >= capture_limit and not Net.is_client():
 		end_match.call_deferred("Eroberungslimit")
 
 
