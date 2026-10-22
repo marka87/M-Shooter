@@ -81,18 +81,23 @@ custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 theme_override_styles/panel = SubResource("Style_Line")
 
-[node name="Grid" type="GridContainer" parent="Center/Panel/Margin/VBox"]
+[node name="Body" type="BoxContainer" parent="Center/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+vertical = true
+
+[node name="Grid" type="GridContainer" parent="Center/Panel/Margin/VBox/Body"]
 layout_mode = 2
 theme_override_constants/h_separation = 28
 theme_override_constants/v_separation = 4
 columns = 5
 
-[node name="Line2" type="Panel" parent="Center/Panel/Margin/VBox"]
+[node name="Line2" type="Panel" parent="Center/Panel/Margin/VBox/Body"]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 theme_override_styles/panel = SubResource("Style_Line")
 
-[node name="Stats" type="GridContainer" parent="Center/Panel/Margin/VBox"]
+[node name="Stats" type="GridContainer" parent="Center/Panel/Margin/VBox/Body"]
 layout_mode = 2
 theme_override_constants/h_separation = 28
 theme_override_constants/v_separation = 4

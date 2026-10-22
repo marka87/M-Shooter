@@ -24,7 +24,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'assets', 'sounds', 'new')
 OUT = os.path.join(ROOT, 'assets', 'sounds', 'custom')
 # Dateinamen, die nicht dem Spiel-Namen entsprechen
-ALIASES = {'ligthning': 'lightning', 'rocket launcher': 'rocket_fire', 'rocket_launcher': 'rocket_fire'}
+ALIASES = {'ligthning': 'lightning', 'machingun': 'machinegun', 'rocket launcher': 'rocket_fire', 'rocket_launcher': 'rocket_fire'}
 FIXED_NUMBERS = {'footstep'}
 # Ansager-Dateiname (ohne .mp3, ohne Varianten-Ziffer) -> Satz im Spiel (GameManager.play_announcer)
 ANNOUNCER = {

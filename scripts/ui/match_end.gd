@@ -6,13 +6,16 @@ class_name MatchEndScreen
 
 @onready var title_label: Label = $Center/Panel/Margin/VBox/Title
 @onready var subtitle_label: Label = $Center/Panel/Margin/VBox/Subtitle
-@onready var grid: GridContainer = $Center/Panel/Margin/VBox/Grid
-@onready var stats_grid: GridContainer = $Center/Panel/Margin/VBox/Stats
+@onready var body: BoxContainer = $Center/Panel/Margin/VBox/Body
+@onready var grid: GridContainer = $Center/Panel/Margin/VBox/Body/Grid
+@onready var stats_grid: GridContainer = $Center/Panel/Margin/VBox/Body/Stats
 @onready var again_button: Button = $Center/Panel/Margin/VBox/Buttons/AgainButton
 @onready var menu_button: Button = $Center/Panel/Margin/VBox/Buttons/MenuButton
 
 const COLOR_HEAD := Color(0.6, 0.65, 0.75)
 const COLOR_PLAYER := Color(1.0, 0.85, 0.3)
+## Ab hier passt die Liste nicht mehr ueber die Statistik (720 px hoch): Statistik daneben, Zeilen kompakter
+const COMPACT_ROWS := 8
 
 
 func _ready() -> void:
@@ -34,16 +37,23 @@ func show_results(results: Dictionary) -> void:
 		subtitle_label.text += "   (Rot %d : %d Blau)" % [results.teams[0], results.teams[1]]
 
 	# Rangliste
+	var row_size := 20
+	if results.rows.size() > COMPACT_ROWS:
+		row_size = 16
+		body.vertical = false
+		body.add_theme_constant_override("separation", 28)
+		$Center/Panel/Margin/VBox/Body/Line2.custom_minimum_size = Vector2(2, 0)
+		grid.add_theme_constant_override("v_separation", 2)
 	for text in ["#", "NAME", "FRAGS", "TODE", "SCHADEN"]:
 		_cell(grid, text, COLOR_HEAD, 16, text != "NAME")
 	var place := 1
 	for row in results.rows:
 		var color := COLOR_PLAYER if row.is_player else Color.WHITE
-		_cell(grid, "%d." % place, color, 20, true)
-		_cell(grid, row.name, color, 20, false)
-		_cell(grid, str(row.frags), color, 20, true)
-		_cell(grid, str(row.deaths), color, 20, true)
-		_cell(grid, str(int(row.damage_dealt)), color, 20, true)
+		_cell(grid, "%d." % place, color, row_size, true)
+		_cell(grid, row.name, color, row_size, false)
+		_cell(grid, str(row.frags), color, row_size, true)
+		_cell(grid, str(row.deaths), color, row_size, true)
+		_cell(grid, str(int(row.damage_dealt)), color, row_size, true)
 		place += 1
 
 	# Eigene Statistik

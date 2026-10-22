@@ -389,7 +389,19 @@ func run() -> void:
 	var first_impact: AudioStream = impact.get_stream(0) if impact is AudioStreamRandomizer else null
 	check(impact is AudioStreamRandomizer and impact.streams_count == 4 and first_impact and first_impact.resource_path.contains("/custom/"),
 		"Eigene Sounds: Einschlag aus custom/ mit 4 Varianten")
-	check(SoundGenerator.create_machinegun_sound() != null, "Fehlender eigener Sound faellt zurueck (MG)")
+	check(SoundGenerator.create_machinegun_sound().resource_path.contains("/custom/"), "Eigener MG-Sound aus custom/")
+	check(SoundGenerator.create_glass_break_sound() != null, "Fehlender eigener Sound faellt zurueck (Glas)")
+	# Matchende mit 16 Spielern: Panel samt Buttons passt in 720 px Hoehe
+	var end_screen: Node = load("res://scenes/ui/match_end.tscn").instantiate()
+	root.add_child(end_screen)
+	var end_rows := []
+	for i in 16:
+		end_rows.append({"name": "Bot%d" % i, "frags": 0, "deaths": 0, "damage_dealt": 0, "is_player": i == 0})
+	end_screen.show_results({"player_won": true, "winner": "Bot0", "reason": "Fraglimit", "rows": end_rows, "accuracy": 0.0,
+		"player": {"frags": 0, "deaths": 0, "damage_dealt": 0, "damage_taken": 0, "best_spree": 0, "weapon_kills": {}}})
+	var end_height: float = end_screen.get_node("Center/Panel").get_combined_minimum_size().y
+	check(end_height <= 720.0, "Matchende mit 16 Spielern passt in 720 px (%d)" % end_height)
+	end_screen.free()
 	# Waffenmodell (Quaternius): Laufspitze kurz vor dem Muzzle, Akzent leuchtet in der Waffenfarbe
 	var gun: Node3D = load("res://scenes/weapons/railgun.tscn").instantiate()
 	gun.set_script(null)
