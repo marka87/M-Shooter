@@ -144,11 +144,13 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	# Mausbewegung zur Blicksteuerung (Pause mit ESC laeuft ueber den GameManager)
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		# Im Zoom langsamer, damit sich das Zielen gleich anfuehlt
+		var sensitivity: float = mouse_sensitivity / (CameraFeedback.ZOOM_MAGNIFY if camera_feedback.zoomed else 1.0)
 		# Horizontale Drehung (Yaw) auf den ganzen Koerper anwenden
-		rotate_y(-event.relative.x * mouse_sensitivity)
+		rotate_y(-event.relative.x * sensitivity)
 
 		# Vertikale Drehung (Pitch) nur auf den Kopf/die Kamera anwenden
-		camera_pitch -= event.relative.y * mouse_sensitivity
+		camera_pitch -= event.relative.y * sensitivity
 		camera_pitch = clamp(camera_pitch, deg_to_rad(min_pitch), deg_to_rad(max_pitch))
 		head.rotation.x = camera_pitch
 

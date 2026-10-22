@@ -543,11 +543,10 @@ func _update_animation(delta: float) -> void:
 	anim_tree.set("parameters/loco/blend_position", Vector2(velocity.x, velocity.z).length())
 	anim_tree.set("parameters/air/blend_amount", lerpf(anim_tree.get("parameters/air/blend_amount"), air, weight))
 	anim_tree.set("parameters/aim/blend_amount", lerpf(anim_tree.get("parameters/aim/blend_amount"), aim, weight))
-	# Animations-LOD: nah 60 Hz, mittel 30 Hz, fern 15 Hz (15 Bots kosteten sonst ~7 ms pro Frame)
+	# Animations-LOD: im Bild immer 60 Hz (auch fern, im Zoom sieht man jedes Ruckeln), sonst 10 Hz
 	_anim_time += delta
 	var cam := get_viewport().get_camera_3d()
-	var dist: float = cam.global_position.distance_to(global_position) if cam else 100.0
-	var step: float = 1.0 / 60.0 if dist < 20.0 else (1.0 / 30.0 if dist < 45.0 else 1.0 / 15.0)
+	var step: float = 1.0 / 60.0
 	if cam and not cam.is_position_in_frustum(global_position + Vector3.UP):
 		step = 0.1  # ausserhalb des Bildes reicht eine grobe Pose
 	if _anim_time >= step:

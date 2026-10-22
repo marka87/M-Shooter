@@ -361,7 +361,7 @@ offset_bottom = 150.0
 grow_horizontal = 2
 theme_override_font_sizes/font_size = 13
 autowrap_mode = 3
-text = "[WASD] Bewegen | [Leertaste] Springen & Doppelsprung | [2x Richtung] Dodge | [Shift] Sprint | [1-7 / Mausrad] Waffe | [Rechtsklick] Alt-Feuer | [Tab] Punkte | [ESC] Pause"
+text = "[WASD] Bewegen | [Leertaste] Springen & Doppelsprung | [2x Richtung] Dodge | [Shift] Sprint | [1-7 / Mausrad] Waffe | [Rechtsklick] Alt-Feuer / Zoom | [Tab] Punkte | [ESC] Pause"
 horizontal_alignment = 1
 
 [node name="DeathOverlay" type="Control" parent="."]

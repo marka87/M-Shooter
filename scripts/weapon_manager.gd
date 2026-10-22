@@ -282,7 +282,11 @@ func _process_weapon_sway(delta: float) -> void:
 	var target_offset := Vector3(target_x, target_y, 0.0)
 	
 	target_offset.y += _air_offset + _land_dip
-	position = position.lerp(default_pos + target_offset, delta * sway_smooth)
+	# Im Zoom (schmaleres Sichtfeld) Waffe quer zur Blickrichtung stauchen: auf dem Bild bleibt sie gleich gross
+	var k: float = minf(tan(deg_to_rad(camera.fov) / 2.0) / tan(deg_to_rad(GameManager.fov) / 2.0), 1.0)
+	var squash := Vector3(k, k, 1.0)
+	position = position.lerp((default_pos + target_offset) * squash, delta * sway_smooth)
+	scale = squash * view_scale
 	mouse_input = mouse_input.lerp(Vector2.ZERO, delta * sway_smooth)
 
 

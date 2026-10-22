@@ -11,10 +11,14 @@ class_name CameraFeedback
 ## Ab diesem Tempo waechst das Sichtfeld, bei speed_fov_full ist der volle Zusatz erreicht (m/s)
 @export var speed_fov_start: float = 13.0
 @export var speed_fov_full: float = 26.0
+## Rechte Maustaste bei Waffen ohne Alt-Feuer: halber Zoom (doppelte Vergroesserung)
+const ZOOM_MAGNIFY := 2.0
 
 var player: Player
 var camera: Camera3D
 var base_fov: float = 100.0
+## Zoom gerade gehalten (der Spieler verlangsamt dann die Maus)
+var zoomed: bool = false
 
 var _dip: float = 0.0          # Absenkung der Kamera nach der Landung (m)
 var _punch: Vector3 = Vector3.ZERO  # Nicken/Gieren/Rollen durch Treffer und Rueckstoss (rad)
@@ -62,10 +66,13 @@ func _on_dodged(local_dir: Vector3, _wall: bool) -> void:
 
 
 func _process(delta: float) -> void:
+	var weapon := player.weapon_manager.get_current_weapon()
+	zoomed = Input.is_action_pressed("shoot_alt") and weapon != null and weapon.data.alt_cooldown <= 0.0 and not player.is_dead
+	var zoom_fov: float = rad_to_deg(2.0 * atan(tan(deg_to_rad(base_fov) / 2.0) / ZOOM_MAGNIFY))
 	if not GameManager.camera_effects:
 		camera.position = Vector3.ZERO
 		camera.rotation = Vector3.ZERO
-		camera.fov = base_fov
+		camera.fov = zoom_fov if zoomed else base_fov
 		return
 	_time += delta
 
@@ -87,4 +94,7 @@ func _process(delta: float) -> void:
 	# Sichtfeld waechst mit dem Tempo (Gefuehl von Geschwindigkeit beim Strafe-Jumping)
 	var speed: float = Vector2(player.velocity.x, player.velocity.z).length()
 	var t: float = clampf((speed - speed_fov_start) / (speed_fov_full - speed_fov_start), 0.0, 1.0)
-	camera.fov = lerpf(camera.fov, base_fov + max_fov_bonus * t, 1.0 - exp(-6.0 * delta))
+	var target_fov: float = zoom_fov if zoomed else base_fov + max_fov_bonus * t
+	# Zoom rein und raus zuegig, das Tempo-Sichtfeld weich
+	var rate: float = 14.0 if zoomed or camera.fov < base_fov - 0.5 else 6.0
+	camera.fov = lerpf(camera.fov, target_fov, 1.0 - exp(-rate * delta))

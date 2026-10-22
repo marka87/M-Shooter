@@ -219,6 +219,17 @@ func run() -> void:
 	await create_timer(0.25).timeout
 	check(shotgun.position.is_equal_approx(shotgun.initial_position) and shotgun.can_fire(), "Waffenwechsel: nach 0,15 s oben und feuerbereit")
 
+	# Rechte Maustaste bei Waffe ohne Alt-Feuer: halber Zoom, Waffe gestaucht (bleibt auf dem Bild gleich gross)
+	Input.action_press("shoot_alt")
+	await create_timer(0.5).timeout
+	var zoom_fov: float = player.camera.fov
+	check(zoom_fov < player.camera_feedback.base_fov * 0.7 and wm.scale.x < wm.view_scale * 0.7,
+		"Rechte Maustaste: halber Zoom (FOV %.0f), Waffe gestaucht" % zoom_fov)
+	Input.action_release("shoot_alt")
+	await create_timer(0.6).timeout
+	check(absf(player.camera.fov - player.camera_feedback.base_fov) < 1.0 and wm.scale.x > wm.view_scale * 0.98,
+		"Zoom losgelassen: altes Sichtfeld (FOV %.1f, Waffe %.2f/%.2f)" % [player.camera.fov, wm.scale.x, wm.view_scale])
+
 	# Tempo-Sichtfeld: schnell in der Luft -> groesseres FOV
 	await place(player, Vector3(-20, 6.0, 30))
 	var base_fov: float = player.camera_feedback.base_fov
