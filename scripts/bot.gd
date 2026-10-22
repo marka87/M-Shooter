@@ -1,7 +1,8 @@
 extends CharacterBody3D
 class_name Bot
 
-## Gegner-Bot fuer die Arena mit Zustandsmaschine (Patrouille, Verfolgen, Angreifen, Tot).
+## Gegner-Bot fuer die Arena. Entscheidungen per Utility-AI (utility_scores): Angreifen, Verfolgen,
+## Item holen oder Patrouille bekommen eine Punktzahl, die beste wird ausgefuehrt (Zustaende PATROL/CHASE/ATTACK).
 ## Jeder gegen jeden: Ziel ist der naechste sichtbare Gegner (Spieler oder anderer Bot).
 ## Verwendet NavigationAgent3D fuer die Wegfindung und schiesst mit Streuung je nach Schwierigkeit.
 
@@ -73,6 +74,8 @@ const KILL_LINES: Array = [
 	["gg", "Treffer!", "Weiter geht's."],
 ]
 const DEATH_LINES: Array[String] = ["Glück gehabt.", "Das gibt Rache!", "Lag!", "Na warte ...", "Nicht schlecht."]
+## Kampfeslust je Persoenlichkeit (Faktor auf Angreifen und Verfolgen in der Utility-AI)
+const AGGRESSION := { Personality.AGGRESSIVE: 1.3, Personality.CAUTIOUS: 0.75, Personality.CAMPER: 0.9, Personality.BALANCED: 1.0 }
 # Hoechstens alle 5 s ein Spruch pro Bot
 var _chat_cooldown: float = 0.0
 
@@ -102,6 +105,7 @@ var target: CharacterBody3D = null
 var target_scan_timer: float = 0.0
 # Verbleibende Reaktionszeit bis zum ersten Schuss auf ein neues Ziel
 var reaction_timer: float = 0.0
+## Sekunden seit dem letzten Sichtkontakt zum Ziel (0 = gerade sichtbar)
 var lose_target_timer: float = 0.0
 var patrol_target: Vector3 = Vector3.ZERO
 var patrol_wait_timer: float = 0.0
@@ -127,6 +131,7 @@ var ragdoll: PhysicalBoneSimulator3D = null
 var _los_timer: float = 0.0
 var _los_visible: bool = false
 var _los_target: Node3D = null
+var _decide_timer: float = 0.0
 ## Ab diesem Schaden zerplatzt der Bot in Wuerfel statt als Ragdoll umzufallen
 const GIB_DAMAGE: float = 120.0
 const GIB_SPLASH_DAMAGE: float = 50.0
@@ -242,8 +247,13 @@ func _physics_process(delta: float) -> void:
 			_los_target = target
 			_los_visible = _check_line_of_sight(target)
 		target_visible = _los_visible
+	lose_target_timer = 0.0 if target_visible else lose_target_timer + delta
+	_decide_timer -= delta
+	if _decide_timer <= 0.0:
+		_decide_timer = 0.25
+		_decide(target_visible, distance_to_target)
 
-	# Zustandsmaschine abarbeiten
+	# Gewaehlte Handlung ausfuehren
 	match current_state:
 		State.PATROL:
 			_process_patrol(delta, target, target_visible, distance_to_target)
@@ -270,12 +280,7 @@ func _physics_process(delta: float) -> void:
 # ==============================================================================
 
 ## Patrouille: Zufaellige Wegpunkte ansteuern und nach Gegnern Ausschau halten
-func _process_patrol(delta: float, _target: CharacterBody3D, target_visible: bool, distance: float) -> void:
-	# Wenn ein Gegner in Sicht und Reichweite ist -> Verfolgung aufnehmen
-	if target_visible and distance < sight_range:
-		_switch_state(State.CHASE)
-		return
-
+func _process_patrol(delta: float, _target: CharacterBody3D, _target_visible: bool, _distance: float) -> void:
 	# Wartezeit am Wegpunkt
 	if patrol_wait_timer > 0.0:
 		patrol_wait_timer -= delta
@@ -307,26 +312,9 @@ func _process_patrol(delta: float, _target: CharacterBody3D, target_visible: boo
 
 
 ## Verfolgen: Mit Navigationsagent auf das Ziel zulaufen
-func _process_chase(delta: float, chase_target: CharacterBody3D, target_visible: bool, distance: float) -> void:
+func _process_chase(delta: float, chase_target: CharacterBody3D, _target_visible: bool, _distance: float) -> void:
 	if not _is_alive(chase_target):
-		_switch_state(State.PATROL)
 		return
-
-	# In Angriffsmodus wechseln, wenn nahe genug und freie Schussbahn
-	if target_visible and distance <= attack_range:
-		_switch_state(State.ATTACK)
-		reaction_timer = reaction_time
-		return
-
-	# Wenn das Ziel nicht mehr sichtbar ist, Timer starten
-	if not target_visible:
-		lose_target_timer += delta
-		if lose_target_timer > (8.0 if personality == Personality.AGGRESSIVE else 5.0):
-			_switch_state(State.PATROL)
-			return
-	else:
-		lose_target_timer = 0.0
-
 	# Weg zum Ziel berechnen
 	_move_towards(chase_target.global_position, chase_speed, delta)
 
@@ -334,17 +322,7 @@ func _process_chase(delta: float, chase_target: CharacterBody3D, target_visible:
 ## Angreifen: Ziel fixieren, seitlich strafen und gezielt feuern
 func _process_attack(delta: float, attack_target: CharacterBody3D, target_visible: bool, distance: float) -> void:
 	if not _is_alive(attack_target):
-		_switch_state(State.PATROL)
 		return
-
-	# Wenn das Ziel ausser Reichweite oder hinter einer Wand verschwunden ist
-	if not target_visible or distance > attack_range * 1.35:
-		lose_target_timer += delta
-		if lose_target_timer > 1.2:
-			_switch_state(State.CHASE)
-			return
-	else:
-		lose_target_timer = 0.0
 
 	# Das Ziel horizontal ansehen
 	_look_towards(attack_target.global_position)
@@ -378,10 +356,58 @@ func _process_attack(delta: float, attack_target: CharacterBody3D, target_visibl
 			shoot_timer = shoot_interval
 
 
+## Utility-AI (Roadmap 5.5): Punktzahl 0..1 je Handlung aus der Lage und der Persoenlichkeit.
+## hp = (Leben + halbe Ruestung) / max. Leben, seen = Sekunden seit Sichtkontakt (0 = sichtbar),
+## item_value = Wert des besten Items (ItemPickup.value_for, durch Entfernung geteilt).
+## Wenig Leben senkt Angreifen/Verfolgen und hebt Item holen: der Bot zieht sich zum Heilen zurueck.
+func utility_scores(hp: float, has_target: bool, seen: float, distance: float, item_value: float) -> Dictionary:
+	var courage: float = clampf(hp, 0.15, 1.0) * AGGRESSION[personality]
+	var memory: float = 8.0 if personality == Personality.AGGRESSIVE else 5.0
+	var scores := { "patrol": 0.2, "collect": clampf(item_value / 50.0, 0.0, 1.0) * (1.6 - clampf(hp, 0.0, 1.0)), "chase": 0.0, "attack": 0.0 }
+	if has_target:
+		# Im Kampf etwas mehr Reichweite halten, damit der Bot nicht an der Grenze hin- und herschaltet
+		var reach: float = attack_range * (1.35 if current_state == State.ATTACK else 1.0)
+		if seen <= 0.0 and distance <= reach:
+			scores.attack = 0.9 * courage
+		if seen < memory and (seen > 0.0 or distance < sight_range):
+			scores.chase = 0.65 * courage * (1.0 - seen / memory)
+	return scores
+
+
+## Beste Handlung waehlen; die laufende bekommt einen kleinen Bonus (kein Flackern zwischen zwei Werten)
+func _decide(target_visible: bool, distance: float) -> void:
+	var best_item: Array = _best_item_scored()
+	var hp: float = (health.health + health.armor * 0.5) / health.max_health
+	var scores := utility_scores(hp, _is_alive(target), 0.0 if target_visible else lose_target_timer, distance, best_item[1])
+	var current: String = {State.ATTACK: "attack", State.CHASE: "chase"}.get(current_state, "collect" if patrol_item else "patrol")
+	scores[current] += 0.1
+	var choice: String = scores.keys().reduce(func(a, b): return a if scores[a] >= scores[b] else b)
+	match choice:
+		"attack":
+			if current_state != State.ATTACK:
+				_switch_state(State.ATTACK)
+				reaction_timer = reaction_time
+		"chase":
+			if current_state != State.CHASE:
+				_switch_state(State.CHASE)
+		"collect":
+			# Aus dem Kampf heraus (oder beim Herumlaufen ohne Item) das beste Item ansteuern
+			if current_state != State.PATROL or patrol_item == null:
+				_switch_state(State.PATROL)
+				patrol_item = best_item[0]
+				patrol_target = patrol_item.global_position
+				nav_agent.target_position = patrol_target
+				patrol_travel_timer = 0.0
+				patrol_wait_timer = 0.0
+		_:
+			if current_state != State.PATROL:
+				_switch_state(State.PATROL)
+				_pick_new_patrol_point()
+
+
 ## Zustand wechseln und vorbereiten
 func _switch_state(new_state: State) -> void:
 	current_state = new_state
-	lose_target_timer = 0.0
 	_update_nameplate()
 
 
@@ -557,6 +583,7 @@ func _update_target() -> void:
 	if best:
 		if best != target:
 			reaction_timer = reaction_time
+			lose_target_timer = 0.0
 		target = best
 	elif not _is_alive(target):
 		target = null
@@ -674,6 +701,7 @@ func take_damage(info: DamageInfo) -> void:
 		if info.attacker != target:
 			target = info.attacker
 			reaction_timer = reaction_time
+			lose_target_timer = 0.0
 		if current_state == State.PATROL:
 			_switch_state(State.CHASE)
 
@@ -853,6 +881,20 @@ func _pick_new_patrol_point() -> void:
 ## Lohnendstes erreichbares Item: Wert geteilt durch Entfernung. Unter einer Schwelle
 ## (bei mittelwertigen Items zufaellig in 30 % der Faelle) wird stattdessen normal patrouilliert.
 func _best_item() -> Node3D:
+	var scored: Array = _best_item_scored()
+	var best: Node3D = scored[0]
+	var best_score: float = scored[1]
+	# Unwichtiges ignorieren; mittelwertige Items in 30 % der Faelle auslassen (Abwechslung),
+	# hochwertige (Power-ups in der Naehe) immer holen
+	# Aggressive holen nur Wertvolles, Camper fast alles (sie warten gern an Item-Plaetzen)
+	var threshold: float = {Personality.AGGRESSIVE: 30.0, Personality.CAMPER: 6.0}.get(personality, 12.0)
+	if best_score < threshold or (best_score < 40.0 and randf() < 0.3):
+		return null
+	return best
+
+
+## [Item, Punktzahl] des lohnendsten erreichbaren Items (Wert geteilt durch Entfernung), sonst [null, 0]
+func _best_item_scored() -> Array:
 	var best: Node3D = null
 	var best_score: float = 0.0
 	for item in get_tree().get_nodes_in_group("pickups"):
@@ -865,13 +907,7 @@ func _best_item() -> Node3D:
 		if score > best_score:
 			best_score = score
 			best = item
-	# Unwichtiges ignorieren; mittelwertige Items in 30 % der Faelle auslassen (Abwechslung),
-	# hochwertige (Power-ups in der Naehe) immer holen
-	# Aggressive holen nur Wertvolles, Camper fast alles (sie warten gern an Item-Plaetzen)
-	var threshold: float = {Personality.AGGRESSIVE: 30.0, Personality.CAMPER: 6.0}.get(personality, 12.0)
-	if best_score < threshold or (best_score < 40.0 and randf() < 0.3):
-		return null
-	return best
+	return [best, best_score]
 
 
 ## Aktualisiert das schwebende 3D-Namensschild ueber dem Kopf

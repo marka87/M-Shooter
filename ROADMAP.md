@@ -114,7 +114,7 @@ Heute können Bots nur patrouillieren, verfolgen und mit einer Waffe schießen.
 | 5.2 | ✅ Bots nutzen alle Waffen, wählen die passende nach Distanz und **zielen bei Projektilen vor** (Vorhalt) | M |
 | 5.3 | ✅ Bots holen Items und Waffen und kennen die Respawn-Zeit von Quad, Mega Health und Rüstung. **Item-Bewusstsein**: Bots holen Health/Armor bei wenig Leben und kennen die Respawn-Zeiten großer Items | M |
 | 5.4 | Ausweichen: Dodge, Strafe-Jumping, Rocket-Jump auf hohe Plattformen | L |
-| 5.5 | Entscheidungslogik als **Utility-AI** statt fester Zustandsmaschine (jede Aktion bekommt eine Punktzahl, der Bot wählt die beste) | M |
+| 5.5 | ✅ Bot.utility_scores: Angreifen/Verfolgen/Item/Patrouille mit Punktzahl, wenig Leben -> heilen. Entscheidungslogik als **Utility-AI** statt fester Zustandsmaschine (jede Aktion bekommt eine Punktzahl, der Bot wählt die beste) | M |
 | 5.6 | ✅ Persönlichkeiten und Chat-Sprüche. Namen, Persönlichkeiten (aggressiv, vorsichtig, Camper), Sprüche im Chat | S |
 
 ---

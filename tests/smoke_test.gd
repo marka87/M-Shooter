@@ -145,6 +145,13 @@ func run() -> void:
 	var board: Array = gm.get_scoreboard()
 	check(board.size() == 3 and board[0].name == player.display_name, "Scoreboard: 3 Eintraege, Spieler vorn")
 
+	# Utility-AI: gesund und Gegner in Sicht -> angreifen; fast tot -> Leben holen; nichts los -> patrouillieren
+	var pick := func(scores: Dictionary) -> String: return scores.keys().reduce(func(x, y): return x if scores[x] >= scores[y] else y)
+	var healthy: String = pick.call(b1.utility_scores(1.0, true, 0.0, 10.0, 20.0))
+	var hurt: String = pick.call(b1.utility_scores(0.2, true, 0.0, 10.0, 60.0))
+	var idle: String = pick.call(b1.utility_scores(1.0, false, 99.0, 9999.0, 5.0))
+	check([healthy, hurt, idle] == ["attack", "collect", "patrol"], "Utility-AI: angreifen / heilen / patrouillieren (%s)" % [[healthy, hurt, idle]])
+
 	# Koerpertreffer mit 100 Schaden -> Ragdoll faellt um; Kopf landet nahe am Boden.
 	# (Der Railgun-Schuss oben war auf Augenhoehe ein Kopftreffer mit 150 Schaden -> Gib.)
 	b1._respawn()
