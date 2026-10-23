@@ -294,10 +294,21 @@ func _on_game_paused(is_paused: bool) -> void:
 		_wait_for_shoot_release = true
 
 
-## Nur die Munition der aktiven Waffe ans HUD melden
+## Reihenfolge fuer den automatischen Wechsel bei leerer Waffe (staerkste zuerst, wie in Quake 3)
+const STRENGTH_ORDER: Array[StringName] = [&"rocket_launcher", &"railgun", &"shock_rifle", &"lightning", &"plasma", &"shotgun", &"machine_gun"]
+
+
+## Nur die Munition der aktiven Waffe ans HUD melden; ist sie leer, zur staerksten mit Munition wechseln
 func _on_weapon_ammo_changed(current: int, max_val: int, weapon: WeaponBase) -> void:
-	if weapon == get_current_weapon():
-		ammo_updated.emit(current, max_val)
+	if weapon != get_current_weapon():
+		return
+	ammo_updated.emit(current, max_val)
+	if current <= 0:
+		for id in STRENGTH_ORDER:
+			var next := get_weapon(id)
+			if next and next.owned and next.current_ammo > 0:
+				switch_to_weapon.call_deferred(weapons.find(next))
+				return
 
 
 ## Berechnet die geschmeidige Waffen-Traegheit beim Drehen des Blickwinkels

@@ -22,6 +22,8 @@ func _ready() -> void:
 	# Navigationsnetz aus der Geometrie backen, damit Bots Waenden und Pfeilern ausweichen
 	var nav_region := get_node_or_null("NavigationRegion3D") as NavigationRegion3D
 	if nav_region:
+		# Bots steigen keine Stufen: hoehere Kanten (z. B. Rampenseiten) nicht begehbar; mind. eine Zellhoehe (0,25), sonst zerfaellt das Netz
+		nav_region.navigation_mesh.agent_max_climb = 0.3
 		nav_region.bake_navigation_mesh(false)
 
 	GameManager.spawn_points.clear()

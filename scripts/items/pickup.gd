@@ -45,7 +45,7 @@ var _respawn_timer: SceneTreeTimer
 ## Grosse Items, deren Respawn-Zeit die Bots kennen (wie Spieler in Quake, die das Item-Timing lernen)
 const TIMED_TYPES: Array[PickupType] = [PickupType.QUAD_DAMAGE, PickupType.MEGA_HEALTH, PickupType.ARMOR]
 ## So viele Sekunden vor dem Respawn laufen Bots schon zu einem grossen Item
-const RESPAWN_LOOKAHEAD: float = 6.0
+const RESPAWN_LOOKAHEAD: float = 3.0
 
 
 func _ready() -> void:

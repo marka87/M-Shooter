@@ -138,6 +138,14 @@ func run() -> void:
 		"Start nur mit MG und Shotgun, Railgun und Raketenwerfer einsammeln")
 	wm.give_weapon(&"railgun", 10)
 	wm.give_weapon(&"rocket_launcher", 10)
+	# Leere Waffe: automatisch zur staerksten mit Munition (Raketenwerfer leer -> Railgun)
+	var rl = wm.get_weapon(&"rocket_launcher")
+	var rl_ammo: int = rl.current_ammo
+	rl.current_ammo = 0
+	rl.ammo_changed.emit(0, rl.max_ammo)
+	await process_frame
+	check(wm.get_current_weapon().weapon_id == &"railgun", "Leere Waffe: Wechsel zur staerksten mit Munition (%s)" % wm.get_current_weapon().weapon_id)
+	rl.current_ammo = rl_ammo
 	wm.switch_to_weapon_id(&"railgun")
 	await wait(0.2)
 	wm.fire_current_weapon()
@@ -258,6 +266,7 @@ func run() -> void:
 	player.powerups.give_quad(12.0)
 	player.take_damage(DamageInfo.create(1000.0, b2, player.global_position, Vector3.ZERO, "Test"))
 	check(player.is_dead, "Spieler stirbt")
+	check(not wm.visible, "Tot: keine Waffe in der Hand")
 	var drops: Array = get_nodes_in_group("pickups").filter(func(p): return p.dropped)
 	check(drops.size() == 1 and drops[0].quad_seconds > 11.0 and drops[0].quad_seconds <= 12.0 and drops[0].global_position.distance_to(player.global_position) < 2.0,
 		"Quad faellt beim Tod mit Restzeit (%s)" % [drops.map(func(p): return snappedf(p.quad_seconds, 0.1))])
@@ -283,6 +292,7 @@ func run() -> void:
 		b.set_physics_process(false)
 	await wait(3.5)
 	check(not player.is_dead, "Respawn nach Pause")
+	check(wm.visible, "Nach Respawn: Waffe wieder da")
 	check(player.health.armor == player.health.start_armor, "Start-Ruestung nach Respawn")
 
 	# Spawn: Der gewaehlte Punkt liegt weit weg von allen anderen Kaempfern
@@ -360,8 +370,8 @@ func run() -> void:
 	armor_item._collect()
 	armor_item._respawn_timer.time_left = 20.0
 	var useful_early: bool = armor_item.is_useful_for(victim)
-	armor_item._respawn_timer.time_left = 4.0
-	check(not useful_early and armor_item.is_useful_for(victim), "Bot kennt Respawn-Zeit der Ruestung (20 s: nein, 4 s: ja)")
+	armor_item._respawn_timer.time_left = 2.0
+	check(not useful_early and armor_item.is_useful_for(victim), "Bot kennt Respawn-Zeit der Ruestung (20 s: nein, 2 s: ja)")
 
 	# Tastenbelegung: neue Taste ersetzt die alte (danach Original wiederherstellen)
 	var jump_events: Array = InputMap.action_get_events("jump")

@@ -278,6 +278,7 @@ func _on_died(info: DamageInfo) -> void:
 	death_timer = respawn_delay
 	powerups.drop_quad()
 	powerups.clear()
+	weapon_manager.visible = false  # tot keine Waffe in der Hand
 	# Selbsttreffer (Rocket-Jump) zaehlt als Selbstmord
 	GameManager.register_kill(info.attacker, self, info.weapon_name, info.is_headshot)
 
@@ -286,6 +287,7 @@ func _on_died(info: DamageInfo) -> void:
 func _respawn(at: Variant = null) -> void:
 	health.reset()
 	weapon_manager.reset_loadout()
+	weapon_manager.visible = true
 	global_transform = at if at is Transform3D else GameManager.get_spawn_transform(self)
 	reset_physics_interpolation()
 	Net.on_respawned(self, global_transform)

@@ -57,9 +57,10 @@ def tower(sx):
     for z in (-8, 8):
         kit.deco(inner - sx * 0.3, 0, z - 0.1, inner - sx * 0.2, 14, z + 0.1, CYAN if sx > 0 else MAGENTA)
     # Balkon y=6 im hinteren Teil, Treppe (8 m fuer 6 m Hoehe, 37 Grad) an der Nordwand hinauf
-    b0, b1 = sorted((sx * (TX + 1), outer))
+    # Treppe 1 m weg von der Tuerwand: sonst kein Platz am Fuss, Bots kaemen nur seitlich auf die Rampe
+    b0, b1 = sorted((sx * (TX + 2), outer))
     kit.platform(b0, -7.75, b1, 7.75, 6, WALK, glow=YELLOW)
-    s0, s1 = sorted((sx * (TX - 7), sx * (TX + 1)))
+    s0, s1 = sorted((sx * (TX - 6), sx * (TX + 2)))
     kit.stairs(s0, s1, -7.5, -5, 0, 6, '+x' if sx > 0 else '-x')
     # Dach y=14 mit Oeffnung ueber dem Pad (hinteres Viertel Sued)
     h0, h1 = sorted((sx * TX, outer))

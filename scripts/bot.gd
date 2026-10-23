@@ -145,6 +145,11 @@ var _objective_stuck: float = 0.0
 var _objective_pos: Vector3 = Vector3.INF
 # Items, zu denen kein Weg fuehrt (z. B. auf Saeulen): Item -> Zeitpunkt (ms), bis dahin ignorieren
 var _unreachable: Dictionary = {}
+# Festhaengen erkennen: Position beim letzten Fortschritt und Zeit seitdem
+var _progress_pos: Vector3 = Vector3.ZERO
+var _progress_time: float = 0.0
+# Startpunkt des letzten Jump-Pad-Flugs (Ziel auf dem Pad selbst = Schleife)
+var _launch_from: Vector3 = Vector3.INF
 ## Ab diesem Schaden zerplatzt der Bot in Wuerfel statt als Ragdoll umzufallen
 const GIB_DAMAGE: float = 120.0
 const GIB_SPLASH_DAMAGE: float = 50.0
@@ -237,6 +242,9 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		if is_on_floor() and velocity.y <= 0.0:
 			is_launched = false
+			# Liegt das Ziel am Pad, von dem der Bot kam, wuerde er zurueck aufs Pad laufen: neues Ziel
+			if current_state == State.PATROL and _flat(patrol_target - _launch_from).length() < 4.0:
+				_pick_new_patrol_point()
 		return
 
 	# Schwerkraft anwenden
@@ -290,6 +298,7 @@ func _physics_process(delta: float) -> void:
 
 	# Bewegung ausfuehren
 	move_and_slide()
+	_check_stuck(delta)
 	if is_on_floor():
 		var speed := Vector2(velocity.x, velocity.z).length()
 		if speed > 1.5:
@@ -335,7 +344,7 @@ func _process_patrol(delta: float, _target: CharacterBody3D, _target_visible: bo
 	var arrive_dist: float = 0.5 if item_wanted else 2.0
 	var arrived: bool = to_target.length() < arrive_dist or (not item_wanted and nav_agent.is_navigation_finished())
 	if arrived or patrol_travel_timer > 12.0 or (patrol_item != null and not item_wanted):
-		patrol_wait_timer = randf_range(4.0, 9.0) if personality == Personality.CAMPER else randf_range(1.5, 3.5)
+		patrol_wait_timer = randf_range(2.0, 5.0) if personality == Personality.CAMPER else randf_range(0.0, 0.5)
 		_pick_new_patrol_point()
 		return
 
@@ -751,6 +760,7 @@ func on_item_picked(pickup_type: int, _item_name: String = "") -> void:
 func launch(launch_velocity: Vector3) -> void:
 	if puppet:
 		return
+	_launch_from = global_position
 	velocity = launch_velocity
 	is_launched = true
 
@@ -763,6 +773,12 @@ func take_damage(info: DamageInfo) -> void:
 	if Net.is_client():
 		return
 	_hit_effects(info)
+	# Von einem unsichtbaren Gegner getroffen: zu ihm umdrehen und ihn jagen, statt weiterzulaufen
+	if info.attacker != self and _is_alive(info.attacker) and info.attacker != target and not _los_visible:
+		target = info.attacker
+		lose_target_timer = 0.5
+		reaction_timer = reaction_time
+		_look_towards(info.attacker.global_position)
 	GameManager.register_damage(info, self)
 	# Schaden zuletzt anwenden: Bei Tod startet health.died -> _die() mit Todes-Sound,
 	# der sonst vom Treffer-Sound in _hit_effects ueberschrieben wuerde
@@ -999,6 +1015,12 @@ func _move_towards(target_pos: Vector3, speed: float, _delta: float) -> void:
 
 	if dir.length_squared() > 0.01:
 		dir = dir.normalized()
+		# Frontal gegen eine Kante (Tuerrahmen, Treppenfuss): an der Wand entlang zur Seite des Wegpunkts
+		if is_on_wall():
+			var n := _flat(get_wall_normal()).normalized()
+			if dir.dot(n) < -0.7:
+				var side := n.cross(Vector3.UP)
+				dir = side if side.dot(dir) >= 0.0 else -side
 		velocity.x = dir.x * speed
 		velocity.z = dir.z * speed
 		_look_towards(global_position + dir)
@@ -1024,13 +1046,60 @@ func _pick_new_patrol_point() -> void:
 		nav_agent.target_position = patrol_target
 		return
 	var nav_map: RID = nav_agent.get_navigation_map()
-	if nav_map.is_valid() and NavigationServer3D.map_get_iteration_id(nav_map) > 0:
+	var prey: Node3D = _nearest_enemy()
+	var nav_ready: bool = nav_map.is_valid() and NavigationServer3D.map_get_iteration_id(nav_map) > 0
+	if prey and nav_ready and randf() < HUNT_CHANCE[personality]:
+		# Jagen: in die Gegend des naechsten Gegners (Bots "hoeren", wo gekaempft wird), nicht genau auf ihn
+		var near := prey.global_position + Vector3(randf_range(-8.0, 8.0), 0.0, randf_range(-8.0, 8.0))
+		patrol_target = NavigationServer3D.map_get_closest_point(nav_map, near)
+	elif nav_ready:
 		patrol_target = NavigationServer3D.map_get_random_point(nav_map, nav_agent.navigation_layers, false)
 	else:
 		# Fallback, solange das Navigationsnetz noch nicht bereit ist
 		patrol_target = Vector3(randf_range(-30.0, 30.0), 1.0, randf_range(-30.0, 30.0))
 	# Ziel sofort setzen, damit is_navigation_finished() nicht noch vom alten Ziel true meldet
 	nav_agent.target_position = patrol_target
+
+
+## Wie oft ein Bot ohne Item-Ziel in die Gegend des naechsten Gegners laeuft statt zufaellig
+const HUNT_CHANCE := { Personality.AGGRESSIVE: 0.8, Personality.CAUTIOUS: 0.35, Personality.CAMPER: 0.2, Personality.BALANCED: 0.55 }
+
+
+func _nearest_enemy() -> Node3D:
+	var best: Node3D = null
+	var best_dist := INF
+	for group in ["player", "enemies"]:
+		for node in get_tree().get_nodes_in_group(group):
+			if node == self or not _is_alive(node) or GameManager.are_teammates(self, node):
+				continue
+			var dist: float = global_position.distance_squared_to(node.global_position)
+			if dist < best_dist:
+				best = node
+				best_dist = dist
+	return best
+
+
+static func _flat(v: Vector3) -> Vector3:
+	return Vector3(v.x, 0.0, v.z)
+
+
+## Festhaengen (an einer Wand, unter einem Item auf einem Absatz): 1,5 s gewollt gelaufen, aber kaum
+## vorangekommen -> Item 30 s meiden bzw. Verfolgung abbrechen und ein neues Ziel nehmen
+func _check_stuck(delta: float) -> void:
+	var wants_to_move: bool = _flat(velocity).length() > 1.0 and current_state in [State.PATROL, State.CHASE]
+	if not wants_to_move or _flat(global_position - _progress_pos).length() > 0.75:
+		_progress_pos = global_position
+		_progress_time = 0.0
+		return
+	_progress_time += delta
+	if _progress_time < 1.5:
+		return
+	_progress_time = 0.0
+	if patrol_item:
+		_unreachable[patrol_item] = Time.get_ticks_msec() + 30000
+	_switch_state(State.PATROL)
+	_pick_new_patrol_point()
+	_decide_timer = 1.0
 
 
 ## Lohnendstes erreichbares Item: Wert geteilt durch Entfernung. Unter einer Schwelle
