@@ -6,7 +6,7 @@ extends SceneTree
 #   Godot_v4.7.2-stable_win64_console.exe --headless --path . -s res://tests/maps_test.gd
 # Exit-Code 0 = alles bestanden.
 
-const MAPS := ["sky_yard", "duck_17", "twin_spires", "camp_ground"]
+const MAPS := ["sky_yard", "duck_17", "twin_spires", "camp_ground", "nova_complex"]
 
 var fails := 0
 

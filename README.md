@@ -209,7 +209,10 @@ Neue Flächen bekommen den Look automatisch: dunkle, leicht farbige Grundfarbe w
 Im Match-Fenster wählbar:
 - **Neon Foundry** (Standard): 64 × 64 m, drei Ebenen. Boden mit Deckungsblöcken und zwei Durchgangswänden mit Tür, ein Ring-Steg auf 4 m entlang aller Wände, eine Mittelplattform auf Säulen mit zwei Brücken, zwei Türme auf 8 m (Nordost, Südwest). Sechs Treppen, drei Jump-Pads, 10 Items, 8 Spawnpunkte.
 - **Orbital Void**: Schwebende Weltraum-Plattformen über dem endlosen Abgrund. Mit Jump-Pads zu hohen Spires, dynamischen Physik-Fässern und Kisten, Void-Kill-Zone und tödlichen Kicks ins All.
+- **Nova Complex** (bis 16 Spieler): 150 × 110 m, sechs Bereiche auf drei Ebenen. Platz mit Turmblock (Mega Health), Halle mit Galerie im Westen, drei Plattformen mit Railgun im Osten, Grube mit Energie-Strom (Quad, Shock Rifle) im Norden, Containerhof mit Laufsteg im Süden, zwei Teleporter (`tools/maps/nova_complex.py`).
 - **Testarena**: die ursprüngliche flache Arena (für Tests).
+
+**Spawns:** Jede Map bekommt beim Laden noch einmal so viele Spawnpunkte wie von Hand gesetzt, zufällig aus dem begehbaren Navigationsnetz (weg von Items, Pads, Teleportern und Schadenszonen). Gespawnt wird nie auf jemandem, möglichst weit weg vom nächsten Gegner und von möglichst wenigen Gegnern gesehen. CTF-Basen kommen weiter aus den Spawns von Hand.
 
 **So entsteht die Neon Foundry:**
 1. `python tools/generate_neon_foundry.py` erzeugt `maps/neon_foundry.map` (Quake-Format).

@@ -145,6 +145,7 @@ const MAPS: Array[Dictionary] = [
 	{ "name": "Duck 17", "scene": "res://levels/duck_17.tscn", "max_players": 16 },
 	{ "name": "Twin Spires", "scene": "res://levels/twin_spires.tscn", "max_players": 16 },
 	{ "name": "Camp Ground", "scene": "res://levels/camp_ground.tscn", "max_players": 12 },
+	{ "name": "Nova Complex", "scene": "res://levels/nova_complex.tscn", "max_players": 16 },
 	{ "name": "Testarena", "scene": "res://levels/test_arena.tscn", "max_players": 8, "reverb": ReverbZone.Kind.ROOM },
 ]
 ## Index in MAPS
@@ -750,8 +751,8 @@ func register_spawn_point(point: Node3D) -> void:
 		spawn_points.append(point)
 
 
-## Spawnpunkt mit moeglichst grossem Abstand zu allen anderen lebenden Kaempfern.
-## Unter den zwei besten wird zufaellig gewaehlt, damit der Spawn nicht vorhersagbar ist.
+## Spawnpunkt mit moeglichst grossem Abstand zu allen anderen lebenden Kaempfern, nie auf jemandem,
+## und von moeglichst wenigen Gegnern gesehen. Unter den zwei besten wird zufaellig gewaehlt (nicht vorhersagbar).
 func get_spawn_transform(for_node: Node3D) -> Transform3D:
 	if spawn_points.is_empty():
 		return Transform3D(Basis(), Vector3(0.0, 1.5, 0.0))
@@ -767,15 +768,37 @@ func get_spawn_transform(for_node: Node3D) -> Transform3D:
 		candidates = spawn_points.filter(func(p): return ctf.is_own_half(p.global_position, team_of(for_node)))
 		if candidates.is_empty():
 			candidates = spawn_points
+	# Belegt (uebersprungen) ist ein Punkt, wenn irgendwer (auch ein Teamkollege) darauf steht
+	var everyone: Array[Node3D] = []
+	for group in ["player", "enemies"]:
+		for node in get_tree().get_nodes_in_group(group):
+			if node != for_node and node.get("health") != null and not node.health.is_dead:
+				everyone.append(node)
+	# Bewertung: Abstand zum naechsten Gegner (ab 40 m egal), minus 4 m je Gegner mit Sichtlinie auf den Punkt,
+	# unter 12 m deutlich schlechter (versteckt, aber direkt neben jemandem ist auch kein guter Spawn)
+	var space := get_viewport().find_world_3d().direct_space_state
 	var rated: Array = []
 	for point in candidates:
+		var pos: Vector3 = point.global_position
+		if everyone.any(func(n): return n.global_position.distance_to(pos) < 2.5):
+			continue
 		var nearest: float = INF
+		var seen := 0
 		for other in others:
-			nearest = minf(nearest, point.global_position.distance_to(other.global_position))
-		rated.append({ "point": point, "dist": nearest })
-	rated.sort_custom(func(a, b): return a.dist > b.dist)
-	var pick: int = randi() % mini(2, rated.size())
-	return rated[pick].point.global_transform
+			nearest = minf(nearest, pos.distance_to(other.global_position))
+			if _can_see(space, other.global_position, pos):
+				seen += 1
+		rated.append({ "point": point, "score": minf(nearest, 40.0) - 4.0 * seen - (25.0 if nearest < 12.0 else 0.0) })
+	if rated.is_empty():
+		return candidates[randi() % candidates.size()].global_transform
+	rated.sort_custom(func(a, b): return a.score > b.score)
+	return rated[randi() % mini(2, rated.size())].point.global_transform
+
+
+## Freie Sicht zwischen zwei Standpunkten auf Augenhoehe (nur die Welt verdeckt)
+func _can_see(space: PhysicsDirectSpaceState3D, from: Vector3, to: Vector3) -> bool:
+	var eye := Vector3.UP * 0.6
+	return space.intersect_ray(PhysicsRayQueryParameters3D.create(from + eye, to + eye, Layers.WORLD)).is_empty()
 
 
 ## CTF: Team erobert die Flagge (vom CtfManager aufgerufen)

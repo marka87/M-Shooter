@@ -50,7 +50,8 @@ func run() -> void:
 		b.set_physics_process(false)
 		b.global_position = Vector3(0, -50, 0)
 
-	check(gm.spawn_points.size() == 8, "8 Spawnpunkte (%d)" % gm.spawn_points.size())
+	var hand_spawns: int = gm.spawn_points.filter(func(p): return not p.has_meta(&"nav_spawn")).size()
+	check(hand_spawns == 8 and gm.spawn_points.size() == 16, "8 Spawnpunkte + 8 aus dem Navmesh (%d / %d)" % [hand_spawns, gm.spawn_points.size()])
 
 	# Treppe S1: Boden -> Nord-Ring
 	var p: Vector3 = await walk(player, Vector3(-12.5, 0.1, -13), Vector3(0, 0, -1), 2.5)

@@ -10,7 +10,8 @@ var flags: Array[CtfFlag] = []
 
 ## Basen aus den Spawnpunkten bestimmen und die Flaggen aufstellen (Aufruf nach dem Registrieren der Spawnpunkte)
 func setup() -> void:
-	var points: Array[Node3D] = GameManager.spawn_points
+	# Basen aus den Spawns von Hand (die Arena ergaenzt zufaellige aus dem Navigationsnetz)
+	var points: Array[Node3D] = GameManager.spawn_points.filter(func(p): return not p.has_meta(&"nav_spawn"))
 	var pair := [Vector3(-20, 0, 0), Vector3(20, 0, 0)]
 	var best := -1.0
 	for a in points:

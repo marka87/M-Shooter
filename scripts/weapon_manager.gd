@@ -80,11 +80,36 @@ func _setup_viewmodel_lighting() -> void:
 	light.position = Vector3(0.5, 0.45, 0.2)
 
 
+## Tiefe der Ego-Waffe und -Arme zur Kamera hin gestaucht: Sie tauchen nicht mehr in Waende und Gelaender
+## (die Waffe ragt bis ~2,5 m vor die Kamera, so bleibt sie vor allem, was naeher als ~0,5 m ist)
+const VIEWMODEL_Z_CLIP: float = 0.2
+
+
+## Eigene Kopie eines Materials fuer die Ego-Ansicht (die Bots tragen dieselben Modelle)
+static func viewmodel_material(mat: Material) -> Material:
+	var base := mat as BaseMaterial3D
+	if base == null:
+		return mat
+	base = base.duplicate()
+	base.use_z_clip_scale = true
+	base.z_clip_scale = VIEWMODEL_Z_CLIP
+	return base
+
+
 func _apply_viewmodel_layer(node: Node) -> void:
 	for child in node.get_children():
 		if child is GeometryInstance3D:
 			child.layers = VIEWMODEL_LAYER
 			child.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		# shortcut: Huelsen (GPUParticles) bleiben ohne Stauchung, fliegen nur kurz und weg von der Kamera
+		if child is MeshInstance3D and child.mesh:
+			if child.material_override:
+				child.material_override = viewmodel_material(child.material_override)
+			else:
+				for i in child.mesh.get_surface_count():
+					var mat: Material = child.get_active_material(i)
+					if mat:
+						child.set_surface_override_material(i, viewmodel_material(mat))
 		_apply_viewmodel_layer(child)
 
 

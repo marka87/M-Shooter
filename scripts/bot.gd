@@ -1051,6 +1051,8 @@ func _best_item() -> Node3D:
 func _best_item_scored() -> Array:
 	var best: Node3D = null
 	var best_score: float = 0.0
+	if not is_inside_tree():  # beim Map-Wechsel schon ausgehaengt
+		return [best, best_score]
 	for item in get_tree().get_nodes_in_group("pickups"):
 		if not item.has_method("is_useful_for") or not item.is_useful_for(self) or _unreachable.get(item, 0) > Time.get_ticks_msec():
 			continue

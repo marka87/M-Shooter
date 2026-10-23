@@ -62,6 +62,8 @@ func _ready() -> void:
 			mat.rim_enabled = true
 			mat.rim = 0.6
 			mat.rim_tint = 0.3
+			mat.use_z_clip_scale = true
+			mat.z_clip_scale = WeaponManager.VIEWMODEL_Z_CLIP
 			mesh.set_surface_override_material(i, mat)
 	# Linker Arm: Schulter -> Ellbogen -> Handgelenk zum Ziel, Ellbogen zeigt zum Pol
 	_left_target = Node3D.new()

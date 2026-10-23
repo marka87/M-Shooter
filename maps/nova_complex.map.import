@@ -1,0 +1,14 @@
+[remap]
+
+importer="func_godot.map"
+type="Resource"
+uid="uid://drwgtuqmwaf6b"
+path="res://.godot/imported/nova_complex.map-6e81d036e751fc2ad453af72c852fb0d.tres"
+
+[deps]
+
+source_file="res://maps/nova_complex.map"
+dest_files=["res://.godot/imported/nova_complex.map-6e81d036e751fc2ad453af72c852fb0d.tres"]
+
+[params]
+

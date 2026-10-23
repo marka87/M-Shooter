@@ -1,7 +1,7 @@
 extends SceneTree
 
 # Prueft die Weltraum-Arena Orbital Void:
-# - Map-Laden, 8 Spawnpunkte, Navmesh
+# - Map-Laden, 8 Spawnpunkte (+ 8 aus dem Navmesh), Navmesh
 # - Begehbarkeit der Plattformen und Rampen
 # - Jump-Pad Flugbahnen (Spire, Flanken, Rueckkehr)
 # - Aufsammeln von Railgun, Rocket Launcher, Mega-Health
@@ -55,7 +55,8 @@ func run() -> void:
 	var current_scene = root.get_node("OrbitalVoid")
 	var player = gm.current_player
 	check(player != null, "Spieler in Orbital Void instanziiert")
-	check(gm.spawn_points.size() == 8, "8 Spawnpunkte vorhanden (%d)" % gm.spawn_points.size())
+	var hand_spawns: int = gm.spawn_points.filter(func(p): return not p.has_meta(&"nav_spawn")).size()
+	check(hand_spawns == 8 and gm.spawn_points.size() == 16, "8 Spawnpunkte + 8 aus dem Navmesh (%d / %d)" % [hand_spawns, gm.spawn_points.size()])
 
 	# Hinweis: Bot ohne statischen Typ ansprechen (verhindert GDScript-Autoload-Zirkel)
 	var bots := get_nodes_in_group("enemies")
