@@ -168,7 +168,6 @@ const RAGDOLL_BONES: Array = [
 	["DEF-shin.R", "DEF-foot.R", 0.055, 50.0, 5.0],
 ]
 var floating_number_scene: PackedScene = preload("res://scenes/effects/floating_number.tscn")
-var voxel_burst_scene: PackedScene = preload("res://scenes/effects/voxel_burst.tscn")
 # Vorgenerierte Sounds und Trefferfarbe (einmal pro Bot statt bei jedem Schuss)
 var snd_hurt: AudioStream
 var snd_death: AudioStream
@@ -821,6 +820,8 @@ func _hit_effects(info: DamageInfo) -> void:
 
 	# Optischer Trefferblitz (Mesh kurz weiss aufleuchten lassen)
 	_flash_hit()
+	# Oel spritzt (bei Flaechenschaden aus der Koerpermitte, weg von der Explosion)
+	Oil.spray(get_parent(), global_position + Vector3.UP * 1.1 if info.is_splash else info.position, info.direction, amount)
 
 	# Rache: Wer schiesst, wird zum Ziel (ausser bei Selbsttreffern)
 	if info.attacker != self and _is_alive(info.attacker) and info.attacker is CharacterBody3D:
@@ -904,16 +905,14 @@ func _die(info: DamageInfo) -> void:
 		collision_shape.disabled = true
 
 	nameplate.visible = false
-	# Grosse Treffer (Explosion aus der Naehe, Quad-Railgun, Telefrag): Zerplatzen in leuchtende
-	# Wuerfel in der Farbe des Bots. Sonst faellt der Bot als Ragdoll um.
+	# Grosse Treffer (Explosion aus der Naehe, Quad-Railgun, Telefrag): Der Bot zerfaellt in Teile,
+	# Oel spritzt rundherum. Sonst faellt er als Ragdoll um und liegt in einer Oellache.
 	if info.amount >= GIB_DAMAGE or (info.is_splash and info.amount >= GIB_SPLASH_DAMAGE):
 		model.visible = false
-		var burst := voxel_burst_scene.instantiate() as VoxelBurst
-		get_parent().add_child(burst)
-		burst.global_position = global_position
-		burst.burst(skin_color)
+		Oil.gib(get_parent(), global_position, skin_color, velocity + info.direction * 6.0)
 	else:
 		_start_ragdoll(info)
+		Oil.pool(get_parent(), global_position)
 
 	# Respawn nach Verzoegerung (Clients warten auf den Host)
 	if not Net.is_client():

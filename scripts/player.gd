@@ -246,6 +246,7 @@ func take_damage(info: DamageInfo) -> void:
 	health.apply_damage(info)
 	Net.on_damaged(self, info)
 	_hurt_feedback(info)
+	Oil.spray(get_parent(), global_position + Vector3.UP * 1.1 if info.is_splash else info.position, info.direction, info.amount)
 
 
 ## Client im Netzspiel: Treffer vom Host mit dessen Lebensstand
@@ -279,6 +280,7 @@ func _on_died(info: DamageInfo) -> void:
 	powerups.drop_quad()
 	powerups.clear()
 	weapon_manager.visible = false  # tot keine Waffe in der Hand
+	Oil.pool(get_parent(), global_position)
 	# Selbsttreffer (Rocket-Jump) zaehlt als Selbstmord
 	GameManager.register_kill(info.attacker, self, info.weapon_name, info.is_headshot)
 

@@ -54,7 +54,7 @@ Alle Tasten laufen über die InputMap (Projekt → Projekteinstellungen → Eing
 | **Shock Rifle** (7) | Strahl / Kugel | 45 Strahl, 55 + 35 Fläche Kugel | 0.75s / 0.6s | Rechtsklick feuert eine langsame Shock-Kugel. Trifft der Strahl die Kugel: **Combo**, 150 Schaden im Radius 7 m. **Muss eingesammelt werden** |
 | **Railgun** (6) | Hitscan-Strahl | 100 | 1.25s Abklingzeit | Sofortiger Einschlag über 300m, nachleuchtender Cyan-Energiestrahl. **Muss eingesammelt werden** |
 
-Man startet wie in Quake und UT nur mit Maschinengewehr und Shotgun, alles andere liegt auf der Map (Raketenwerfer und Railgun auf jeder, die Railgun immer am höchsten Aussichtspunkt; MG und Shotgun liegen nirgends). Rechte Maustaste halten zoomt bei allen Waffen ohne Alt-Feuer halb heran. Die Ego-Waffe halten **animierte Arme** (Atmen in Ruhe, Abzug beim Schuss): Arme und Animationen von **DJMaesen, CC BY 4.0**, aus dem Godot-Addon „FPS Hands“ (nur das Modell, siehe `assets/characters/Arm/LICENSE_arms.txt`). Lage von Waffe und Armen pro Waffe im Viewmodel-Editor (F4, in der Waffen-Werkstatt sofort an); die linke Hand lässt sich dort per IK einzeln versetzen (z. B. unter den dicken Shotgun-Lauf).
+Man startet wie in Quake und UT nur mit Maschinengewehr und Shotgun, alles andere liegt auf der Map (Raketenwerfer und Railgun auf jeder, die Railgun immer am höchsten Aussichtspunkt; MG und Shotgun liegen nirgends). **Robo-Gore:** Getroffene Figuren spritzen dunkles, bernsteinfarben schimmerndes Öl, das an Boden und Wänden Flecken hinterlässt (40 s, höchstens 90 gleichzeitig, `scripts/effects/oil.gd`). Rechte Maustaste halten zoomt bei allen Waffen ohne Alt-Feuer halb heran. Die Ego-Waffe halten **animierte Arme** (Atmen in Ruhe, Abzug beim Schuss): Arme und Animationen von **DJMaesen, CC BY 4.0**, aus dem Godot-Addon „FPS Hands“ (nur das Modell, siehe `assets/characters/Arm/LICENSE_arms.txt`). Lage von Waffe und Armen pro Waffe im Viewmodel-Editor (F4, in der Waffen-Werkstatt sofort an); die linke Hand lässt sich dort per IK einzeln versetzen (z. B. unter den dicken Shotgun-Lauf).
 
 ---
 
@@ -76,7 +76,7 @@ Die Bots besitzen eine 4-stufige Zustandsmaschine:
 - **PATROL (Patrouille)**: Läuft Arena-Wegpunkte ab und sucht per Raycast nach freier Sichtlinie zum Spieler.
 - **CHASE (Verfolgen)**: Nutzt `NavigationAgent3D` und die dynamisch gebackene `NavigationRegion3D`, um den Spieler anzulaufen.
 - **ATTACK (Angriff)**: Fixiert das Ziel, strafet seitlich, wählt die passende Waffe und feuert mit Streuung je nach Schwierigkeit.
-- **DEAD (Tot)**: Schaltet Kollision ab, fällt als Ragdoll um (oder zerplatzt), schreibt dem Schützen einen Frag gut und respawnt nach 4 Sekunden am freiesten Spawnpunkt.
+- **DEAD (Tot)**: Schaltet Kollision ab, fällt als Ragdoll in eine Öllache um (oder zerfällt bei großen Treffern in Kopf, Arme, Beine und Rumpf), schreibt dem Schützen einen Frag gut und respawnt nach 4 Sekunden am freiesten Spawnpunkt.
 
 Die Bots sind animierte Figuren (Mannequin aus der **Quaternius Universal Animation Library**, CC0, `assets/characters/ual/`): Idle, Gehen, Joggen und Sprinten je nach Tempo, Sprung-Pose in der Luft, Pistolen-Zielhaltung im Kampf und Zucken bei Treffern. Beim Tod fallen sie als **Ragdoll** um; große Treffer (Explosion aus der Nähe, ab 120 Schaden) lassen sie in Würfel zerplatzen.
 

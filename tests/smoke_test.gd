@@ -190,6 +190,8 @@ func run() -> void:
 	# Grosser Treffer -> Wuerfel statt Ragdoll
 	b1.take_damage(DamageInfo.create(200.0, player, b1.global_position, Vector3.FORWARD, "Test"))
 	check(not b1.model.visible and b1.ragdoll == null, "Grosser Treffer: Bot zerplatzt (Gib)")
+	var gib_parts: Array = current_scene.get_children().filter(func(n): return n is RigidBody3D and n.collision_layer == 0)
+	check(gib_parts.size() >= Oil.PARTS.size() and Oil._pool.size() > 0, "Gore: Koerperteile (%d) und Oelflecken (%d)" % [gib_parts.size(), Oil._pool.size()])
 	b1._respawn()
 	b1.set_physics_process(false)
 	# Bots bleiben bis zum Bot-gegen-Bot-Test eingefroren, sonst stoeren sie die folgenden Pruefungen
