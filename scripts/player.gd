@@ -276,6 +276,7 @@ func _process(_delta: float) -> void:
 ## Spieler stirbt: Tod zaehlen, Respawn laeuft ueber death_timer in _physics_process
 func _on_died(info: DamageInfo) -> void:
 	death_timer = respawn_delay
+	powerups.drop_quad()
 	powerups.clear()
 	# Selbsttreffer (Rocket-Jump) zaehlt als Selbstmord
 	GameManager.register_kill(info.attacker, self, info.weapon_name, info.is_headshot)

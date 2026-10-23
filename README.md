@@ -54,7 +54,7 @@ Alle Tasten laufen über die InputMap (Projekt → Projekteinstellungen → Eing
 | **Shock Rifle** (7) | Strahl / Kugel | 45 Strahl, 55 + 35 Fläche Kugel | 0.75s / 0.6s | Rechtsklick feuert eine langsame Shock-Kugel. Trifft der Strahl die Kugel: **Combo**, 150 Schaden im Radius 7 m. **Muss eingesammelt werden** |
 | **Railgun** (6) | Hitscan-Strahl | 100 | 1.25s Abklingzeit | Sofortiger Einschlag über 300m, nachleuchtender Cyan-Energiestrahl. **Muss eingesammelt werden** |
 
-Man startet wie in Quake und UT nur mit Maschinengewehr und Shotgun, alles andere liegt auf der Map (Raketenwerfer und Railgun auf jeder). Rechte Maustaste halten zoomt bei allen Waffen ohne Alt-Feuer halb heran. Die Ego-Waffe halten **animierte Arme** (Atmen in Ruhe, Abzug beim Schuss): Arme und Animationen von **DJMaesen, CC BY 4.0**, aus dem Godot-Addon „FPS Hands“ (nur das Modell, siehe `assets/characters/Arm/LICENSE_arms.txt`). Lage von Waffe und Armen pro Waffe im Viewmodel-Editor (F4, in der Waffen-Werkstatt sofort an); die linke Hand lässt sich dort per IK einzeln versetzen (z. B. unter den dicken Shotgun-Lauf).
+Man startet wie in Quake und UT nur mit Maschinengewehr und Shotgun, alles andere liegt auf der Map (Raketenwerfer und Railgun auf jeder, die Railgun immer am höchsten Aussichtspunkt; MG und Shotgun liegen nirgends). Rechte Maustaste halten zoomt bei allen Waffen ohne Alt-Feuer halb heran. Die Ego-Waffe halten **animierte Arme** (Atmen in Ruhe, Abzug beim Schuss): Arme und Animationen von **DJMaesen, CC BY 4.0**, aus dem Godot-Addon „FPS Hands“ (nur das Modell, siehe `assets/characters/Arm/LICENSE_arms.txt`). Lage von Waffe und Armen pro Waffe im Viewmodel-Editor (F4, in der Waffen-Werkstatt sofort an); die linke Hand lässt sich dort per IK einzeln versetzen (z. B. unter den dicken Shotgun-Lauf).
 
 ---
 
@@ -88,7 +88,7 @@ Bots benutzen **dieselben Waffen wie der Spieler** (sichtbar in der Hand, mit Mu
 
 ## 🛡️ Schadens- & Pickup-System
 
-- **Einstellungen**: Mausempfindlichkeit, Lautstärke, Sichtfeld, Kamera-Effekte, **Grafik-Stufe** (Niedrig/Mittel mit FSR-Hochskalierung und ohne SSAO/Nebel, Ultra mit 4x MSAA), **V-Sync**, **Fenstermodus** (Fenster, randloses oder exklusives Vollbild), **Auflösung** (im Fenster) und **Tastenbelegung** (Taste anklicken, neue Taste oder Maustaste drücken) werden in `user://settings.cfg` gespeichert. Dazu Effekt-Lautstärke, Fadenkreuz (Form, Farbe, Größe), Hitmarker an/aus und Armfarbe der Ego-Arme (die auch im Pausemenü, gilt sofort).
+- **Einstellungen**: Mausempfindlichkeit, Lautstärke, Sichtfeld, Kamera-Effekte, **Grafik-Stufe** (Niedrig/Mittel mit FSR-Hochskalierung und ohne SSAO/Nebel, Ultra mit 4x MSAA), **V-Sync**, **Fenstermodus** (Fenster, randloses oder exklusives Vollbild), **Auflösung** (im Fenster die Fenstergröße, im Vollbild die Renderauflösung der 3D-Welt, HUD bleibt scharf) und **Tastenbelegung** (Taste anklicken, neue Taste oder Maustaste drücken) werden in `user://settings.cfg` gespeichert. Dazu Effekt-Lautstärke, Fadenkreuz (Form, Farbe, Größe), Hitmarker an/aus und Armfarbe der Ego-Arme (die auch im Pausemenü, gilt sofort).
 - **Lebenspunkte (HP)**: 100 Basis-HP. Sinkt HP auf 0, erscheint das Todes-Overlay mit 3-Sekunden-Respawn-Countdown.
 - **Rüstung**: Startet bei 50 (bis max. 100). Fängt **66 %** allen Schadens ab, während nur 34 % die Lebenspunkte schwächen.
 - **Treffer-Feedback**: 
@@ -99,7 +99,7 @@ Bots benutzen **dieselben Waffen wie der Spieler** (sichtbar in der Hand, mit Mu
   - **Munition** (Gelb): Füllt alle Waffen auf (+60 MG, +6 Raketen, +5 Railgun).
   - **Gesundheit** (Grün): Heilt +35 HP.
   - **Rüstung** (Blau): Gibt +50 Rüstung.
-  - **Quad Damage** (violett): dreifacher Schaden für 30 s, auch beim Rocket-Jump. Violetter Bildrand und Countdown im HUD; Bots mit Quad leuchten violett. Respawn nach 60 s.
+  - **Quad Damage** (violett): dreifacher Schaden für 30 s, auch beim Rocket-Jump. Violetter Bildrand und Countdown im HUD; Bots mit Quad leuchten violett. Respawn nach 60 s. Wer mit Quad stirbt, lässt es mit der Restzeit fallen; liegend läuft die Zeit weiter ab (nicht im Netzspiel).
   - **Mega Health** (blaue Kugel): +100 Leben bis maximal 200, sinkt danach um 1 pro Sekunde auf 100. Respawn nach 35 s.
   - Alle Items rotieren schwebend und respawnen nach dem Einsammeln automatisch.
   - Bots sammeln Leben, Rüstung und Power-ups ebenfalls ein und laufen gezielt zu lohnenden Items (Power-ups zuerst, Leben bei wenig HP).

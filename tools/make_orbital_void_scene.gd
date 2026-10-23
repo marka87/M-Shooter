@@ -28,7 +28,7 @@ func _initialize() -> void:
 	lines.append('[ext_resource type="PackedScene" path="res://scenes/weapons/railgun.tscn" id="13_rail"]')
 	lines.append('[ext_resource type="PackedScene" path="res://scenes/weapons/rocket_launcher.tscn" id="14_rpg"]')
 	lines.append('[ext_resource type="PackedScene" path="res://scenes/weapons/plasma_gun.tscn" id="15_plasma"]')
-	lines.append('[ext_resource type="PackedScene" path="res://scenes/weapons/shotgun.tscn" id="16_sg"]')
+	lines.append('[ext_resource type="PackedScene" path="res://scenes/weapons/lightning_gun.tscn" id="16_lg"]')
 	lines.append('[ext_resource type="Script" path="res://scripts/levels/void_kill_zone.gd" id="17_void"]')
 	lines.append('[ext_resource type="PackedScene" uid="uid://physics_barrel_001" path="res://scenes/props/physics_barrel.tscn" id="18_barrel"]')
 	lines.append('[ext_resource type="PackedScene" uid="uid://physics_crate_001" path="res://scenes/props/physics_crate.tscn" id="19_crate"]')
@@ -630,13 +630,13 @@ func _initialize() -> void:
 	lines.append('light_color = Color(0.25, 0.75, 1, 1)')
 	lines.append('')
 
-	lines.append('[node name="ShotgunCenter" parent="Items" instance=ExtResource("12_wpick")]')
+	lines.append('[node name="LightningCenter" parent="Items" instance=ExtResource("12_wpick")]')
 	lines.append('transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0)')
-	lines.append('weapon_id = &"shotgun"')
-	lines.append('weapon_scene = ExtResource("16_sg")')
-	lines.append('display_name = "Shotgun"')
-	lines.append('[node name="OmniLight3D" parent="Items/ShotgunCenter" index="4"]')
-	lines.append('light_color = Color(1, 0.7, 0.2, 1)')
+	lines.append('weapon_id = &"lightning"')
+	lines.append('weapon_scene = ExtResource("16_lg")')
+	lines.append('display_name = "Lightning Gun"')
+	lines.append('[node name="OmniLight3D" parent="Items/LightningCenter" index="4"]')
+	lines.append('light_color = Color(0.7, 0.9, 1, 1)')
 	lines.append('')
 
 	# Powerups

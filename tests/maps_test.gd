@@ -30,11 +30,13 @@ func run() -> void:
 	gm.time_limit_minutes = 0.0
 	gm.match_countdown = 0.0
 	gm.game_mode = gm.Mode.DEATHMATCH
-	# Start nur mit MG und Shotgun: Raketenwerfer und Railgun muessen auf jeder Map liegen
+	# Start nur mit MG und Shotgun: Raketenwerfer und Railgun muessen auf jeder Map liegen, die Start-Waffen nicht
 	for m in gm.MAPS:
 		var text := FileAccess.get_file_as_string(m.scene)
 		check(text.contains('weapon_id = &"railgun"') and text.contains('weapon_id = &"rocket_launcher"'),
 			"%s: Railgun und Raketenwerfer zum Einsammeln" % m.name)
+		check(not text.contains('weapon_id = &"machine_gun"') and not text.contains('weapon_id = &"shotgun"'),
+			"%s: keine Start-Waffen (MG, Shotgun) auf der Map" % m.name)
 	for map_id in MAPS:
 		gm.bot_count = 4
 		gm.reset_game()

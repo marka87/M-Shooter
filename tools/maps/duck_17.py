@@ -93,8 +93,8 @@ kit.weapon('shock_rifle', 47, H_BALC, 10)
 kit.weapon('rocket_launcher', -32, 0, 0)
 kit.weapon('lightning', 32, 0, 0)
 kit.weapon('plasma', 0, H_WALK, -32)
-kit.weapon('shotgun', 0, H_WALK, 32)
-kit.weapon('machine_gun', 0, 0, 0)            # mitten auf dem Steg ueber dem Schlamm
+kit.weapon('plasma', 0, H_WALK, 32)
+kit.weapon('rocket_launcher', 0, 0, 0)            # mitten auf dem Steg ueber dem Schlamm
 for sx in (-1, 1):
     kit.item('armor', sx * 47, H_BALC, sx * -14)
     kit.item('ammo', sx * 30, H_WALK, -32)

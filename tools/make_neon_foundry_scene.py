@@ -26,7 +26,7 @@ ITEMS = [
     ('HealthUnder', 'health', 0, 0.8, 0),
     ('AmmoTowerNE', 'ammo', 27, 8.8, -27),
     ('MegaTowerSW', 'mega', -27, 8.9, 27),
-    ('ArmorTowerNE', 'armor', 27, 8.8, -22),
+    ('ArmorRingW', 'armor', -28.5, 4.8, -16),
     ('HealthRingN', 'health', -20, 4.8, -28.5),
     ('AmmoRingS', 'ammo', 20, 4.8, 28.5),
     ('HealthPassageE', 'health', 21.5, 0.8, 0),
@@ -39,7 +39,7 @@ WEAPONS = [
     ('PlasmaRingN', 'plasma', 'plasma_gun', 'Plasma', (0.25, 0.75, 1), -5, 4.9, -28.5),
     ('LightningGroundE', 'lightning', 'lightning_gun', 'Lightning Gun', (0.7, 0.9, 1), 28, 0.9, -6),
     ('ShockRingS', 'shock_rifle', 'shock_rifle', 'Shock Rifle', (0.6, 0.35, 1), -4, 4.9, 28.5),
-    ('RailRingW', 'railgun', 'railgun', 'Railgun', (0.3, 1, 0.9), -28.5, 4.9, -16),
+    ('RailTowerNE', 'railgun', 'railgun', 'Railgun', (0.3, 1, 0.9), 27, 8.9, -22),
     ('RocketGroundW', 'rocket_launcher', 'rocket_launcher', 'Raketenwerfer', (1, 0.4, 0.1), -28, 0.9, 6),
 ]
 # Teleporter: (Name, Position, Ziel, Blickrichtung am Ziel in Grad um die Hochachse)

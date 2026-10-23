@@ -226,12 +226,12 @@ light_color = Color(0.6, 0.35, 1, 1)
 
 [node name="Weapon6" parent="Items" instance=ExtResource("5_wpick")]
 transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, 0.9, 20)
-weapon_id = &"shotgun"
-weapon_scene = ExtResource("w_shotgun")
-display_name = "Shotgun"
+weapon_id = &"shock_rifle"
+weapon_scene = ExtResource("w_shock_rifle")
+display_name = "Shock Rifle"
 
 [node name="OmniLight3D" parent="Items/Weapon6" index="4"]
-light_color = Color(1, 0.55, 0.15, 1)
+light_color = Color(0.6, 0.35, 1, 1)
 
 [node name="JumpPads" type="Node3D" parent="."]
 

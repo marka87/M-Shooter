@@ -106,11 +106,8 @@ func _ready() -> void:
 	for res in resolutions:
 		resolution_option.add_item("%d × %d" % [res.x, res.y])
 	resolution_option.selected = maxi(resolutions.find(GameManager.resolution), 0)
-	# Aufloesung gilt nur im Fenster; im Vollbild gibt der Bildschirm sie vor
-	resolution_option.disabled = GameManager.window_mode != 0
 	mode_option.item_selected.connect(func(i: int):
 		GameManager.window_mode = i
-		resolution_option.disabled = i != 0
 		GameManager.apply_display())
 	resolution_option.item_selected.connect(func(i: int):
 		GameManager.resolution = resolutions[i]

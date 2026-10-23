@@ -872,6 +872,7 @@ func _apply_skin_color() -> void:
 ## Tod des Bots: Kollision abschalten, Sound, Frag fuer Spieler und Respawn-Timer
 func _die(info: DamageInfo) -> void:
 	_switch_state(State.DEAD)
+	powerups.drop_quad()
 	powerups.clear()
 
 	# Todes-Sound

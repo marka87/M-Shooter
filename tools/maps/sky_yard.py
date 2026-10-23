@@ -73,7 +73,7 @@ kit.weapon('rocket_launcher', 0, 0, 0)
 kit.weapon('plasma', 6, 6, -49)
 kit.weapon('lightning', -6, 6, 49)
 kit.weapon('shock_rifle', 0, 0, -20)
-kit.weapon('shotgun', 0, 0, 20)
+kit.weapon('shock_rifle', 0, 0, 20)
 for z in (-28, 28):
     kit.item('ammo', 5, 0, z)
 kit.item('health', -5, 0, -8)

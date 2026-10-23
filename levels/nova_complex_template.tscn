@@ -223,21 +223,21 @@ transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 
 
 [node name="Weapon1" parent="Items" instance=ExtResource("5_wpick")]
 transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, 0.9, 24)
-weapon_id = &"machine_gun"
-weapon_scene = ExtResource("w_machine_gun")
-display_name = "Maschinengewehr"
+weapon_id = &"rocket_launcher"
+weapon_scene = ExtResource("w_rocket_launcher")
+display_name = "Raketenwerfer"
 
 [node name="OmniLight3D" parent="Items/Weapon1" index="4"]
-light_color = Color(1, 0.75, 0.25, 1)
+light_color = Color(1, 0.4, 0.1, 1)
 
 [node name="Weapon2" parent="Items" instance=ExtResource("5_wpick")]
 transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -37, 0.9, 0)
-weapon_id = &"shotgun"
-weapon_scene = ExtResource("w_shotgun")
-display_name = "Shotgun"
+weapon_id = &"plasma"
+weapon_scene = ExtResource("w_plasma")
+display_name = "Plasma"
 
 [node name="OmniLight3D" parent="Items/Weapon2" index="4"]
-light_color = Color(1, 0.55, 0.15, 1)
+light_color = Color(0.25, 0.75, 1, 1)
 
 [node name="Weapon3" parent="Items" instance=ExtResource("5_wpick")]
 transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 26, 0.9, -18)

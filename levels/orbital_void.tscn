@@ -14,7 +14,7 @@
 [ext_resource type="PackedScene" path="res://scenes/weapons/railgun.tscn" id="13_rail"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/rocket_launcher.tscn" id="14_rpg"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/plasma_gun.tscn" id="15_plasma"]
-[ext_resource type="PackedScene" path="res://scenes/weapons/shotgun.tscn" id="16_sg"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/lightning_gun.tscn" id="16_lg"]
 [ext_resource type="Script" path="res://scripts/levels/void_kill_zone.gd" id="17_void"]
 [ext_resource type="PackedScene" uid="uid://physics_barrel_001" path="res://scenes/props/physics_barrel.tscn" id="18_barrel"]
 [ext_resource type="PackedScene" uid="uid://physics_crate_001" path="res://scenes/props/physics_crate.tscn" id="19_crate"]
@@ -594,13 +594,13 @@ display_name = "Plasma"
 [node name="OmniLight3D" parent="Items/PlasmaEast" index="4"]
 light_color = Color(0.25, 0.75, 1, 1)
 
-[node name="ShotgunCenter" parent="Items" instance=ExtResource("12_wpick")]
+[node name="LightningCenter" parent="Items" instance=ExtResource("12_wpick")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0)
-weapon_id = &"shotgun"
-weapon_scene = ExtResource("16_sg")
-display_name = "Shotgun"
-[node name="OmniLight3D" parent="Items/ShotgunCenter" index="4"]
-light_color = Color(1, 0.7, 0.2, 1)
+weapon_id = &"lightning"
+weapon_scene = ExtResource("16_lg")
+display_name = "Lightning Gun"
+[node name="OmniLight3D" parent="Items/LightningCenter" index="4"]
+light_color = Color(0.7, 0.9, 1, 1)
 
 [node name="MegaSpire" parent="Items" instance=ExtResource("11_mega")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.8, -36.5)

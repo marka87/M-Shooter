@@ -126,8 +126,8 @@ transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 
 [node name="MegaTowerSW" parent="Items" instance=ExtResource("13_mega")]
 transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -27, 8.9, 27)
 
-[node name="ArmorTowerNE" parent="Items" instance=ExtResource("6_armor")]
-transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 27, 8.8, -22)
+[node name="ArmorRingW" parent="Items" instance=ExtResource("6_armor")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -28.5, 4.8, -16)
 
 [node name="HealthRingN" parent="Items" instance=ExtResource("5_health")]
 transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -20, 4.8, -28.5)
@@ -174,13 +174,13 @@ display_name = "Shock Rifle"
 [node name="OmniLight3D" parent="Items/ShockRingS" index="4"]
 light_color = Color(0.6, 0.35, 1, 1)
 
-[node name="RailRingW" parent="Items" instance=ExtResource("14_wpick")]
-transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -28.5, 4.9, -16)
+[node name="RailTowerNE" parent="Items" instance=ExtResource("14_wpick")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 27, 8.9, -22)
 weapon_id = &"railgun"
 weapon_scene = ExtResource("19_railgun")
 display_name = "Railgun"
 
-[node name="OmniLight3D" parent="Items/RailRingW" index="4"]
+[node name="OmniLight3D" parent="Items/RailTowerNE" index="4"]
 light_color = Color(0.3, 1, 0.9, 1)
 
 [node name="RocketGroundW" parent="Items" instance=ExtResource("14_wpick")]

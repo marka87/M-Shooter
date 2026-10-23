@@ -68,7 +68,7 @@ kit.light(25, 3, 30, (0.2, 0.85, 1), 2.5, 8)
 for x, z in ((-33, -20), (-27, -8), (-33, 6)):
     kit.solid(x - 1.5, 0, z - 1.5, x + 1.5, 2.0, z + 1.5, METAL)
     kit.deco(x - 1.52, 1.9, z - 1.52, x + 1.52, 2.02, z + 1.52, ORANGE)
-kit.weapon('shotgun', -33, 0, -8)
+kit.weapon('lightning', -33, 0, -8)
 
 # --- Weitere Waffen und Items ---
 kit.weapon('railgun', 0, H_WALK, -35)

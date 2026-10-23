@@ -507,16 +507,16 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 4.0)
 [node name="ArmorPillar2" parent="Items" instance=ExtResource("6_armor")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0.8, 16)
 
-[node name="ArmorTower" parent="Items" instance=ExtResource("6_armor")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 6.8, -2)
-
-[node name="RailHigh" parent="Items" instance=ExtResource("10_wpick")]
+[node name="ArmorHigh" parent="Items" instance=ExtResource("6_armor")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 4.3, -24)
+
+[node name="RailTower" parent="Items" instance=ExtResource("10_wpick")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 6.8, -2)
 weapon_id = &"railgun"
 weapon_scene = ExtResource("11_railgun")
 display_name = "Railgun"
 
-[node name="OmniLight3D" parent="Items/RailHigh" index="4"]
+[node name="OmniLight3D" parent="Items/RailTower" index="4"]
 light_color = Color(0.3, 1, 0.9, 1)
 
 [node name="RocketGround" parent="Items" instance=ExtResource("10_wpick")]

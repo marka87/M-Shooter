@@ -25,6 +25,8 @@ enum PickupType { AMMO_BOX, WEAPON_AMMO, HEALTH, ARMOR, QUAD_DAMAGE, MEGA_HEALTH
 @export var weapon_scene: PackedScene
 ## Anzeigename fuer die Ansage beim Einsammeln
 @export var display_name: String = ""
+## Beim Tod fallen gelassen (Quad mit Restzeit): laeuft liegend weiter ab, respawnt nicht
+var dropped: bool = false
 
 @onready var visual_mesh: Node3D = $VisualMesh
 @onready var light: OmniLight3D = $OmniLight3D
@@ -85,6 +87,10 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if not is_active:
 		return
+	if dropped:
+		quad_seconds -= delta
+		if quad_seconds <= 0.0:
+			queue_free()
 	
 	# Schwebende Drehung und Wippen (Quake-Stil)
 	anim_time += delta
@@ -226,6 +232,9 @@ func _collect(silent: bool = false) -> void:
 	if collision_shape:
 		collision_shape.set_deferred("disabled", true)
 	
+	if dropped:
+		get_tree().create_timer(1.0).timeout.connect(queue_free)  # Sound ausklingen lassen
+		return
 	# Nach Ablauf der Respawn-Zeit wieder anzeigen (im Netzspiel meldet das der Host)
 	if not Net.is_client():
 		_respawn_timer = get_tree().create_timer(respawn_time, false)

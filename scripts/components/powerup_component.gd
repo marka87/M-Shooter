@@ -56,6 +56,20 @@ func give_quad(seconds: float) -> void:
 		quad_started.emit()
 
 
+## Beim Tod: laufendes Quad mit der Restzeit als Item fallen lassen (wie in Quake 3)
+func drop_quad() -> void:
+	# shortcut: im Netzspiel kein Drop, die Clients kennen zur Laufzeit erzeugte Items nicht (Net meldet Pfade)
+	# Net ueber den Pfad: dieses Skript haengt an DamageInfo, ein Autoload-Name bricht dort Test-Skripte
+	if quad_time_left <= 0.0 or get_node("/root/Net").active:
+		return
+	var item = load("res://scenes/items/quad_damage_pickup.tscn").instantiate()
+	item.quad_seconds = quad_time_left
+	item.dropped = true
+	var level := get_tree().current_scene
+	level.add_child(item)
+	item.global_position = get_parent().global_position + Vector3.UP * 0.8
+
+
 ## Alle Power-ups sofort beenden (Tod, Respawn)
 func clear() -> void:
 	var was_active := quad_time_left > 0.0

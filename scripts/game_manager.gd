@@ -641,7 +641,8 @@ func apply_graphics(level: Node = null) -> void:
 	var p := graphics_preset
 	var viewport := get_viewport()
 	viewport.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR if p < 2 else Viewport.SCALING_3D_MODE_BILINEAR
-	viewport.scaling_3d_scale = [0.67, 0.85, 1.0, 1.0][p]
+	var screen_size := Vector2i.ZERO if DisplayServer.get_name() == "headless" else DisplayServer.screen_get_size(DisplayServer.window_get_current_screen())
+	viewport.scaling_3d_scale = [0.67, 0.85, 1.0, 1.0][p] * render_factor(window_mode, resolution, screen_size)
 	viewport.msaa_3d = Viewport.MSAA_4X if p == 3 else Viewport.MSAA_DISABLED
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if vsync else DisplayServer.VSYNC_DISABLED)
 	if level == null:
@@ -679,8 +680,16 @@ func apply_graphics(level: Node = null) -> void:
 			light.shadow_enabled = false
 
 
+## Vollbild: die 3D-Welt in der gewaehlten Aufloesung rendern (Anteil an der Bildschirmhoehe, HUD bleibt nativ).
+## Im Fenster ist das Fenster selbst so gross, also 1.
+static func render_factor(mode: int, res: Vector2i, screen: Vector2i) -> float:
+	if mode == 0 or screen.y <= 0:
+		return 1.0
+	return clampf(float(res.y) / screen.y, 0.25, 1.0)
+
+
 ## Fenstermodus und Aufloesung anwenden. Im Fenster: gewaehlte Groesse (hoechstens Bildschirmgroesse),
-## mittig. Vollbild nutzt die Bildschirmaufloesung; die Grafik-Stufe regelt dort die Renderaufloesung.
+## mittig. Vollbild bleibt in Bildschirmaufloesung, die Welt rendert in der gewaehlten (render_factor).
 func apply_display() -> void:
 	if DisplayServer.get_name() == "headless":
 		return
@@ -696,6 +705,7 @@ func apply_display() -> void:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 		2:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
+	apply_graphics()  # Renderaufloesung haengt am Modus
 
 
 ## Aufloesungen, die auf den aktuellen Bildschirm passen (ohne Bildschirm: alle)

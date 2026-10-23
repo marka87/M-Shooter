@@ -103,8 +103,8 @@ kit.tele(-26, -4, -46, 66, 0, 46, 90)
 kit.tele(68, 0, -48, -66, 0, 42, -90)
 
 # --- Waffen und Items ---
-kit.weapon('machine_gun', 0, 0, 24)
-kit.weapon('shotgun', -37, 0, 0)
+kit.weapon('rocket_launcher', 0, 0, 24)
+kit.weapon('plasma', -37, 0, 0)
 kit.weapon('plasma', 26, 0, -18)
 kit.weapon('rocket_launcher', -68, 6, 0)
 kit.weapon('railgun', 66, 11, 0)

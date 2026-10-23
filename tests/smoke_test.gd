@@ -255,8 +255,14 @@ func run() -> void:
 	# Tod durch Bot und Respawn
 	var b2 = bots[1]
 	var bot_frags_before: int = gm.bot_frags
+	player.powerups.give_quad(12.0)
 	player.take_damage(DamageInfo.create(1000.0, b2, player.global_position, Vector3.ZERO, "Test"))
 	check(player.is_dead, "Spieler stirbt")
+	var drops: Array = get_nodes_in_group("pickups").filter(func(p): return p.dropped)
+	check(drops.size() == 1 and drops[0].quad_seconds > 11.0 and drops[0].quad_seconds <= 12.0 and drops[0].global_position.distance_to(player.global_position) < 2.0,
+		"Quad faellt beim Tod mit Restzeit (%s)" % [drops.map(func(p): return snappedf(p.quad_seconds, 0.1))])
+	if drops.size() == 1:
+		drops[0].queue_free()  # nicht vom Respawn wieder einsammeln lassen
 	check(gm.bot_frags == bot_frags_before + 1, "Bot-Frag gezaehlt (%d)" % gm.bot_frags)
 
 	# Pause waehrend des Todes: Respawn darf nicht weiterlaufen
@@ -265,6 +271,9 @@ func run() -> void:
 	check(paused, "Pause aktiv")
 	check(gm._pause_layer.visible, "Pause-Menue sichtbar")
 	var arms_option: OptionButton = gm._pause_layer.arms_color_option
+	var rf: Callable = gm.render_factor
+	check(rf.call(0, Vector2i(1920, 1080), Vector2i(2560, 1440)) == 1.0 and is_equal_approx(rf.call(1, Vector2i(1920, 1080), Vector2i(2560, 1440)), 0.75)
+		and rf.call(2, Vector2i(3840, 2160), Vector2i(2560, 1440)) == 1.0, "Vollbild rendert in der gewaehlten Aufloesung")
 	check(arms_option.item_count > 1 and arms_option.selected == gm.arms_color, "Pause-Menue: Armfarbe waehlbar")
 	check(player.hud.death_overlay.visible, "Todes-Overlay sichtbar")
 	await wait(4.0)

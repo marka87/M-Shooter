@@ -184,12 +184,12 @@ light_color = Color(1, 0.4, 0.1, 1)
 
 [node name="Weapon2" parent="Items" instance=ExtResource("5_wpick")]
 transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -33, 0.9, -8)
-weapon_id = &"shotgun"
-weapon_scene = ExtResource("w_shotgun")
-display_name = "Shotgun"
+weapon_id = &"lightning"
+weapon_scene = ExtResource("w_lightning")
+display_name = "Lightning Gun"
 
 [node name="OmniLight3D" parent="Items/Weapon2" index="4"]
-light_color = Color(1, 0.55, 0.15, 1)
+light_color = Color(0.7, 0.9, 1, 1)
 
 [node name="Weapon3" parent="Items" instance=ExtResource("5_wpick")]
 transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, 0, 5.9, -35)
