@@ -57,3 +57,16 @@ custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "BEENDEN"
+
+[node name="ArmsRow" type="HBoxContainer" parent="Center/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Center/VBox/ArmsRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Armfarbe:"
+
+[node name="ArmsColorOption" type="OptionButton" parent="Center/VBox/ArmsRow"]
+layout_mode = 2
+size_flags_horizontal = 3

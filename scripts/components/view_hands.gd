@@ -9,7 +9,7 @@ class_name ViewHands
 ## beim Schuss kurz die Schuss-Animation; die Bewegung der AK darin wird herausgerechnet,
 ## unsere Waffe bleibt also fest in den Haenden (Rueckstoss macht weiter der WeaponManager).
 ## Die linke Hand greift per IK an ihren AK-Platz plus left_offset (dicke oder kurze Waffen wie die Shotgun).
-## Die Grundfarbe ist grau, die Armfarbe kommt aus den Einstellungen (GameManager.arms_color).
+## Die Grundfarbe ist grau, die Armfarbe kommt aus den Einstellungen (GameManager.arms_color, auch im Pausemenue).
 
 const ARMS: PackedScene = preload("res://assets/characters/Arm/arms.glb")
 const ANIM := &"allanims"
@@ -41,6 +41,8 @@ var _left_pole: Node3D
 var _weapon: WeaponBase
 var _time: float = 0.0
 var _fire_left: float = 0.0
+var _materials: Array[StandardMaterial3D] = []
+var _color: int = -1
 
 
 func _ready() -> void:
@@ -55,16 +57,16 @@ func _ready() -> void:
 		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		# Gleiche Render-Ebene wie die Waffen (eigenes Viewmodel-Licht)
 		mesh.layers = WeaponManager.VIEWMODEL_LAYER
-		# Armfarbe auf die graue Textur, Randlicht, damit die Arme vor dunklen Waenden lesbar sind
+		# Graue Textur (Farbe setzt _process), Randlicht, damit die Arme vor dunklen Waenden lesbar sind
 		for i in mesh.get_surface_override_material_count():
 			var mat := mesh.get_active_material(i).duplicate() as StandardMaterial3D
-			mat.albedo_color = COLORS[clampi(GameManager.arms_color, 0, COLORS.size() - 1)]
 			mat.rim_enabled = true
 			mat.rim = 0.6
 			mat.rim_tint = 0.3
 			mat.use_z_clip_scale = true
 			mat.z_clip_scale = WeaponManager.VIEWMODEL_Z_CLIP
 			mesh.set_surface_override_material(i, mat)
+			_materials.append(mat)
 	# Linker Arm: Schulter -> Ellbogen -> Handgelenk zum Ziel, Ellbogen zeigt zum Pol
 	_left_target = Node3D.new()
 	_left_pole = Node3D.new()
@@ -82,6 +84,10 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if _color != GameManager.arms_color:
+		_color = GameManager.arms_color
+		for mat in _materials:
+			mat.albedo_color = COLORS[clampi(_color, 0, COLORS.size() - 1)]
 	var weapon: WeaponBase = weapon_manager.get_current_weapon() if weapon_manager else null
 	var model: WeaponModel = weapon.get_node_or_null("Model") as WeaponModel if weapon else null
 	visible = model != null and weapon.visible and settings.get("hand", true)

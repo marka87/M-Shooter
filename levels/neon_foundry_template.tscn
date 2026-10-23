@@ -13,6 +13,8 @@
 [ext_resource type="PackedScene" path="res://scenes/weapons/plasma_gun.tscn" id="15_plasma"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/lightning_gun.tscn" id="16_lightning_gun"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/shock_rifle.tscn" id="17_shock_rifle"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/railgun.tscn" id="19_railgun"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/rocket_launcher.tscn" id="20_rocket"]
 [ext_resource type="Shader" path="res://assets/shaders/space_sky.gdshader" id="9_sky"]
 [ext_resource type="Script" path="res://addons/func_godot/src/map/func_godot_map.gd" id="10_map"]
 [ext_resource type="Resource" path="res://resources/map/neon_map_settings.tres" id="11_settings"]
@@ -171,6 +173,24 @@ display_name = "Shock Rifle"
 
 [node name="OmniLight3D" parent="Items/ShockRingS" index="4"]
 light_color = Color(0.6, 0.35, 1, 1)
+
+[node name="RailRingW" parent="Items" instance=ExtResource("14_wpick")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -28.5, 4.9, -16)
+weapon_id = &"railgun"
+weapon_scene = ExtResource("19_railgun")
+display_name = "Railgun"
+
+[node name="OmniLight3D" parent="Items/RailRingW" index="4"]
+light_color = Color(0.3, 1, 0.9, 1)
+
+[node name="RocketGroundW" parent="Items" instance=ExtResource("14_wpick")]
+transform = Transform3D(1.000000, 0, 0.000000, 0, 1, 0, -0.000000, 0, 1.000000, -28, 0.9, 6)
+weapon_id = &"rocket_launcher"
+weapon_scene = ExtResource("20_rocket")
+display_name = "Raketenwerfer"
+
+[node name="OmniLight3D" parent="Items/RocketGroundW" index="4"]
+light_color = Color(1, 0.4, 0.1, 1)
 
 [node name="JumpPads" type="Node3D" parent="."]
 

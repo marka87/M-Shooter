@@ -39,6 +39,8 @@ WEAPONS = [
     ('PlasmaRingN', 'plasma', 'plasma_gun', 'Plasma', (0.25, 0.75, 1), -5, 4.9, -28.5),
     ('LightningGroundE', 'lightning', 'lightning_gun', 'Lightning Gun', (0.7, 0.9, 1), 28, 0.9, -6),
     ('ShockRingS', 'shock_rifle', 'shock_rifle', 'Shock Rifle', (0.6, 0.35, 1), -4, 4.9, 28.5),
+    ('RailRingW', 'railgun', 'railgun', 'Railgun', (0.3, 1, 0.9), -28.5, 4.9, -16),
+    ('RocketGroundW', 'rocket_launcher', 'rocket_launcher', 'Raketenwerfer', (1, 0.4, 0.1), -28, 0.9, 6),
 ]
 # Teleporter: (Name, Position, Ziel, Blickrichtung am Ziel in Grad um die Hochachse)
 # 0 Grad = Blick nach -Z (Norden), 90 = Westen, -90 = Osten, 180 = Sueden
@@ -76,6 +78,8 @@ head = '''[gd_scene format=3]
 [ext_resource type="PackedScene" path="res://scenes/weapons/plasma_gun.tscn" id="15_plasma"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/lightning_gun.tscn" id="16_lightning_gun"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/shock_rifle.tscn" id="17_shock_rifle"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/railgun.tscn" id="19_railgun"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/rocket_launcher.tscn" id="20_rocket"]
 [ext_resource type="Shader" path="res://assets/shaders/space_sky.gdshader" id="9_sky"]
 [ext_resource type="Script" path="res://addons/func_godot/src/map/func_godot_map.gd" id="10_map"]
 [ext_resource type="Resource" path="res://resources/map/neon_map_settings.tres" id="11_settings"]
@@ -158,7 +162,8 @@ res = {'ammo': '4_ammo', 'health': '5_health', 'armor': '6_armor', 'quad': '12_q
 for name, kind, x, y, z in ITEMS:
     body += f'[node name="{name}" parent="Items" instance=ExtResource("{res[kind]}")]\ntransform = {tf(x, y, z)}\n\n'
 
-wscene = {'plasma_gun': '15_plasma', 'lightning_gun': '16_lightning_gun', 'shock_rifle': '17_shock_rifle'}
+wscene = {'plasma_gun': '15_plasma', 'lightning_gun': '16_lightning_gun', 'shock_rifle': '17_shock_rifle',
+          'railgun': '19_railgun', 'rocket_launcher': '20_rocket'}
 for name, wid, scene, label, c, x, y, z in WEAPONS:
     body += (f'[node name="{name}" parent="Items" instance=ExtResource("14_wpick")]\ntransform = {tf(x, y, z)}\n'
              f'weapon_id = &"{wid}"\nweapon_scene = ExtResource("{wscene[scene]}")\ndisplay_name = "{label}"\n\n'

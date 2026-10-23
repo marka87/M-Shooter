@@ -134,6 +134,10 @@ func run() -> void:
 
 	b1.health.health = 50.0
 	var frags_before: int = gm.player_frags
+	check(not wm.get_weapon(&"railgun").owned and not wm.get_weapon(&"rocket_launcher").owned and wm.get_weapon(&"shotgun").owned,
+		"Start nur mit MG und Shotgun, Railgun und Raketenwerfer einsammeln")
+	wm.give_weapon(&"railgun", 10)
+	wm.give_weapon(&"rocket_launcher", 10)
 	wm.switch_to_weapon_id(&"railgun")
 	await wait(0.2)
 	wm.fire_current_weapon()
@@ -260,6 +264,8 @@ func run() -> void:
 	gm.toggle_pause()
 	check(paused, "Pause aktiv")
 	check(gm._pause_layer.visible, "Pause-Menue sichtbar")
+	var arms_option: OptionButton = gm._pause_layer.arms_color_option
+	check(arms_option.item_count > 1 and arms_option.selected == gm.arms_color, "Pause-Menue: Armfarbe waehlbar")
 	check(player.hud.death_overlay.visible, "Todes-Overlay sichtbar")
 	await wait(4.0)
 	check(player.is_dead, "Respawn wartet waehrend Pause")
@@ -448,6 +454,12 @@ func run() -> void:
 	var arm_mesh: MeshInstance3D = hands.find_children("*", "MeshInstance3D", true, false)[0]
 	check(arm_mesh.get_surface_override_material(0).albedo_color == hands.COLORS[gm.arms_color] and skel.find_children("*", "TwoBoneIK3D", true, false).size() == 1,
 		"Ego-Arme: Farbe aus den Einstellungen, linke Hand per IK")
+	var orig_arms_color: int = gm.arms_color
+	gm.arms_color = (orig_arms_color + 1) % hands.COLORS.size()
+	await process_frame
+	await process_frame
+	check(arm_mesh.get_surface_override_material(0).albedo_color == hands.COLORS[gm.arms_color], "Ego-Arme: neue Armfarbe gilt sofort")
+	gm.arms_color = orig_arms_color
 	press.call([KEY_H])
 	await process_frame
 	await process_frame

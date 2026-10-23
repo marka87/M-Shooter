@@ -1,6 +1,6 @@
 extends SceneTree
 
-# Neue Maps aus dem Baukasten (tools/maps/*.py): laedt jede Map und prueft Spawns, Bot-Wege zu allen
+# Neue Maps aus dem Baukasten (tools/maps/*.py): laedt jede Map und prueft Spawns (auch ihre Blickrichtung), Bot-Wege zu allen
 # Spawns und Items (inklusive Jump-Pads und Teleporter), CTF-Basenabstand und eine kurze Bot-Runde.
 # Start (aus dem Projektordner):
 #   Godot_v4.7.2-stable_win64_console.exe --headless --path . -s res://tests/maps_test.gd
@@ -30,6 +30,11 @@ func run() -> void:
 	gm.time_limit_minutes = 0.0
 	gm.match_countdown = 0.0
 	gm.game_mode = gm.Mode.DEATHMATCH
+	# Start nur mit MG und Shotgun: Raketenwerfer und Railgun muessen auf jeder Map liegen
+	for m in gm.MAPS:
+		var text := FileAccess.get_file_as_string(m.scene)
+		check(text.contains('weapon_id = &"railgun"') and text.contains('weapon_id = &"rocket_launcher"'),
+			"%s: Railgun und Raketenwerfer zum Einsammeln" % m.name)
 	for map_id in MAPS:
 		gm.bot_count = 4
 		gm.reset_game()
@@ -39,6 +44,10 @@ func run() -> void:
 		var spawns: Array = level.get_node("SpawnPoints").get_children()
 		var max_players: int = gm.MAPS.filter(func(m): return m.scene.ends_with(map_id + ".tscn"))[0].max_players
 		check(spawns.size() >= max_players, "%s: %d Spawnpunkte fuer %d Spieler" % [map_id, spawns.size(), max_players])
+		# Spawns aus dem Navigationsnetz schauen ins Freie, nicht gegen eine Wand oder ueber eine Kante
+		var space: PhysicsDirectSpaceState3D = level.get_world_3d().direct_space_state
+		var cramped: Array = gm.spawn_points.filter(func(p): return p.has_meta(&"nav_spawn") and level._open_distance(space, p.global_position, -p.global_basis.z) < 6.0)
+		check(cramped.is_empty(), "%s: neue Spawns schauen ins Freie %s" % [map_id, cramped.map(func(p): return p.name)])
 		check(level.get_node("Props").get_child_count() > 0 and level.get_node("FogVolumes").get_child_count() > 0,
 			"%s: zerstoerbare Objekte und Nebel" % map_id)
 

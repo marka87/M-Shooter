@@ -48,13 +48,13 @@ Alle Tasten laufen über die InputMap (Projekt → Projekteinstellungen → Eing
 |---|---|---|---|---|
 | **Maschinengewehr** (1) | Hitscan | 12 | 11 Schuss/s | Geringer Rückstoß, leichte Streuung, Mündungsfeuer |
 | **Shotgun** (2) | Hitscan, 11 Kugeln | 9 pro Kugel (bis 99) | 1.0s Abklingzeit | Stark auf kurze Distanz, Treffer werden pro Ziel zusammengefasst |
-| **Raketenwerfer** (4) | Projektil | 50 (Direkt) + bis zu 100 (Fläche) | 0.8s Abklingzeit | Sichtbare Rakete, Schockwelle, Flächenschaden & Rocket-Jumping |
+| **Raketenwerfer** (4) | Projektil | 50 (Direkt) + bis zu 100 (Fläche) | 0.8s Abklingzeit | Sichtbare Rakete, Schockwelle, Flächenschaden & Rocket-Jumping. **Muss eingesammelt werden** |
 | **Plasma** (3) | Projektil, 10 Schuss/s | 20 + bis 15 Fläche | 0.1s | Schnelle Energie-Bolzen, kleiner Splash. **Muss eingesammelt werden** |
 | **Lightning Gun** (5) | Dauerstrahl, 24 m | 8 pro Tick, 20 Ticks/s | – | Zuckender Doppel-Blitz, ideal für gutes Tracking. **Muss eingesammelt werden** |
 | **Shock Rifle** (7) | Strahl / Kugel | 45 Strahl, 55 + 35 Fläche Kugel | 0.75s / 0.6s | Rechtsklick feuert eine langsame Shock-Kugel. Trifft der Strahl die Kugel: **Combo**, 150 Schaden im Radius 7 m. **Muss eingesammelt werden** |
-| **Railgun** (6) | Hitscan-Strahl | 100 | 1.25s Abklingzeit | Sofortiger Einschlag über 300m, nachleuchtender Cyan-Energiestrahl |
+| **Railgun** (6) | Hitscan-Strahl | 100 | 1.25s Abklingzeit | Sofortiger Einschlag über 300m, nachleuchtender Cyan-Energiestrahl. **Muss eingesammelt werden** |
 
-Rechte Maustaste halten zoomt bei allen Waffen ohne Alt-Feuer halb heran. Die Ego-Waffe halten **animierte Arme** (Atmen in Ruhe, Abzug beim Schuss): Arme und Animationen von **DJMaesen, CC BY 4.0**, aus dem Godot-Addon „FPS Hands“ (nur das Modell, siehe `assets/characters/Arm/LICENSE_arms.txt`). Lage von Waffe und Armen pro Waffe im Viewmodel-Editor (F4, in der Waffen-Werkstatt sofort an); die linke Hand lässt sich dort per IK einzeln versetzen (z. B. unter den dicken Shotgun-Lauf).
+Man startet wie in Quake und UT nur mit Maschinengewehr und Shotgun, alles andere liegt auf der Map (Raketenwerfer und Railgun auf jeder). Rechte Maustaste halten zoomt bei allen Waffen ohne Alt-Feuer halb heran. Die Ego-Waffe halten **animierte Arme** (Atmen in Ruhe, Abzug beim Schuss): Arme und Animationen von **DJMaesen, CC BY 4.0**, aus dem Godot-Addon „FPS Hands“ (nur das Modell, siehe `assets/characters/Arm/LICENSE_arms.txt`). Lage von Waffe und Armen pro Waffe im Viewmodel-Editor (F4, in der Waffen-Werkstatt sofort an); die linke Hand lässt sich dort per IK einzeln versetzen (z. B. unter den dicken Shotgun-Lauf).
 
 ---
 
@@ -88,7 +88,7 @@ Bots benutzen **dieselben Waffen wie der Spieler** (sichtbar in der Hand, mit Mu
 
 ## 🛡️ Schadens- & Pickup-System
 
-- **Einstellungen**: Mausempfindlichkeit, Lautstärke, Sichtfeld, Kamera-Effekte, **Grafik-Stufe** (Niedrig/Mittel mit FSR-Hochskalierung und ohne SSAO/Nebel, Ultra mit 4x MSAA), **V-Sync**, **Fenstermodus** (Fenster, randloses oder exklusives Vollbild), **Auflösung** (im Fenster) und **Tastenbelegung** (Taste anklicken, neue Taste oder Maustaste drücken) werden in `user://settings.cfg` gespeichert. Dazu Effekt-Lautstärke, Fadenkreuz (Form, Farbe, Größe), Hitmarker an/aus und Armfarbe der Ego-Arme.
+- **Einstellungen**: Mausempfindlichkeit, Lautstärke, Sichtfeld, Kamera-Effekte, **Grafik-Stufe** (Niedrig/Mittel mit FSR-Hochskalierung und ohne SSAO/Nebel, Ultra mit 4x MSAA), **V-Sync**, **Fenstermodus** (Fenster, randloses oder exklusives Vollbild), **Auflösung** (im Fenster) und **Tastenbelegung** (Taste anklicken, neue Taste oder Maustaste drücken) werden in `user://settings.cfg` gespeichert. Dazu Effekt-Lautstärke, Fadenkreuz (Form, Farbe, Größe), Hitmarker an/aus und Armfarbe der Ego-Arme (die auch im Pausemenü, gilt sofort).
 - **Lebenspunkte (HP)**: 100 Basis-HP. Sinkt HP auf 0, erscheint das Todes-Overlay mit 3-Sekunden-Respawn-Countdown.
 - **Rüstung**: Startet bei 50 (bis max. 100). Fängt **66 %** allen Schadens ab, während nur 34 % die Lebenspunkte schwächen.
 - **Treffer-Feedback**: 
@@ -212,7 +212,7 @@ Im Match-Fenster wählbar:
 - **Nova Complex** (bis 16 Spieler): 150 × 110 m, sechs Bereiche auf drei Ebenen. Platz mit Turmblock (Mega Health), Halle mit Galerie im Westen, drei Plattformen mit Railgun im Osten, Grube mit Energie-Strom (Quad, Shock Rifle) im Norden, Containerhof mit Laufsteg im Süden, zwei Teleporter (`tools/maps/nova_complex.py`).
 - **Testarena**: die ursprüngliche flache Arena (für Tests).
 
-**Spawns:** Jede Map bekommt beim Laden noch einmal so viele Spawnpunkte wie von Hand gesetzt, zufällig aus dem begehbaren Navigationsnetz (weg von Items, Pads, Teleportern und Schadenszonen). Gespawnt wird nie auf jemandem, möglichst weit weg vom nächsten Gegner und von möglichst wenigen Gegnern gesehen. CTF-Basen kommen weiter aus den Spawns von Hand.
+**Spawns:** Jede Map bekommt beim Laden noch einmal so viele Spawnpunkte wie von Hand gesetzt, zufällig aus dem begehbaren Navigationsnetz (weg von Items, Pads, Teleportern und Schadenszonen), mit Blick in die freieste Richtung statt gegen Wand oder Kante. Gespawnt wird nie auf jemandem, möglichst weit weg vom nächsten Gegner und von möglichst wenigen Gegnern gesehen. CTF-Basen kommen weiter aus den Spawns von Hand.
 
 **So entsteht die Neon Foundry:**
 1. `python tools/generate_neon_foundry.py` erzeugt `maps/neon_foundry.map` (Quake-Format).

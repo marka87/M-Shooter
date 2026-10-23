@@ -77,7 +77,7 @@ const SPAWN_AREA_MARGIN := 1.5
 
 ## Doppelt so viele Spawnpunkte wie von Hand gesetzt (die Maps haben genau so viele wie Spieler erlaubt):
 ## zufaellige begehbare Stellen aus dem gebackenen Navigationsnetz, mit Platz rundherum, weg von allen
-## Area3D (Schadenszonen, Pads, Teleporter, Items, Flaggen), Blick zur Mapmitte. Fester Zufall je Map.
+## Area3D (Schadenszonen, Pads, Teleporter, Items, Flaggen), Blick ins Freie (_spawn_look). Fester Zufall je Map.
 func _add_navmesh_spawns(nav_region: NavigationRegion3D) -> void:
 	var nav := nav_region.navigation_mesh
 	var verts: PackedVector3Array = nav.get_vertices()
@@ -128,10 +128,48 @@ func _add_navmesh_spawns(nav_region: NavigationRegion3D) -> void:
 		marker.name = "NavSpawn%d" % added
 		marker.set_meta(&"nav_spawn", true)  # CTF waehlt seine Basen nur aus den Spawns von Hand
 		spawn_points_container.add_child(marker)
-		var look := Vector3(center.x - pos.x, 0.0, center.z - pos.z)
-		marker.global_transform = Transform3D(Basis.looking_at(look if look.length() > 0.1 else Vector3.FORWARD), pos)
+		marker.global_transform = Transform3D(Basis.looking_at(_spawn_look(space, pos, center)), pos)
 		GameManager.register_spawn_point(marker)
 		added += 1
+
+
+## Reichweite fuer die Blickrichtung neuer Spawns (m)
+const SPAWN_VIEW := 20.0
+
+
+## Blickrichtung fuer einen Spawn: von 16 Richtungen die mit der meisten freien Strecke (_open_distance),
+## leicht zur Mapmitte gezogen. So schaut man nicht gegen eine Wand oder ueber eine Kante ins Nichts.
+func _spawn_look(space: PhysicsDirectSpaceState3D, pos: Vector3, center: Vector3) -> Vector3:
+	var to_center := Vector3(center.x - pos.x, 0.0, center.z - pos.z).normalized()
+	var dist := PackedFloat32Array()
+	for i in 16:
+		dist.append(_open_distance(space, pos, Vector3.FORWARD.rotated(Vector3.UP, TAU * i / 16.0)))
+	var look := Vector3.FORWARD
+	var best := -INF
+	for i in 16:
+		var dir := Vector3.FORWARD.rotated(Vector3.UP, TAU * i / 16.0)
+		# Nachbarrichtungen zaehlen halb mit, sonst steht eine Wand direkt neben der Blickachse
+		var score := dist[i] + 0.5 * (dist[i - 1] + dist[(i + 1) % 16]) + 4.0 * dir.dot(to_center)
+		if score > best:
+			best = score
+			look = dir
+	return look
+
+
+## Freie Strecke von pos (1 m ueber dem Boden) in Richtung dir: bis zur ersten Wand in Augenhoehe
+## oder bis der Boden aufhoert (alle 2 m nach unten getastet), hoechstens SPAWN_VIEW
+func _open_distance(space: PhysicsDirectSpaceState3D, pos: Vector3, dir: Vector3) -> float:
+	var mask := Layers.WORLD | Layers.PROPS
+	var eye := pos + Vector3.UP * 0.6
+	var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(eye, eye + dir * SPAWN_VIEW, mask))
+	var wall: float = eye.distance_to(hit.position) if hit else SPAWN_VIEW
+	var d := 2.0
+	while d < wall:
+		var p := eye + dir * d
+		if not space.intersect_ray(PhysicsRayQueryParameters3D.create(p, p + Vector3.DOWN * 6.0, mask)):
+			return d
+		d += 2.0
+	return wall
 
 
 ## Polygon-Indizes des groessten zusammenhaengenden Teils des Navigationsnetzes (Union-Find ueber Ecken)
