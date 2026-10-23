@@ -8,7 +8,7 @@ class_name ViewmodelTuner
 ## F6 speichert alle Waffen nach resources/viewmodel.cfg (wird im Spiel geladen).
 
 const SAVE_PATH := "res://resources/viewmodel.cfg"
-const ITEMS := ["Waffe Position", "Waffe Groesse", "Arme Position", "Arme Drehung", "Arme Groesse"]
+const ITEMS := ["Waffe Position", "Waffe Groesse", "Arme Position", "Arme Drehung", "Arme Groesse", "Linke Hand"]
 ## Werte der frueheren Einzel-Hand, die beim Laden alter Dateien wegfallen
 const OLD_HAND_KEYS := ["hand_offset", "hand_rot", "hand_scale", "fingers"]
 
@@ -26,6 +26,7 @@ func defaults() -> Dictionary:
 	return {
 		"pos": weapon_manager.default_pos, "scale": weapon_manager.view_scale,
 		"hand": true, "arms_offset": Vector3.ZERO, "arms_rot": Vector3.ZERO, "arms_scale": 1.0,
+		"left_offset": Vector3.ZERO,
 	}
 
 
@@ -126,6 +127,7 @@ func _nudge(dir: Vector3, fine: bool) -> void:
 		# Pfeile links/rechts = gieren, hoch/runter = nicken, Shift = rollen
 		3: s.arms_rot += Vector3(dir.y, -dir.x, -dir.z) * 5.0 * m
 		4: s.arms_scale = maxf(s.arms_scale + dir.y * 0.02 * m, 0.2)
+		5: s.left_offset += dir * 0.005 * m
 
 
 func _refresh() -> void:
@@ -147,7 +149,8 @@ func _value_text(i: int, s: Dictionary) -> String:
 		1: return "%.2f" % s.scale
 		2: return _vec(s.arms_offset)
 		3: return _vec(s.arms_rot)
-		_: return "%.2f" % s.arms_scale
+		4: return "%.2f" % s.arms_scale
+		_: return _vec(s.left_offset)
 
 
 func _vec(v: Vector3) -> String:

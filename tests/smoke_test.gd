@@ -436,6 +436,8 @@ func run() -> void:
 	check(player.weapon_manager.default_pos.is_equal_approx(tuner.settings[other_id].pos) and not tuner.settings[other_id].pos.is_equal_approx(tuner.settings[cur_id].pos),
 		"Viewmodel-Editor: jede Waffe hat eigene Werte")
 	# Ego-Arme: rechte Handflaeche am Griff der Waffe (seitlich daneben), H blendet sie fuer diese Waffe aus
+	# Mit Grundwerten messen (die gespeicherten Werte stellt tuner.settings = saved unten wieder her)
+	tuner.current().merge({"arms_offset": Vector3.ZERO, "arms_rot": Vector3.ZERO, "arms_scale": 1.0}, true)
 	await create_timer(0.3).timeout  # Waffenwechsel abwarten
 	var hands = tuner.hands
 	var skel: Skeleton3D = hands.find_children("*", "Skeleton3D", true, false)[0]
@@ -443,6 +445,9 @@ func run() -> void:
 	var weapon: Node3D = player.weapon_manager.get_current_weapon()
 	var grip: Vector3 = player.weapon_manager.global_transform * (weapon.transform * weapon.get_node("Model").grip_point())
 	check(hands.visible and palm.distance_to(grip) < 0.3, "Ego-Arme greifen die Waffe (Abstand %.2f)" % palm.distance_to(grip))
+	var arm_mesh: MeshInstance3D = hands.find_children("*", "MeshInstance3D", true, false)[0]
+	check(arm_mesh.get_surface_override_material(0).albedo_color == hands.COLORS[gm.arms_color] and skel.find_children("*", "TwoBoneIK3D", true, false).size() == 1,
+		"Ego-Arme: Farbe aus den Einstellungen, linke Hand per IK")
 	press.call([KEY_H])
 	await process_frame
 	await process_frame

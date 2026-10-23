@@ -55,6 +55,7 @@ var _hosting: bool = false
 @onready var color_option: OptionButton = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/CrosshairRow/ColorOption
 @onready var size_slider: HSlider = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/SizeSlider
 @onready var hitmarker_check: CheckButton = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/HitmarkerCheck
+@onready var arms_color_option: OptionButton = $CenterContainer/SettingsPanel/MarginContainer/Columns/RightColumn/ArmsRow/ArmsColorOption
 
 # Aktion, die gerade neu belegt wird (leer = keine), und ihr Button
 var _rebind_action: StringName = &""
@@ -137,6 +138,10 @@ func _ready() -> void:
 	size_slider.value_changed.connect(func(v: float): GameManager.crosshair_size = v)
 	hitmarker_check.button_pressed = GameManager.hitmarker_enabled
 	hitmarker_check.toggled.connect(func(on: bool): GameManager.hitmarker_enabled = on)
+	for color_name in ViewHands.COLOR_NAMES:
+		arms_color_option.add_item(color_name)
+	arms_color_option.selected = GameManager.arms_color
+	arms_color_option.item_selected.connect(func(i: int): GameManager.arms_color = i)
 
 	# Match-Einstellungen
 	_update_bot_limit()

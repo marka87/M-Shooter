@@ -1,6 +1,6 @@
 """AK-Arme aus fps_ak_animated.glb (DJMaesen, CC BY 4.0) herausloesen: nur Arm-Mesh, Skelett, Animation.
 AK-Knoten bleiben leer (Bezug fuer die Waffenlage), AK-Meshes/Material/Texturen fliegen raus,
-Arm-Texturen werden auf 1024 px verkleinert. Aufruf: python strip_arms.py <quelle.glb> <ziel.glb>"""
+Arm-Texturen werden auf 1024 px verkleinert, die Grundfarbe grau. Aufruf: python strip_arms.py <quelle.glb> <ziel.glb>"""
 import io
 import json
 import struct
@@ -75,11 +75,18 @@ for i, acc in enumerate(j['accessors']):
     acc_map[i] = len(accessors)
     accessors.append(acc)
 
-for im in j['images']:
+base_color = j['materials'][0]['pbrMetallicRoughness']['baseColorTexture']['index']
+for i, im in enumerate(j['images']):
     old = j['bufferViews'][im['bufferView']]
     off = old.get('byteOffset', 0)
     img = Image.open(io.BytesIO(blob[off:off + old['byteLength']]))
     img = img.resize((1024, 1024), Image.LANCZOS)
+    if i == j['textures'][base_color]['source']:
+        # Grundfarbe grau und auf volle Helligkeit gestreckt: die Armfarbe kommt im Spiel aus dem Material
+        gray = img.convert('L')
+        hist = gray.histogram()
+        top = next(v for v in range(256) if sum(hist[:v + 1]) >= 0.99 * sum(hist))
+        img = gray.point(lambda v: min(255, v * 230 // max(top, 1))).convert('RGB')
     buf = io.BytesIO()
     img.save(buf, 'PNG', optimize=True)
     im['bufferView'] = add_view(buf.getvalue())

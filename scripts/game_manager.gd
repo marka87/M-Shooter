@@ -100,6 +100,8 @@ var crosshair_shape: int = 2
 var crosshair_color: int = 0
 var crosshair_size: float = 7.0
 var hitmarker_enabled: bool = true
+## Farbe der Ego-Arme (Index in ViewHands.COLORS)
+var arms_color: int = 0
 ## Horizontales Sichtfeld in Grad (Quake-Spieler nutzen oft 100-110)
 var fov: float = 100.0
 ## Kamera-Feedback (Wackeln, Einknicken, Tempo-Sichtfeld) an/aus
@@ -565,6 +567,7 @@ func load_settings() -> void:
 		crosshair_color = cfg.get_value("hud", "crosshair_color", crosshair_color)
 		crosshair_size = cfg.get_value("hud", "crosshair_size", crosshair_size)
 		hitmarker_enabled = cfg.get_value("hud", "hitmarker", hitmarker_enabled)
+		arms_color = cfg.get_value("hud", "arms_color", arms_color)
 		fov = cfg.get_value("video", "fov", fov)
 		camera_effects = cfg.get_value("video", "camera_effects", camera_effects)
 		bot_count = clampi(cfg.get_value("match", "bot_count", bot_count), 1, MAX_BOTS)
@@ -606,6 +609,7 @@ func save_settings() -> void:
 	cfg.set_value("hud", "crosshair_color", crosshair_color)
 	cfg.set_value("hud", "crosshair_size", crosshair_size)
 	cfg.set_value("hud", "hitmarker", hitmarker_enabled)
+	cfg.set_value("hud", "arms_color", arms_color)
 	cfg.set_value("video", "fov", fov)
 	cfg.set_value("video", "camera_effects", camera_effects)
 	cfg.set_value("match", "bot_count", bot_count)
