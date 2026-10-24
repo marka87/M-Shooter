@@ -49,6 +49,7 @@ func _ready() -> void:
 	if not Net.is_client():
 		_spawn_bots()
 	_add_map_reverb()
+	GameManager.play_music(scene_file_path.get_file().get_basename())
 	GameManager.apply_graphics(self)
 	GameManager.start_match()
 	Net.on_level_ready(self)

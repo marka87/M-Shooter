@@ -68,6 +68,7 @@ func _ready() -> void:
 	get_tree().paused = false
 	
 	GameManager.current_state = GameManager.GameState.MENU
+	GameManager.play_music("menu")
 
 	# Versionsnummer aus den Projekteinstellungen (application/config/version) und Engine-Version
 	var engine := Engine.get_version_info()

@@ -43,6 +43,7 @@ func run() -> void:
 		change_scene_to_file("res://levels/%s.tscn" % map_id)
 		await create_timer(1.0).timeout
 		var level := current_scene
+		check(gm._music.playing and gm._music.stream.resource_path.ends_with(map_id + ".wav"), "%s: eigene Musik (%s)" % [map_id, gm._music.stream.resource_path.get_file()])
 		var spawns: Array = level.get_node("SpawnPoints").get_children()
 		var max_players: int = gm.MAPS.filter(func(m): return m.scene.ends_with(map_id + ".tscn"))[0].max_players
 		check(spawns.size() >= max_players, "%s: %d Spawnpunkte fuer %d Spieler" % [map_id, spawns.size(), max_players])

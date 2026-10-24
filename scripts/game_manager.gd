@@ -183,15 +183,23 @@ func _setup_audio() -> void:
 	_music = AudioStreamPlayer.new()
 	_music.bus = &"Music"
 	add_child(_music)
-	var stream := SoundGenerator.load_music("arena_loop")
+	apply_music_volume()
+
+
+## Musik wechseln: assets/sounds/music/<track>.wav (Menue "menu", Maps nach Dateiname), sonst arena_loop.
+## Laeuft derselbe Track schon, spielt er weiter.
+func play_music(track: String) -> void:
+	var stream := SoundGenerator.load_music(track)
+	if stream == null:
+		stream = SoundGenerator.load_music("arena_loop")
+	if stream == null or (_music.stream == stream and _music.playing):
+		return
 	if stream is AudioStreamWAV:
 		stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
 		stream.loop_begin = 0
 		stream.loop_end = int(stream.get_length() * stream.mix_rate)
-	if stream:
-		_music.stream = stream
-		_music.play()
-	apply_music_volume()
+	_music.stream = stream
+	_music.play()
 
 
 func _route_to_sfx(node: Node) -> void:
