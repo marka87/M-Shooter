@@ -80,9 +80,13 @@ func run_host() -> void:
 	var puppet = net.node_of(eid)
 	check(puppet != null and puppet.display_name == "Gast" and puppet.puppet, "Puppe heisst Gast")
 
+	# Wie ein Railgun-Pickup ueber den Host: sonst lehnt der Host die Schuesse ab (Waffe nicht im Besitz)
+	puppet.weapon_manager.give_weapon(&"railgun", 10)
 	var in_front: Vector3 = bot.global_position + Vector3(0, 0, 6)
 	check(await wait_for(func(): return puppet.global_position.distance_to(in_front) < 1.5, 10.0),
 		"Host sieht die Bewegung des Clients (%s)" % puppet.global_position.snappedf(0.1))
+	# Der Client hat vorher gefaelschten Fallschaden -500 geschickt: der darf nicht heilen
+	check(puppet.health.health <= puppet.health.max_health, "Negativer Fallschaden heilt nicht (%d HP)" % puppet.health.health)
 	check(await wait_for(func(): return bot.health.health < bot.health.max_health, 10.0),
 		"Railgun-Treffer des Clients zaehlt beim Host (Bot %d HP)" % bot.health.health)
 
@@ -113,6 +117,11 @@ func run_host() -> void:
 			if line.begins_with("FAIL"):
 				fails += 1
 	check(await wait_for(func(): return not net.entities.has(eid), 5.0), "Puppe verschwindet nach dem Verlassen")
+	# Wer waehrend eines Neustarts in der Warteliste steht und geht, darf den Host nicht stoeren
+	var gone_id: int = eid.substr(1).to_int()
+	net._pending_ready.append(gone_id)
+	net._on_peer_disconnected(gone_id)
+	check(not net._pending_ready.has(gone_id), "Getrennter Mitspieler verlaesst die Warteliste")
 	net.leave()
 	print("FEHLER: ", fails)
 	quit(1 if fails > 0 else 0)
@@ -141,6 +150,7 @@ func run_client() -> void:
 	var crate := _add_test_crate()
 	check(player.display_name == "Gast", "Eigener Name kommt vom Host")
 	check(await wait_for(func(): return net.node_of("P1") != null and net.node_of("Bot1") != null, 5.0), "Client sieht Host und Bot als Puppen")
+	net.send_self_damage(-500.0, "Fall")  # Schummelversuch, der Host prueft das
 	var bot = net.node_of("Bot1")
 	check(await wait_for(func(): return bot.global_position.y > -100.0, 5.0), "Bot-Puppe folgt dem Host (%s)" % bot.global_position.snappedf(0.1))
 	await create_timer(0.5).timeout

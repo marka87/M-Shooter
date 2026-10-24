@@ -132,9 +132,7 @@ static func splat(parent: Node, pos: Vector3, normal: Vector3, radius: float) ->
 		parent.add_child(decal)
 	_pool.append(decal)
 	decal.global_position = pos + normal * 0.03
-	var up := normal.normalized()
-	var side := up.cross(Vector3.UP if absf(up.y) < 0.98 else Vector3.FORWARD).normalized()
-	decal.global_basis = Basis(side, up, side.cross(up)).rotated(up, randf() * TAU)
+	decal.global_basis = BulletHole.basis_on(normal)
 	# Laenglich und unregelmaessig gross, damit nicht jeder Fleck ein Kreis ist
 	decal.size = Vector3(radius * randf_range(0.7, 1.4), 0.5, radius * randf_range(0.7, 1.0))
 	decal.modulate.a = 1.0
@@ -202,6 +200,6 @@ static func _spawn_drops(parent: Node, pos: Vector3, dir: Vector3, count: int, s
 	drops.global_position = pos
 	drops.emitting = true
 	_sprays += 1
-	drops.finished.connect(func():
-		_sprays -= 1
-		drops.queue_free())
+	# Beim Verlassen des Baums zaehlen, nicht bei finished: ein Mapwechsel loescht fliegende Tropfen ohne finished
+	drops.tree_exiting.connect(func(): _sprays -= 1)
+	drops.finished.connect(drops.queue_free)

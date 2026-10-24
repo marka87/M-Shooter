@@ -338,6 +338,7 @@ func run() -> void:
 		w.current_ammo = w.max_ammo
 	arsenal.switch_hold = 5.0
 	arsenal._next_switch_msec = 0
+	arsenal._equip(arsenal.get_weapon(&"machine_gun"))  # sonst haelt der Bot schon die Shotgun: kein Wechsel, keine Haltezeit
 	var held: Array = [5.0, 30.0].map(func(d): return arsenal.choose_for(d).weapon_id)
 	check(held == [&"shotgun", &"shotgun"], "Bot haelt Waffe nach Wechsel eine Weile (%s)" % [held])
 	arsenal.switch_hold = 0.0

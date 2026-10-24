@@ -49,7 +49,6 @@ var _destroyed_props: Array[NodePath] = []
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	multiplayer.connected_to_server.connect(_on_connected)
 	multiplayer.connection_failed.connect(func(): _fail("Verbindung fehlgeschlagen"))
@@ -199,14 +198,11 @@ func _team_counts() -> Array:
 	return counts
 
 
-func _on_peer_connected(_id: int) -> void:
-	pass
-
-
 func _on_peer_disconnected(id: int) -> void:
 	if not is_host():
 		return
 	_clients.erase(id)
+	_pending_ready.erase(id)  # sonst baut on_level_ready eine Puppe fuer einen, der weg ist
 	_remove_entity("P%d" % id)
 	_remove_entity.rpc("P%d" % id)
 
@@ -440,6 +436,10 @@ func _client_fire(weapon_id: StringName, alt: bool, aim: Transform3D) -> void:
 	var puppet := node_of(eid)
 	if puppet == null or puppet.health.is_dead:
 		return
+	# Nur Waffen, die der Host der Puppe gegeben hat (Pickups laufen ueber den Host)
+	var weapon = puppet.weapon_manager.get_weapon(weapon_id)
+	if weapon == null or not weapon.owned:
+		return
 	puppet.net_fire(weapon_id, alt, aim)
 	for id in _clients:
 		if id != sender:
@@ -487,7 +487,8 @@ func send_self_damage(amount: float, weapon_name: String) -> void:
 func _client_self_damage(amount: float, weapon_name: String) -> void:
 	var puppet := node_of("P%d" % multiplayer.get_remote_sender_id())
 	if puppet:
-		puppet.take_damage(DamageInfo.create(amount, null, puppet.global_position, Vector3.ZERO, weapon_name))
+		# Kein negativer "Schaden" (wuerde ueber das Maximum heilen)
+		puppet.take_damage(DamageInfo.create(maxf(amount, 0.0), null, puppet.global_position, Vector3.ZERO, weapon_name))
 
 
 ## Host: Respawn an einem Spawnpunkt

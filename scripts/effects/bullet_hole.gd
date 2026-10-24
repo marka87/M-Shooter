@@ -37,11 +37,16 @@ static func spawn(parent: Node, pos: Vector3, normal: Vector3, size: float = 1.0
 		parent.add_child(hole)
 	_pool.append(hole)
 	hole.global_position = pos + normal * 0.02
-	# Decals projizieren entlang -Y: Y zeigt aus der Wand heraus, zufaellig gedreht
+	hole.global_basis = basis_on(normal)
+	hole._start(size, glow)
+
+
+## Ausrichtung fuer ein Decal auf einer Flaeche: Decals projizieren entlang -Y, Y zeigt also aus der
+## Flaeche heraus, zufaellig um diese Achse gedreht (auch fuer Oelflecken)
+static func basis_on(normal: Vector3) -> Basis:
 	var up := normal.normalized()
 	var side := up.cross(Vector3.UP if absf(up.y) < 0.98 else Vector3.FORWARD).normalized()
-	hole.global_basis = Basis(side, up, side.cross(up)).rotated(up, randf() * TAU)
-	hole._start(size, glow)
+	return Basis(side, up, side.cross(up)).rotated(up, randf() * TAU)
 
 
 ## Alle Figuren-Meshes unter node auf den Dynamik-Layer legen (keine Loecher auf Bots und Kisten)

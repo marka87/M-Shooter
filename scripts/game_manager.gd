@@ -7,14 +7,12 @@ extends Node
 # Signale fuer UI und Spielereignisse
 signal score_updated(player_frags: int, player_deaths: int)
 signal game_paused(is_paused: bool)
-signal player_died()
 ## Fuer den Killfeed: Wer hat wen womit erwischt (killer_name leer = Umgebung)
 signal kill_registered(killer_name: String, victim_name: String, weapon_name: String)
 ## Die Punktetabelle hat sich geaendert (fuer das Scoreboard)
 signal scoreboard_changed()
 ## Countdown vor dem Start: 3, 2, 1, dann 0 = "FIGHT!"
 signal countdown_tick(seconds_left: int)
-signal match_started()
 ## Match vorbei; results siehe end_match()
 signal match_ended(results: Dictionary)
 ## Ansage fuer den Spieler (Multi-Kill, Serie)
@@ -296,7 +294,6 @@ func _process(delta: float) -> void:
 				current_state = GameState.PLAYING
 				countdown_tick.emit(0)
 				play_announcer("fight")
-				match_started.emit()
 		GameState.PLAYING:
 			# Netzspiel-Client: die Uhr kommt vom Host, das Matchende auch
 			if time_limit_minutes > 0.0 and match_time_left > 0.0 and not Net.is_client():
@@ -326,7 +323,6 @@ func start_match() -> void:
 		countdown_left = match_countdown
 	else:
 		current_state = GameState.PLAYING
-		match_started.emit()
 
 
 ## Waehrend Countdown und Siegerbildschirm: keine Bewegung, kein Schiessen
@@ -470,7 +466,6 @@ func register_kill(killer: Node, victim: Node, weapon_name: String, headshot: bo
 	score_updated.emit(player_frags, player_deaths)
 	scoreboard_changed.emit()
 	if victim is Player:
-		player_died.emit()
 		_player_multi = 0
 
 	# Fraglimit erreicht? (verzoegert, damit Effekte des letzten Kills noch starten). Im TDM zaehlt das Team,
@@ -837,11 +832,3 @@ func team_of(node: Node) -> int:
 ## Zwei verschiedene Kaempfer im selben Team? (kein Eigenbeschuss, Bots zielen nicht aufeinander)
 func are_teammates(a: Node, b: Node) -> bool:
 	return is_team_mode() and a != b and team_of(a) >= 0 and team_of(a) == team_of(b)
-
-
-## Gibt einen zufaelligen Spawnpunkt zurueck
-func get_random_spawn_transform() -> Transform3D:
-	if spawn_points.is_empty():
-		return Transform3D(Basis(), Vector3(0.0, 1.5, 0.0))
-	var random_index: int = randi() % spawn_points.size()
-	return spawn_points[random_index].global_transform
