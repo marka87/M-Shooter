@@ -82,6 +82,7 @@ func run_host() -> void:
 
 	# Wie ein Railgun-Pickup ueber den Host: sonst lehnt der Host die Schuesse ab (Waffe nicht im Besitz)
 	puppet.weapon_manager.give_weapon(&"railgun", 10)
+	var rail_start: int = puppet.weapon_manager.get_weapon(&"railgun").current_ammo
 	var in_front: Vector3 = bot.global_position + Vector3(0, 0, 6)
 	check(await wait_for(func(): return puppet.global_position.distance_to(in_front) < 1.5, 10.0),
 		"Host sieht die Bewegung des Clients (%s)" % puppet.global_position.snappedf(0.1))
@@ -89,6 +90,8 @@ func run_host() -> void:
 	check(puppet.health.health <= puppet.health.max_health, "Negativer Fallschaden heilt nicht (%d HP)" % puppet.health.health)
 	check(await wait_for(func(): return bot.health.health < bot.health.max_health, 10.0),
 		"Railgun-Treffer des Clients zaehlt beim Host (Bot %d HP)" % bot.health.health)
+	var rail_ammo: int = puppet.weapon_manager.get_weapon(&"railgun").current_ammo
+	check(rail_ammo < rail_start, "Schuesse des Clients verbrauchen Munition der Puppe (%d -> %d)" % [rail_start, rail_ammo])
 
 	await create_timer(0.5).timeout
 	puppet.take_damage(DamageInfo.create(500.0, host_player, puppet.global_position, Vector3.ZERO, "Test"))

@@ -145,6 +145,10 @@ func run() -> void:
 	rl.ammo_changed.emit(0, rl.max_ammo)
 	await process_frame
 	check(wm.get_current_weapon().weapon_id == &"railgun", "Leere Waffe: Wechsel zur staerksten mit Munition (%s)" % wm.get_current_weapon().weapon_id)
+	# Mausrad zurueck ueberspringt den leeren Raketenwerfer (sonst springt der Auto-Wechsel gleich wieder zur Railgun)
+	wm.cycle_weapon(-1)
+	await process_frame
+	check(wm.get_current_weapon().weapon_id == &"shotgun", "Mausrad ueberspringt leere Waffe (%s)" % wm.get_current_weapon().weapon_id)
 	rl.current_ammo = rl_ammo
 	wm.switch_to_weapon_id(&"railgun")
 	await wait(0.2)

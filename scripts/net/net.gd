@@ -97,6 +97,7 @@ func join_game(ip: String, player_name: String) -> void:
 
 ## Netzspiel verlassen (Hauptmenue, Fehler)
 func leave() -> void:
+	var was_active := active
 	if multiplayer.multiplayer_peer:
 		multiplayer.multiplayer_peer.close()
 	multiplayer.multiplayer_peer = null
@@ -106,6 +107,9 @@ func leave() -> void:
 	_pending_ready.clear()
 	_level = null
 	_beacon = null
+	# Host-Werte (Map, Modus, Instagib, Duell aus) wieder durch die eigenen ersetzen
+	if was_active:
+		GameManager.load_settings()
 
 
 func _fail(message: String) -> void:

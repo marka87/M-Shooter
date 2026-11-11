@@ -260,6 +260,11 @@ func run() -> void:
 	await process_frame
 	check(player.camera.position == Vector3.ZERO and is_equal_approx(player.camera.fov, base_fov), "Kamera-Effekte abschaltbar")
 
+	# Jump-Pad faengt einen tiefen Sturz ab: der Sturz davor zaehlt nicht mehr fuer Fallschaden
+	player.movement._fall_speed = -25.0
+	player.movement.launch(Vector3(0, 15, 0))
+	check(player.movement._fall_speed == 0.0, "Jump-Pad setzt die Fallgeschwindigkeit zurueck")
+
 	gm.bot_count = orig[0]
 	gm.frag_limit = orig[1]
 	gm.time_limit_minutes = orig[2]

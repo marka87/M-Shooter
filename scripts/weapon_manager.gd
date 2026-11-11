@@ -210,7 +210,7 @@ func cycle_weapon(direction: int) -> void:
 	var new_index: int = current_weapon_index
 	for i in weapons.size():
 		new_index = posmod(new_index + direction, weapons.size())
-		if weapons[new_index].owned:
+		if weapons[new_index].owned and weapons[new_index].current_ammo > 0:
 			break
 	switch_to_weapon(new_index)
 

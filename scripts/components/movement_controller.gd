@@ -175,6 +175,7 @@ func launch(launch_velocity: Vector3) -> void:
 	body.velocity = launch_velocity
 	launch_grace = 0.15
 	jumps_remaining = max_jumps - 1
+	_fall_speed = 0.0  # das Pad faengt den Sturz ab
 
 
 ## Fallschaden wie in Quake: ab 12 m Fallhoehe 5, ab 20 m 10, darueber mehr (Jump-Pads und

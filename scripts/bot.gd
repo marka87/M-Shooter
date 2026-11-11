@@ -772,12 +772,6 @@ func take_damage(info: DamageInfo) -> void:
 	if Net.is_client():
 		return
 	_hit_effects(info)
-	# Von einem unsichtbaren Gegner getroffen: zu ihm umdrehen und ihn jagen, statt weiterzulaufen
-	if info.attacker != self and _is_alive(info.attacker) and info.attacker != target and not _los_visible:
-		target = info.attacker
-		lose_target_timer = 0.5
-		reaction_timer = reaction_time
-		_look_towards(info.attacker.global_position)
 	GameManager.register_damage(info, self)
 	# Schaden zuletzt anwenden: Bei Tod startet health.died -> _die() mit Todes-Sound,
 	# der sonst vom Treffer-Sound in _hit_effects ueberschrieben wuerde
@@ -991,6 +985,9 @@ func net_fire(weapon_id: StringName, alt: bool, aim: Transform3D) -> void:
 	else:
 		weapon._on_fire(self, _aim)
 	weapon._pulse_muzzle()
+	# Munition mitzaehlen, sonst ist die Puppe bald voll und der Host gibt keine Munition mehr
+	if not GameManager.instagib:
+		weapon.current_ammo = maxi(weapon.current_ammo - (weapon.data.alt_ammo_cost if alt else 1), 0)
 
 
 # ==============================================================================
